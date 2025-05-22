@@ -25,6 +25,5 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/.env ./
-COPY --from=builder /app/scripts/ ./scripts
 
 CMD [ "yarn", "start:prod" ]
