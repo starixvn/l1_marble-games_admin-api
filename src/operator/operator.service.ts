@@ -6,7 +6,7 @@ import {
 } from './schema/operator-credential.schema';
 import { Model } from 'mongoose';
 import { hash } from 'bcryptjs';
-import { generateRandomPassword } from 'src/utils/random';
+import { generateRandomPassword } from '../utils/random';
 
 const SALT_ROUND = 10;
 

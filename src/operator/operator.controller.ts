@@ -1,13 +1,13 @@
-import { Body, Controller, Post, Query } from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, Query } from "@nestjs/common";
 import { ChangePasswordArgs, OperatorService, UpdateAliasArgs } from "./operator.service";
 import { ApiBody, ApiOperation, ApiProperty, ApiQuery } from "@nestjs/swagger";
 
 class UpdateAliasDto implements UpdateAliasArgs {
   @ApiProperty({ description: 'Operator ID string' })
-  operatorId: string;
+  operatorId: string = '';
   
   @ApiProperty({ description: 'New alias for the operator' })
-  alias: string;
+  alias: string = '';
 }
 
 class ChangePasswordDto implements ChangePasswordArgs {
@@ -26,6 +26,7 @@ export class OperatorController {
         summary: "Generate new operator credential",
         description: "Please copy the result and saved it because you wont get this credential again. And NEVER SHARE THIS TO UNAUTHORIZED ONE"
     })
+    @HttpCode(200)
     @Post('generate')
     async generateOperator() {
         return await this.operatorServcice.createOperator();
@@ -36,6 +37,7 @@ export class OperatorController {
         description: "Update the alias of the operator"
     })
     @ApiBody({ type: UpdateAliasDto })
+    @HttpCode(200)
     @Post('updateAlias')
     async updateAlias(@Body() body: UpdateAliasArgs) {
         return this.operatorServcice.updateAlias(body);
@@ -46,6 +48,7 @@ export class OperatorController {
         description: "Change the password of the operator"
     })
     @ApiQuery({ type: ChangePasswordDto })
+    @HttpCode(200)
     @Post('changePassword')
     async changePassword(@Query() query: ChangePasswordArgs) {
         return this.operatorServcice.changePassword(query);

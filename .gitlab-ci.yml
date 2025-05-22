@@ -1,0 +1,21 @@
+include:
+  - project: ci/core-cicd
+    ref: main
+    file: luminet.gitlab-ci.yml
+variables:  
+  ENABLE_NODEJS_INTEGRATION_TEST: "true"
+  NODEJS_INTEGRATION_TEST_IMAGE_VERSION: hub.lumigame.com/base/node:22-alpine-25h1.1
+  NODEJS_IMAGE: hub.lumigame.com/base/node:22-alpine-25h1.1
+  NODEJS_INTEGRATION_TEST_DB_IMAGE_VERSION: hub.lumigame.com/docker-hub/library/mongo:8.0.8
+integration_test_js:
+  before_script:
+    - npm set registry $NPM_LUMI_HOST
+    - yarn install
+  artifacts:
+    when: always
+    paths:
+      - ./coverage
+    reports:
+      junit:
+        - ./coverage/integration-tests.xml
+    expire_in: 1 day
