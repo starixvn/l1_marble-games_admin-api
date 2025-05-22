@@ -9,6 +9,10 @@ export type OperatorDocument = OperatorCredential & Document<ObjectId>;
 
 @Schema()
 export class OperatorCredential {
+
+    @Prop({ type: String, required: false })
+    alias?: string;
+
     @Prop({ type: String })
     password: string;
 }
