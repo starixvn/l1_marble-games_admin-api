@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
+import { GameIntegrationModule } from './game-integration/game-integration.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { AppController } from './app.controller';
         };
       }
     }),
-    OperatorModule
+    OperatorModule,
+    GameIntegrationModule
   ],
   controllers: [AppController],
 })
