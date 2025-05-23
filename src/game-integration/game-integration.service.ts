@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { GameIntegration, GameIntegrationDocument } from "./schema/game-integration.schema";
 import { Model, Types } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
@@ -17,15 +17,11 @@ export class GameIntegrationService {
 
   async upsertGameIntegration(query: GameIntegrationQueryDto, updateRequest: GameIntegrationUpdateRequestDto) {
 
-
-    if (!query.operatorId && !query.alias) {
-      throw new BadRequestException('Operator ID or alias is required');
-    }
-
     const operatorId = 
       query.operatorId 
         ? new Types.ObjectId(query.operatorId) 
         : (await this.operatorModel.findOne({ alias: query.alias }).select('_id').lean())?._id;
+    
     if (!operatorId) {
       throw new NotFoundException('Operator not found');
     }

@@ -30,6 +30,8 @@
     "@nestjs/swagger": "^11.0.6",
     "@scalar/nestjs-api-reference": "^0.3.190",
     "bcryptjs": "^3.0.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "dotenv": "^16.4.7",
     "mongoose": "^8.12.1",
     "random": "^5.3.0",

@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { IsOptional, IsArray, IsObject } from "class-validator";
 
 export class GameIntegrationUpdateRequestDto {
   @ApiProperty({ 
@@ -6,7 +7,9 @@ export class GameIntegrationUpdateRequestDto {
     required: false,
     example: { "eventType": "match", "priority": 1 }
   })
-  mergeEvent: Record<string, any> = {};
+  @IsOptional()
+  @IsObject()
+  mergeEvent?: Record<string, any>;
 
   @ApiProperty({ 
     description: 'Array of merge event details',
@@ -14,7 +17,9 @@ export class GameIntegrationUpdateRequestDto {
     example: [{ "detail": "live", "value": true }],
     isArray: true
   })
-  mergeEventDetails: Array<any> = [];
+  @IsOptional()
+  @IsArray()
+  mergeEventDetails?: Array<any>;
 
   @ApiProperty({ 
     description: 'Array of patches to apply',
@@ -22,7 +27,9 @@ export class GameIntegrationUpdateRequestDto {
     example: [{ "op": "replace", "path": "/status", "value": "active" }],
     isArray: true
   })
-  patches: Array<any> = [];
+  @IsOptional()
+  @IsArray()
+  patches?: Array<any>;
 
   @ApiProperty({ 
     description: 'Array of market strings',
@@ -31,5 +38,7 @@ export class GameIntegrationUpdateRequestDto {
     isArray: true,
     type: String
   })
-  markets: Array<string> = [];
+  @IsOptional()
+  @IsArray()
+  markets?: Array<string>;
 }
