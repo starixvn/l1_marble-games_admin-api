@@ -16,6 +16,36 @@ export class GameIntegrationService {
   ) {}
 
   async upsertGameIntegration(query: GameIntegrationQueryDto, updateRequest: GameIntegrationUpdateRequestDto) {
+    const operatorId = await this.getOperator(query);
+
+    return this.updateOrCreateGameIntegration(operatorId as unknown as string, query.gameId, updateRequest);
+  }
+
+  private async updateOrCreateGameIntegration(operatorId: string, gameId: number, updateRequest: GameIntegrationUpdateRequestDto) {
+    let gameIntegration = await this.gameIntegrationModel.findOne({ operatorId, gameId });
+
+    if (!gameIntegration) {
+      gameIntegration = await this.gameIntegrationModel.create({
+        operatorId,
+        gameId,
+        ...updateRequest,
+      });
+    } else {
+      gameIntegration = await this.gameIntegrationModel.findOneAndUpdate(
+        { _id: gameIntegration._id }, 
+        { $set: updateRequest },
+        { new: true }
+      );
+    }
+
+    if (!gameIntegration) {
+      throw new InternalServerErrorException('Update failed');
+    }
+
+    return gameIntegration.toObject();
+  }
+
+  private async getOperator(query: GameIntegrationQueryDto) {
     let operatorQuery: { _id: string } | { alias: string } | null = null;
     
     if (query.operatorId) {
@@ -34,28 +64,6 @@ export class GameIntegrationService {
       throw new NotFoundException('Operator not found');
     }
 
-    const operatorId = operator._id;
-
-    let gameIntegration = await this.gameIntegrationModel.findOne({ operatorId, gameId: query.gameId });
-
-    if (!gameIntegration) {
-      gameIntegration = await this.gameIntegrationModel.create({
-        operatorId,
-        gameId: query.gameId,
-        ...updateRequest,
-      });
-    } else {
-      gameIntegration = await this.gameIntegrationModel.findOneAndUpdate(
-        { _id: gameIntegration._id }, 
-        { $set: updateRequest },
-        { new: true }
-      );
-    }
-
-    if (!gameIntegration) {
-      throw new InternalServerErrorException('Update failed');
-    }
-
-    return gameIntegration.toObject();
+    return operator._id;
   }
 }
