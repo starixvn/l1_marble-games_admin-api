@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="E:\projects\pentagon\l1\marble-games\admin-api\integration-tests\test-suites\operator\operator.test.ts">
+    <testCase name="Operator Generate should generate an operator" duration="81"/>
+    <testCase name="Operator Update alias should update the alias of the operator" duration="13"/>
+    <testCase name="Operator Update alias should throw 404 if operator not found" duration="7"/>
+    <testCase name="Operator Change password should generate new password for the operator" duration="57"/>
+    <testCase name="Operator Change password should use alias if operatorId is not provided" duration="61"/>
+    <testCase name="Operator Change password should throw 404 if operator not found" duration="4"/>
+  </file>
+  <file path="E:\projects\pentagon\l1\marble-games\admin-api\integration-tests\test-suites\healthcheck\healthcheck.test.ts">
+    <testCase name="Healthcheck should return 200 status for root endpoint" duration="4"/>
+  </file>
+</testExecutions>

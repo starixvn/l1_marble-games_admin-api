@@ -66,7 +66,7 @@ export class OperatorService {
 
     operator.alias = alias;
 
-    await operator.save();;
+    await operator.save();
   }
  
   async changePassword(args: ChangePasswordArgs) {

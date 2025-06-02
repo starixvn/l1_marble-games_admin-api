@@ -1,0 +1,96 @@
+[{
+  "_id": {
+    "$oid": "67d3a83b13fae5b5c4230254"
+  },
+  "operatorId": {
+    "$oid": "67d291d943a96fad7f14ddae"
+  },
+  "gameId": 2001,
+  "mergeEvent": {
+    "productCode": "SM_CLUB_WC_25",
+    "productTypeKey": "MARBLE",
+    "_id": null,
+    "__v": null,
+    "streamServer": "https://stream.lumigame.com",
+    "videoExtension": "mp4"
+  },
+  "mergeEventDetails": [],
+  "markets": [
+    {
+      "$oid": "6809fce26a798f36657e4c4d"
+    },
+    {
+      "$oid": "680a038f6a798f36657e4c51"
+    },
+    {
+      "$oid": "680a03bf6a798f36657e4c52"
+    },
+    {
+      "$oid": "680a03d96a798f36657e4c53"
+    },
+    {
+      "$oid": "680a03fc6a798f36657e4c54"
+    },
+    {
+      "$oid": "680a04126a798f36657e4c55"
+    },
+    {
+      "$oid": "680a04266a798f36657e4c56"
+    },
+    {
+      "$oid": "680a043a6a798f36657e4c57"
+    }
+  ],
+  "patches": [
+    {
+      "op": "jsonata",
+      "path": "/eventDetails/0/playlist",
+      "expression": "$exists(eventDetails[0].playlist) and $trim(eventDetails[0].playlist) != \"\" ? streamServer & '/' & eventDetails[0].playlist & '.' & videoExtension : \"\""
+    },
+    {
+      "op": "jsonata",
+      "path": "/eventDetails/0/goalInfo",
+      "expression": "$exists(eventDetails[0].goalInfo) and $trim(eventDetails[0].goalInfo) != \"\" ? streamServer & '/' & eventDetails[0].goalInfo & '.json' : \"\""
+    },
+    {
+      "op": "jsonata",
+      "path": "/eventDetails/1/playlist",
+      "expression": "$exists(eventDetails[1].playlist) and $trim(eventDetails[1].playlist) != \"\" ? streamServer & '/' & eventDetails[1].playlist & '.' & videoExtension : \"\""
+    },
+    {
+      "op": "jsonata",
+      "path": "/eventDetails/1/goalInfo",
+      "expression": "$exists(eventDetails[1].goalInfo) and $trim(eventDetails[1].goalInfo) != \"\" ? streamServer & '/' & eventDetails[1].goalInfo & '.json' : \"\""
+    },
+    {
+      "op": "remove",
+      "path": "/streamServer"
+    },
+    {
+      "op": "remove",
+      "path": "/videoExtension"
+    },
+    {
+      "op": "remove",
+      "path": "/eventDetails/0/selections"
+    },
+    {
+      "op": "remove",
+      "path": "/eventDetails/1/selections"
+    },
+    {
+      "op": "remove",
+      "path": "/gameId"
+    },
+    {
+      "op": "jsonata",
+      "path": "/eventDetails/0/result",
+      "expression": "$exists(eventDetails[0].result) and $exists(eventDetails[0].result.finalScore) ? eventDetails[0].result.finalScore : \"\""
+    },
+    {
+      "op": "jsonata",
+      "path": "/eventDetails/1/result",
+      "expression": "$exists(eventDetails[1].result) and $exists(eventDetails[1].result.finalScore) ? eventDetails[1].result.finalScore : \"\""
+    }
+  ]
+}]
