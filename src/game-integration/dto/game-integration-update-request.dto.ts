@@ -12,9 +12,22 @@ export class MarketIntegrationUpdateRequestDto {
   @IsString()
   id?: string;
 
+  @ApiProperty({
+    description: 'Merge configuration object',
+    required: false,
+    example: { "marketType": "1x2", "priority": 1 },
+    type: Object
+  })
   @IsOptional()
   merge?: Record<string, any>;
 
+  @ApiProperty({
+    description: 'Selection array',
+    required: false,
+    example: [{ "selectionID": 1, "name": "ft_hdp_home", "column": 1 }, { "selectionID": 2, "name": "ft_hdp_away", "column": 2 }],
+    type: Object,
+    isArray: true
+  })
   @IsOptional()
   selections?: Array<any>;
 
@@ -51,14 +64,13 @@ export class GameIntegrationUpdateRequestDto {
   })
   @IsOptional()
   @IsArray()
-  patches?: Array<any>;
+  patches?: Array<Record<string, any>>;
 
   @ApiProperty({ 
-    description: 'Array of market strings',
+    description: 'Array of market integration objects',
     required: false,
-    example: ["1X2", "Over/Under", "Both Teams to Score"],
     isArray: true,
-    type: String
+    type: MarketIntegrationUpdateRequestDto
   })
   @IsOptional()
   @IsArray()
