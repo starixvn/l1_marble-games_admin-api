@@ -26,7 +26,7 @@ describe("Operator", () => {
 
     describe("Update alias", () => {
         it("should update the alias of the operator", async () => {
-            // Arrange - Use the existing test operator from stub data
+            // Arrange
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             const newAlias = "updated-test-operator";
             
@@ -73,7 +73,7 @@ describe("Operator", () => {
     
     describe("Change password", () => {
         it("should generate new password for the operator", async () => {
-            // Arrange - Use the existing test operator from stub data
+            // Arrange
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
@@ -96,11 +96,10 @@ describe("Operator", () => {
         });
 
         it("should use alias if operatorId is not provided", async () => {
-            // Arrange - First set an alias for the test operator
+            // Arrange
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             const testAlias = "test-operator-alias";
             
-            // Set alias first
             await fetch(`${baseUrl}/api/operator/updateAlias`, {
                 method: 'POST',
                 headers: {
@@ -112,7 +111,7 @@ describe("Operator", () => {
                 }),
             });
             
-            // Act - Change password using alias
+            // Act
             const response = await fetch(`${baseUrl}/api/operator/changePassword?alias=${testAlias}`, {
                 method: 'POST',
                 headers: {

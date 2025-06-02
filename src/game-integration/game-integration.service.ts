@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { GameIntegration, GameIntegrationDocument } from "./schema/game-integration.schema";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import { GameIntegrationUpdateRequestDto } from "./dto/game-integration-update-request.dto";
 import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
@@ -16,15 +16,25 @@ export class GameIntegrationService {
   ) {}
 
   async upsertGameIntegration(query: GameIntegrationQueryDto, updateRequest: GameIntegrationUpdateRequestDto) {
-
-    const operatorId = 
-      query.operatorId 
-        ? new Types.ObjectId(query.operatorId) 
-        : (await this.operatorModel.findOne({ alias: query.alias }).select('_id').lean())?._id;
+    let operatorQuery: { _id: string } | { alias: string } | null = null;
     
-    if (!operatorId) {
+    if (query.operatorId) {
+      operatorQuery = { _id: query.operatorId };
+    } else if (query.alias) {
+      operatorQuery = { alias: query.alias };
+    }
+
+    if (!operatorQuery) {
       throw new NotFoundException('Operator not found');
     }
+
+    const operator = await this.operatorModel.findOne(operatorQuery).select('_id').lean();
+    
+    if (!operator) {
+      throw new NotFoundException('Operator not found');
+    }
+
+    const operatorId = operator._id;
 
     let gameIntegration = await this.gameIntegrationModel.findOne({ operatorId, gameId: query.gameId });
 

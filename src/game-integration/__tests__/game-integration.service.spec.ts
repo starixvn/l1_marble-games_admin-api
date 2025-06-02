@@ -63,6 +63,7 @@ describe('GameIntegrationService', () => {
             mergeEvent: { eventType: 'match' },
             markets: ['1X2'],
           };
+          const mockOperator = { _id: mockOperatorId };
           const mockCreatedIntegration = {
             _id: mockGameIntegrationId,
             operatorId: mockOperatorId,
@@ -76,6 +77,11 @@ describe('GameIntegrationService', () => {
             }),
           };
 
+          mockOperatorModel.findOne.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(mockOperator),
+            }),
+          });
           mockGameIntegrationModel.findOne.mockResolvedValue(null);
           mockGameIntegrationModel.create.mockResolvedValue(mockCreatedIntegration);
 
@@ -83,12 +89,13 @@ describe('GameIntegrationService', () => {
           const result = await service.upsertGameIntegration(query, updateRequest);
 
           // Assert
+          expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ _id: mockOperatorId.toString() });
           expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
-            operatorId: expect.any(Types.ObjectId),
+            operatorId: mockOperatorId,
             gameId: 1001,
           });
           expect(mockGameIntegrationModel.create).toHaveBeenCalledWith({
-            operatorId: expect.any(Types.ObjectId),
+            operatorId: mockOperatorId,
             gameId: 1001,
             ...updateRequest,
           });
@@ -113,6 +120,7 @@ describe('GameIntegrationService', () => {
             mergeEvent: { eventType: 'match' },
             markets: ['1X2'],
           };
+          const mockOperator = { _id: mockOperatorId };
           const mockExistingIntegration = {
             _id: mockGameIntegrationId,
             operatorId: mockOperatorId,
@@ -131,6 +139,11 @@ describe('GameIntegrationService', () => {
             }),
           };
 
+          mockOperatorModel.findOne.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(mockOperator),
+            }),
+          });
           mockGameIntegrationModel.findOne.mockResolvedValue(mockExistingIntegration);
           mockGameIntegrationModel.findOneAndUpdate.mockResolvedValue(mockUpdatedIntegration);
 
@@ -138,8 +151,9 @@ describe('GameIntegrationService', () => {
           const result = await service.upsertGameIntegration(query, updateRequest);
 
           // Assert
+          expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ _id: mockOperatorId.toString() });
           expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
-            operatorId: expect.any(Types.ObjectId),
+            operatorId: mockOperatorId,
             gameId: 1001,
           });
           expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
@@ -304,6 +318,48 @@ describe('GameIntegrationService', () => {
       });
     });
 
+    describe('when neither operatorId nor alias is provided', () => {
+      it('should throw NotFoundException', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: 'match' },
+        };
+
+        // Act & Assert
+        await expect(service.upsertGameIntegration(query, updateRequest)).rejects.toThrow(
+          NotFoundException
+        );
+      });
+    });
+
+    describe('when operatorId is provided but operator does not exist', () => {
+      it('should throw NotFoundException', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: 'match' },
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(null),
+          }),
+        });
+
+        // Act & Assert
+        await expect(service.upsertGameIntegration(query, updateRequest)).rejects.toThrow(
+          NotFoundException
+        );
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ _id: mockOperatorId.toString() });
+      });
+    });
+
     describe('when create operation fails', () => {
       it('should throw InternalServerErrorException', async () => {
         // Arrange
@@ -314,7 +370,13 @@ describe('GameIntegrationService', () => {
         const updateRequest: GameIntegrationUpdateRequestDto = {
           mergeEvent: { eventType: 'match' },
         };
+        const mockOperator = { _id: mockOperatorId };
 
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
         mockGameIntegrationModel.findOne.mockResolvedValue(null);
         mockGameIntegrationModel.create.mockResolvedValue(null);
 
@@ -335,12 +397,18 @@ describe('GameIntegrationService', () => {
         const updateRequest: GameIntegrationUpdateRequestDto = {
           mergeEvent: { eventType: 'match' },
         };
+        const mockOperator = { _id: mockOperatorId };
         const mockExistingIntegration = {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
           gameId: 1001,
         };
 
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
         mockGameIntegrationModel.findOne.mockResolvedValue(mockExistingIntegration);
         mockGameIntegrationModel.findOneAndUpdate.mockResolvedValue(null);
 
@@ -364,6 +432,7 @@ describe('GameIntegrationService', () => {
           patches: [{ op: 'replace', path: '/status', value: 'active' }],
           markets: ['1X2', 'Over/Under', 'Both Teams to Score'],
         };
+        const mockOperator = { _id: mockOperatorId };
         const mockCreatedIntegration = {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
@@ -377,6 +446,11 @@ describe('GameIntegrationService', () => {
           }),
         };
 
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
         mockGameIntegrationModel.findOne.mockResolvedValue(null);
         mockGameIntegrationModel.create.mockResolvedValue(mockCreatedIntegration);
 
@@ -385,7 +459,7 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockGameIntegrationModel.create).toHaveBeenCalledWith({
-          operatorId: expect.any(Types.ObjectId),
+          operatorId: mockOperatorId,
           gameId: 1001,
           ...updateRequest,
         });
@@ -406,6 +480,7 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {};
+        const mockOperator = { _id: mockOperatorId };
         const mockCreatedIntegration = {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
@@ -417,6 +492,11 @@ describe('GameIntegrationService', () => {
           }),
         };
 
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
         mockGameIntegrationModel.findOne.mockResolvedValue(null);
         mockGameIntegrationModel.create.mockResolvedValue(mockCreatedIntegration);
 
@@ -425,7 +505,7 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockGameIntegrationModel.create).toHaveBeenCalledWith({
-          operatorId: expect.any(Types.ObjectId),
+          operatorId: mockOperatorId,
           gameId: 1001,
         });
         expect(result).toEqual({
