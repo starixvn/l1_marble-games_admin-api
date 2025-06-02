@@ -1,16 +1,19 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { GameIntegration, GameIntegrationDocument } from "./schema/game-integration.schema";
-import { Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
-import { GameIntegrationUpdateRequestDto } from "./dto/game-integration-update-request.dto";
+import { GameIntegrationUpdateRequestDto, MarketIntegrationUpdateRequestDto } from "./dto/game-integration-update-request.dto";
 import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
 import { OperatorCredential, OperatorDocument } from "../operator/schema/operator-credential.schema";
+import { MarketIntegration, MarketIntegrationDocument } from "./schema/market-integration.schema";
 
 @Injectable()
 export class GameIntegrationService {
   constructor(
     @InjectModel(GameIntegration.name)
     private readonly gameIntegrationModel: Model<GameIntegrationDocument>,
+    @InjectModel(MarketIntegration.name)
+    private readonly marketIntegrationModel: Model<MarketIntegrationDocument>,
     @InjectModel(OperatorCredential.name)
     private readonly operatorModel: Model<OperatorDocument>,
   ) {}
@@ -18,10 +21,19 @@ export class GameIntegrationService {
   async upsertGameIntegration(query: GameIntegrationQueryDto, updateRequest: GameIntegrationUpdateRequestDto) {
     const operatorId = await this.getOperator(query);
 
-    return this.updateOrCreateGameIntegration(operatorId as unknown as string, query.gameId, updateRequest);
+    const marketIntegrationToProcess = updateRequest.markets ?? [];
+
+    const processedMarketIntegrations = await this.processMarketIntegrations(marketIntegrationToProcess);
+
+    const processedUpdateRequest = {
+      ...updateRequest,
+      markets: processedMarketIntegrations,
+    };
+
+    return this.updateOrCreateGameIntegration(operatorId as unknown as string, query.gameId, processedUpdateRequest);
   }
 
-  private async updateOrCreateGameIntegration(operatorId: string, gameId: number, updateRequest: GameIntegrationUpdateRequestDto) {
+  private async updateOrCreateGameIntegration(operatorId: string, gameId: number, updateRequest: any) {
     let gameIntegration = await this.gameIntegrationModel.findOne({ operatorId, gameId });
 
     if (!gameIntegration) {
@@ -65,5 +77,55 @@ export class GameIntegrationService {
     }
 
     return operator._id;
+  }
+
+  private async processMarketIntegrations(marketIntegrations: MarketIntegrationUpdateRequestDto[]): Promise<unknown[]> {
+    const marketIntegrationIds = await Promise.all(marketIntegrations.map(marketIntegration => this.processMarketIntegration(marketIntegration)));
+
+    return marketIntegrationIds;
+  }
+
+  private async processMarketIntegration(marketIntegration: MarketIntegrationUpdateRequestDto) {
+    if (!marketIntegration.id) {
+      return this.createMarketIntegration(marketIntegration);
+    }
+
+    return this.updateMarketIntegration(marketIntegration);
+  }
+
+  private async createMarketIntegration(marketIntegration: MarketIntegrationUpdateRequestDto) {
+    const newMarketIntegration = await this.marketIntegrationModel.create({
+      selections: marketIntegration.selections ?? [],
+      merge: marketIntegration.merge ?? {},
+      name: marketIntegration.name ?? '',
+    });
+
+    if (!newMarketIntegration) {
+      throw new InternalServerErrorException('Failed to create market integration');
+    }
+
+    return newMarketIntegration._id;
+  }
+
+  private async updateMarketIntegration(marketIntegration: MarketIntegrationUpdateRequestDto) {
+    if (!marketIntegration.id) {
+      throw new Error('Market integration id is required for this function');
+    }
+
+    if (!marketIntegration.merge && !marketIntegration.selections && !marketIntegration.name) {
+      return mongoose.Types.ObjectId.createFromHexString(marketIntegration.id);
+    }
+
+    const updatedMarketIntegration = await this.marketIntegrationModel.findOneAndUpdate(
+      { _id: marketIntegration.id },
+      { $set: marketIntegration },
+      { new: true }
+    );
+
+    if (!updatedMarketIntegration) {
+      throw new InternalServerErrorException('Failed to update market integration');
+    }
+
+    return updatedMarketIntegration._id;
   }
 }

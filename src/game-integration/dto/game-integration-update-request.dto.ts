@@ -1,5 +1,27 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsArray, IsObject } from "class-validator";
+import { IsOptional, IsArray, IsObject, IsString } from "class-validator";
+
+export class MarketIntegrationUpdateRequestDto {
+  @ApiProperty({
+    description: 'Object id of the market integration object',
+    required: false,
+    example: "6809fce26a798f36657e4c4d",
+    type: String
+  })
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsOptional()
+  merge?: Record<string, any>;
+
+  @IsOptional()
+  selections?: Array<any>;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
+}
 
 export class GameIntegrationUpdateRequestDto {
   @ApiProperty({ 
@@ -40,5 +62,5 @@ export class GameIntegrationUpdateRequestDto {
   })
   @IsOptional()
   @IsArray()
-  markets?: Array<string>;
+  markets?: Array<MarketIntegrationUpdateRequestDto>;
 }

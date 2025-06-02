@@ -47,7 +47,7 @@ describe('GameIntegrationController', () => {
       mergeEvent: { eventType: 'match', priority: 1 },
       mergeEventDetails: [{ detail: 'live', value: true }],
       patches: [{ op: 'replace', path: '/status', value: 'active' }],
-      markets: ['1X2', 'Over/Under', 'Both Teams to Score'],
+      markets: [],
     };
 
     const mockGameIntegrationResponse = {
@@ -57,7 +57,7 @@ describe('GameIntegrationController', () => {
       mergeEvent: { eventType: 'match', priority: 1 },
       mergeEventDetails: [{ detail: 'live', value: true }],
       patches: [{ op: 'replace', path: '/status', value: 'active' }],
-      markets: ['1X2', 'Over/Under', 'Both Teams to Score'],
+      markets: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -184,7 +184,7 @@ describe('GameIntegrationController', () => {
     it('should handle updateRequest with only markets', async () => {
       // Arrange
       const partialUpdateRequest: GameIntegrationUpdateRequestDto = {
-        markets: ['1X2', 'Over/Under'],
+        markets: [],
       };
       mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
 

@@ -4,6 +4,7 @@ import { Types } from 'mongoose';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { GameIntegrationService } from '../game-integration.service';
 import { GameIntegration } from '../schema/game-integration.schema';
+import { MarketIntegration } from '../schema/market-integration.schema';
 import { OperatorCredential } from '../../operator/schema/operator-credential.schema';
 import { GameIntegrationQueryDto } from '../dto/game-integration-query.dto';
 import { GameIntegrationUpdateRequestDto } from '../dto/game-integration-update-request.dto';
@@ -11,13 +12,21 @@ import { GameIntegrationUpdateRequestDto } from '../dto/game-integration-update-
 describe('GameIntegrationService', () => {
   let service: GameIntegrationService;
   let mockGameIntegrationModel: any;
+  let mockMarketIntegrationModel: any;
   let mockOperatorModel: any;
 
   const mockOperatorId = new Types.ObjectId();
   const mockGameIntegrationId = new Types.ObjectId();
+  const mockMarketIntegrationId = new Types.ObjectId();
 
   beforeEach(async () => {
     const mockGameIntegrationModelFactory = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      findOneAndUpdate: jest.fn(),
+    };
+
+    const mockMarketIntegrationModelFactory = {
       findOne: jest.fn(),
       create: jest.fn(),
       findOneAndUpdate: jest.fn(),
@@ -35,6 +44,10 @@ describe('GameIntegrationService', () => {
           useValue: mockGameIntegrationModelFactory,
         },
         {
+          provide: getModelToken(MarketIntegration.name),
+          useValue: mockMarketIntegrationModelFactory,
+        },
+        {
           provide: getModelToken(OperatorCredential.name),
           useValue: mockOperatorModelFactory,
         },
@@ -43,6 +56,7 @@ describe('GameIntegrationService', () => {
 
     service = module.get<GameIntegrationService>(GameIntegrationService);
     mockGameIntegrationModel = module.get(getModelToken(GameIntegration.name));
+    mockMarketIntegrationModel = module.get(getModelToken(MarketIntegration.name));
     mockOperatorModel = module.get(getModelToken(OperatorCredential.name));
   });
 
@@ -61,7 +75,7 @@ describe('GameIntegrationService', () => {
           };
           const updateRequest: GameIntegrationUpdateRequestDto = {
             mergeEvent: { eventType: 'match' },
-            markets: ['1X2'],
+            markets: [],
           };
           const mockOperator = { _id: mockOperatorId };
           const mockCreatedIntegration = {
@@ -107,6 +121,77 @@ describe('GameIntegrationService', () => {
             ...updateRequest,
           });
         });
+
+        it('should create new game integration with market integrations', async () => {
+          // Arrange
+          const query: GameIntegrationQueryDto = {
+            operatorId: mockOperatorId.toString(),
+            gameId: 1001,
+          };
+          const updateRequest: GameIntegrationUpdateRequestDto = {
+            mergeEvent: { eventType: 'match' },
+            markets: [
+              {
+                name: 'Test Market',
+                selections: ['Selection 1', 'Selection 2'],
+                merge: { key: 'value' },
+              },
+            ],
+          };
+          const mockOperator = { _id: mockOperatorId };
+          const mockCreatedMarketIntegration = {
+            _id: mockMarketIntegrationId,
+            name: 'Test Market',
+            selections: ['Selection 1', 'Selection 2'],
+            merge: { key: 'value' },
+          };
+          const mockCreatedIntegration = {
+            _id: mockGameIntegrationId,
+            operatorId: mockOperatorId,
+            gameId: 1001,
+            mergeEvent: { eventType: 'match' },
+            markets: [mockMarketIntegrationId],
+            toObject: jest.fn().mockReturnValue({
+              _id: mockGameIntegrationId,
+              operatorId: mockOperatorId,
+              gameId: 1001,
+              mergeEvent: { eventType: 'match' },
+              markets: [mockMarketIntegrationId],
+            }),
+          };
+
+          mockOperatorModel.findOne.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(mockOperator),
+            }),
+          });
+          mockGameIntegrationModel.findOne.mockResolvedValue(null);
+          mockMarketIntegrationModel.create.mockResolvedValue(mockCreatedMarketIntegration);
+          mockGameIntegrationModel.create.mockResolvedValue(mockCreatedIntegration);
+
+          // Act
+          const result = await service.upsertGameIntegration(query, updateRequest);
+
+          // Assert
+          expect(mockMarketIntegrationModel.create).toHaveBeenCalledWith({
+            name: 'Test Market',
+            selections: ['Selection 1', 'Selection 2'],
+            merge: { key: 'value' },
+          });
+          expect(mockGameIntegrationModel.create).toHaveBeenCalledWith({
+            operatorId: mockOperatorId,
+            gameId: 1001,
+            mergeEvent: { eventType: 'match' },
+            markets: [mockMarketIntegrationId],
+          });
+          expect(result).toEqual({
+            _id: mockGameIntegrationId,
+            operatorId: mockOperatorId,
+            gameId: 1001,
+            mergeEvent: { eventType: 'match' },
+            markets: [mockMarketIntegrationId],
+          });
+        });
       });
 
       describe('and game integration exists', () => {
@@ -118,7 +203,7 @@ describe('GameIntegrationService', () => {
           };
           const updateRequest: GameIntegrationUpdateRequestDto = {
             mergeEvent: { eventType: 'match' },
-            markets: ['1X2'],
+            markets: [],
           };
           const mockOperator = { _id: mockOperatorId };
           const mockExistingIntegration = {
@@ -169,6 +254,87 @@ describe('GameIntegrationService', () => {
             ...updateRequest,
           });
         });
+
+        it('should update existing game integration with market integrations', async () => {
+          // Arrange
+          const query: GameIntegrationQueryDto = {
+            operatorId: mockOperatorId.toString(),
+            gameId: 1001,
+          };
+          const updateRequest: GameIntegrationUpdateRequestDto = {
+            mergeEvent: { eventType: 'match' },
+            markets: [
+              {
+                id: mockMarketIntegrationId.toString(),
+                name: 'Updated Market',
+                selections: ['Updated Selection'],
+                merge: { updated: true },
+              },
+            ],
+          };
+          const mockOperator = { _id: mockOperatorId };
+          const mockExistingIntegration = {
+            _id: mockGameIntegrationId,
+            operatorId: mockOperatorId,
+            gameId: 1001,
+          };
+          const mockUpdatedMarketIntegration = {
+            _id: mockMarketIntegrationId,
+            name: 'Updated Market',
+            selections: ['Updated Selection'],
+            merge: { updated: true },
+          };
+          const mockUpdatedIntegration = {
+            _id: mockGameIntegrationId,
+            operatorId: mockOperatorId,
+            gameId: 1001,
+            mergeEvent: { eventType: 'match' },
+            markets: [mockMarketIntegrationId],
+            toObject: jest.fn().mockReturnValue({
+              _id: mockGameIntegrationId,
+              operatorId: mockOperatorId,
+              gameId: 1001,
+              mergeEvent: { eventType: 'match' },
+              markets: [mockMarketIntegrationId],
+            }),
+          };
+
+          mockOperatorModel.findOne.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(mockOperator),
+            }),
+          });
+          mockGameIntegrationModel.findOne.mockResolvedValue(mockExistingIntegration);
+          mockMarketIntegrationModel.findOneAndUpdate.mockResolvedValue(mockUpdatedMarketIntegration);
+          mockGameIntegrationModel.findOneAndUpdate.mockResolvedValue(mockUpdatedIntegration);
+
+          // Act
+          const result = await service.upsertGameIntegration(query, updateRequest);
+
+          // Assert
+          expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+            { _id: mockMarketIntegrationId.toString() },
+            { $set: updateRequest.markets![0] },
+            { new: true }
+          );
+          expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+            { _id: mockGameIntegrationId },
+            { 
+              $set: {
+                mergeEvent: { eventType: 'match' },
+                markets: [mockMarketIntegrationId],
+              }
+            },
+            { new: true }
+          );
+          expect(result).toEqual({
+            _id: mockGameIntegrationId,
+            operatorId: mockOperatorId,
+            gameId: 1001,
+            mergeEvent: { eventType: 'match' },
+            markets: [mockMarketIntegrationId],
+          });
+        });
       });
     });
 
@@ -183,7 +349,7 @@ describe('GameIntegrationService', () => {
             };
             const updateRequest: GameIntegrationUpdateRequestDto = {
               mergeEvent: { eventType: 'match' },
-              markets: ['1X2'],
+              markets: [],
             };
             const mockOperator = { _id: mockOperatorId };
             const mockCreatedIntegration = {
@@ -239,7 +405,7 @@ describe('GameIntegrationService', () => {
             };
             const updateRequest: GameIntegrationUpdateRequestDto = {
               mergeEvent: { eventType: 'match' },
-              markets: ['1X2'],
+              markets: [],
             };
             const mockOperator = { _id: mockOperatorId };
             const mockExistingIntegration = {
@@ -430,7 +596,7 @@ describe('GameIntegrationService', () => {
           mergeEvent: { eventType: 'match', priority: 1 },
           mergeEventDetails: [{ detail: 'live', value: true }],
           patches: [{ op: 'replace', path: '/status', value: 'active' }],
-          markets: ['1X2', 'Over/Under', 'Both Teams to Score'],
+          markets: [],
         };
         const mockOperator = { _id: mockOperatorId };
         const mockCreatedIntegration = {
@@ -485,10 +651,12 @@ describe('GameIntegrationService', () => {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
           gameId: 1001,
+          markets: [],
           toObject: jest.fn().mockReturnValue({
             _id: mockGameIntegrationId,
             operatorId: mockOperatorId,
             gameId: 1001,
+            markets: [],
           }),
         };
 
@@ -507,12 +675,94 @@ describe('GameIntegrationService', () => {
         expect(mockGameIntegrationModel.create).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
           gameId: 1001,
+          markets: [],
         });
         expect(result).toEqual({
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
           gameId: 1001,
+          markets: [],
         });
+      });
+    });
+
+    describe('market integration processing', () => {
+      it('should throw InternalServerErrorException when market integration creation fails', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: 'match' },
+          markets: [
+            {
+              name: 'Test Market',
+              selections: ['Selection 1'],
+              merge: { key: 'value' },
+            },
+          ],
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+        mockGameIntegrationModel.findOne.mockResolvedValue(null);
+        mockMarketIntegrationModel.create.mockResolvedValue(null);
+
+        // Act & Assert
+        await expect(service.upsertGameIntegration(query, updateRequest)).rejects.toThrow(
+          InternalServerErrorException
+        );
+        expect(mockMarketIntegrationModel.create).toHaveBeenCalledWith({
+          name: 'Test Market',
+          selections: ['Selection 1'],
+          merge: { key: 'value' },
+        });
+      });
+
+      it('should throw InternalServerErrorException when market integration update fails', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: 'match' },
+          markets: [
+            {
+              id: mockMarketIntegrationId.toString(),
+              name: 'Updated Market',
+            },
+          ],
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockExistingIntegration = {
+          _id: mockGameIntegrationId,
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+        mockGameIntegrationModel.findOne.mockResolvedValue(mockExistingIntegration);
+        mockMarketIntegrationModel.findOneAndUpdate.mockResolvedValue(null);
+
+        // Act & Assert
+        await expect(service.upsertGameIntegration(query, updateRequest)).rejects.toThrow(
+          InternalServerErrorException
+        );
+        expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+          { _id: mockMarketIntegrationId.toString() },
+          { $set: updateRequest.markets![0] },
+          { new: true }
+        );
       });
     });
   });
