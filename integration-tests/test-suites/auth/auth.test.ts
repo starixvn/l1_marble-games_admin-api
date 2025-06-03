@@ -4,33 +4,6 @@ describe("Auth", () => {
   const baseUrl = global.__API_SERVICE__.getBaseUrl();
 
   describe("OneTimeRegister", () => {
-    it("should return account on one time register", async () => {
-      // Act
-      const response = await fetch(`${baseUrl}/api/auth/oneTimeRegister`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      // Assert  
-      expect(response.status).toBe(200);
-      
-      const data = await response.json();
-      expect(data).toEqual(
-        expect.objectContaining({
-          username: "admin",
-          password: expect.any(String)
-        })
-      );
-      expect(data.password.length).toBeGreaterThan(0);
-
-      setAdminCredentials({
-        username: data.username,
-        password: data.password
-      });
-    });
-
     it("should return 400 when admin account already exists", async () => {
       // Act
       const response = await fetch(`${baseUrl}/api/auth/oneTimeRegister`, {
@@ -210,4 +183,4 @@ describe("Auth", () => {
       expect(response.status).toBe(401);
     });
   });
-})
+});

@@ -1,6 +1,7 @@
-import { Body, Controller, HttpCode, Post, Query } from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
 import { ChangePasswordArgs, OperatorService, UpdateAliasArgs } from "./operator.service";
-import { ApiBody, ApiOperation, ApiProperty, ApiQuery } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 
 class UpdateAliasDto implements UpdateAliasArgs {
   @ApiProperty({ description: 'Operator ID string' })
@@ -19,6 +20,8 @@ class ChangePasswordDto implements ChangePasswordArgs {
 }
 
 @Controller('operator')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class OperatorController {
     constructor(private readonly operatorServcice: OperatorService) {}
 

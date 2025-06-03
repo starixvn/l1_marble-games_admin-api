@@ -1,14 +1,27 @@
+import { addAdminAuth } from '../../utils/auth';
+
 describe("Operator", () => {
     const baseUrl = global.__API_SERVICE__.getBaseUrl();
     
     describe("Generate", () => {
-        it("should generate an operator", async () => {
+        it("should return 401 if not authenticated", async () => {
             // Act
             const response = await fetch(`${baseUrl}/api/operator/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+            });
+
+            // Assert
+            expect(response.status).toBe(401);
+        });
+      
+        it("should generate an operator", async () => {
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/generate`, {
+                method: 'POST',
+                headers: addAdminAuth(),
             });
             
             // Assert
@@ -25,7 +38,7 @@ describe("Operator", () => {
     });
 
     describe("Update alias", () => {
-        it("should update the alias of the operator", async () => {
+        it("should return 401 if not authenticated", async () => {
             // Arrange
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             const newAlias = "updated-test-operator";
@@ -36,6 +49,25 @@ describe("Operator", () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                    operatorId: existingOperatorId,
+                    alias: newAlias,
+                }),
+            });
+            
+            // Assert
+            expect(response.status).toBe(401);
+        });
+
+        it("should update the alias of the operator", async () => {
+            // Arrange
+            const existingOperatorId = "67d291d943a96fad7f14ddae";
+            const newAlias = "updated-test-operator";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/updateAlias`, {
+                method: 'POST',
+                headers: addAdminAuth(),
                 body: JSON.stringify({
                     operatorId: existingOperatorId,
                     alias: newAlias,
@@ -54,9 +86,7 @@ describe("Operator", () => {
             // Act
             const response = await fetch(`${baseUrl}/api/operator/updateAlias`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: addAdminAuth(),
                 body: JSON.stringify({
                     operatorId: nonExistentOperatorId,
                     alias: newAlias,
@@ -72,7 +102,7 @@ describe("Operator", () => {
     });
     
     describe("Change password", () => {
-        it("should generate new password for the operator", async () => {
+        it("should return 401 if not authenticated", async () => {
             // Arrange
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
@@ -82,6 +112,20 @@ describe("Operator", () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+            });
+            
+            // Assert
+            expect(response.status).toBe(401);
+        });
+
+        it("should generate new password for the operator", async () => {
+            // Arrange
+            const existingOperatorId = "67d291d943a96fad7f14ddae";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/changePassword?operatorId=${existingOperatorId}`, {
+                method: 'POST',
+                headers: addAdminAuth(),
             });
             
             // Assert
@@ -102,9 +146,7 @@ describe("Operator", () => {
             
             await fetch(`${baseUrl}/api/operator/updateAlias`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: addAdminAuth(),
                 body: JSON.stringify({
                     operatorId: existingOperatorId,
                     alias: testAlias,
@@ -114,9 +156,7 @@ describe("Operator", () => {
             // Act
             const response = await fetch(`${baseUrl}/api/operator/changePassword?alias=${testAlias}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: addAdminAuth(),
             });
             
             // Assert
@@ -137,9 +177,7 @@ describe("Operator", () => {
             // Act
             const response = await fetch(`${baseUrl}/api/operator/changePassword?operatorId=${nonExistentOperatorId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: addAdminAuth(),
             });
             
             // Assert

@@ -1,9 +1,31 @@
 import { MongoClient, ObjectId } from 'mongodb';
+import { addAdminAuth } from '../../utils/auth';
 
 describe("Game Integration", () => {
   const baseUrl = global.__API_SERVICE__.getBaseUrl();
   
   describe("Upsert", () => {
+    it("should return 401 if not authenticated", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const gameId = 2001;
+      const updateRequest = {
+        mergeEvent: { eventType: "match", priority: 1 }
+      };
+
+      // Act
+      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateRequest),
+      });
+
+      // Assert
+      expect(response.status).toBe(401);
+    });
+
     it("should throw 404 if operator not found (using alias)", async () => {
       // Arrange
       const nonExistentAlias = "non-existent-operator-alias";
@@ -15,9 +37,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?alias=${nonExistentAlias}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -39,9 +59,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -60,9 +78,7 @@ describe("Game Integration", () => {
       
       await fetch(`${baseUrl}/api/operator/updateAlias`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify({
           operatorId: existingOperatorId,
           alias: testAlias,
@@ -77,9 +93,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?alias=${testAlias}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -114,9 +128,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -155,9 +167,7 @@ describe("Game Integration", () => {
 
       const createResponse = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(initialRequest),
       });
 
@@ -179,9 +189,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -224,9 +232,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -267,9 +273,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 
@@ -324,9 +328,7 @@ describe("Game Integration", () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
       });
 

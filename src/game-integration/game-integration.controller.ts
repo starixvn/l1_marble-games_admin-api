@@ -1,11 +1,14 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { Body, Controller, HttpCode, HttpStatus, Post, Query, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { GameIntegrationService } from "./game-integration.service";
 import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
 import { GameIntegrationUpdateRequestDto } from "./dto/game-integration-update-request.dto";
+import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 
 @ApiTags('Game Integration')
 @Controller('gameIntegration')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class GameIntegrationController {
 
   constructor(private readonly gameIntegrationService: GameIntegrationService) {}
