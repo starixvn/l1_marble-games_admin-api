@@ -31,6 +31,32 @@ if (!uri || !dbName) {
 
 log(`Connecting to MongoDB: ${uri}`);
 
+async function clearAllCollections() {
+  try {
+    const db = mongoose.connection.db;
+    
+    if (!db) {
+      throw new Error("Database connection not established");
+    }
+    
+    const collections = await db.listCollections().toArray();
+    
+    log(`Found ${collections.length} collections to clear`);
+    
+    for (const collection of collections) {
+      const collectionName = collection.name;
+      log(`Clearing collection: ${collectionName}`);
+      await db.collection(collectionName).deleteMany({});
+    }
+    
+    log("All collections cleared successfully");
+  } catch (err) {
+    captureError(err);
+    log("Failed to clear collections");
+    throw err;
+  }
+}
+
 function convertObjectIds(obj) {
   if (!obj || typeof obj !== 'object') return obj;
   
@@ -93,9 +119,6 @@ async function processCollection(file) {
   
   const model = mongoose.model(collectionName, schema);
   
-  log(`Clearing collection: ${collectionName}`);
-  await model.deleteMany({});
-  
   let inserted = 0;
   let updated = 0;
   let errors = 0;
@@ -122,6 +145,8 @@ export async function migrateData() {
       dbName
     });
     log("Connected to MongoDB with Mongoose");
+    
+    await clearAllCollections();
     
     const files = fs.readdirSync(dataDirectory).filter(file => file.endsWith(".json"));
     
