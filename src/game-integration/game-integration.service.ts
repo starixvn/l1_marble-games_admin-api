@@ -34,27 +34,11 @@ export class GameIntegrationService {
   }
 
   private async updateOrCreateGameIntegration(operatorId: string, gameId: number, updateRequest: any) {
-    let gameIntegration = await this.gameIntegrationModel.findOne({ operatorId, gameId });
-
-    if (!gameIntegration) {
-      gameIntegration = await this.gameIntegrationModel.create({
-        operatorId,
-        gameId,
-        ...updateRequest,
-      });
-    } else {
-      gameIntegration = await this.gameIntegrationModel.findOneAndUpdate(
-        { _id: gameIntegration._id }, 
+    return this.gameIntegrationModel.findOneAndUpdate(
+        { operatorId, gameId }, 
         { $set: updateRequest },
-        { new: true }
-      );
-    }
-
-    if (!gameIntegration) {
-      throw new InternalServerErrorException('Update failed');
-    }
-
-    return gameIntegration.toObject();
+        { upsert: true, new: true }
+      ).select('-_id -__v');
   }
 
   private async getOperator(query: GameIntegrationQueryDto) {
