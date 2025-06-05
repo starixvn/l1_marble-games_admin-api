@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Query, UseGuards } from "@nestjs/common";
 import { GameConfigService } from "./game-config.service";
 import { ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
@@ -14,6 +14,7 @@ export class GameConfigController {
   ) {}
 
   @Post('upsertGameConfig')
+  @HttpCode(HttpStatus.OK)
   async upsertGameConfig(
     @Query('gameId') gameId: number, 
     @Body() body: GameConfigUpdateRequestDto) {

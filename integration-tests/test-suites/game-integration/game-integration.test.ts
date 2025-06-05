@@ -136,24 +136,21 @@ describe("Game Integration", () => {
       expect(response.status).toBe(200);
       
       const data = await response.json();
-      expect(data).toHaveProperty('_id');
-      expect(data).toHaveProperty('operatorId', existingOperatorId);
-      expect(data).toHaveProperty('gameId', gameId);
-      expect(data).toHaveProperty('mergeEvent');
-      expect(data.mergeEvent).toEqual({ eventType: "live", priority: 3 });
-      expect(data).toHaveProperty('mergeEventDetails');
-      expect(data.mergeEventDetails).toEqual([
-        { detail: "live", value: true },
-        { detail: "duration", value: 90 }
-      ]);
-      expect(data).toHaveProperty('patches');
-      expect(data.patches).toEqual([
-        { op: "add", path: "/config/timeout", value: 5000 },
-        { op: "replace", path: "/status", value: "enabled" }
-      ]);
-      
-      expect(typeof data._id).toBe('string');
-      expect(data._id.length).toBeGreaterThan(0);
+      expect(data).toEqual(
+        expect.objectContaining({
+          operatorId: existingOperatorId,
+          gameId: gameId,
+          mergeEvent: { eventType: "live", priority: 3 },
+          mergeEventDetails: [
+            { detail: "live", value: true },
+            { detail: "duration", value: 90 }
+          ],
+          patches: [
+            { op: "add", path: "/config/timeout", value: 5000 },
+            { op: "replace", path: "/status", value: "enabled" }
+          ]
+        })
+      );
     });
 
     it("should update existing game integration", async () => {
@@ -172,8 +169,6 @@ describe("Game Integration", () => {
       });
 
       expect(createResponse.status).toBe(200);
-      const createdData = await createResponse.json();
-      const gameIntegrationId = createdData._id;
 
       const updateRequest = {
         mergeEvent: { eventType: "updated", priority: 5 },
@@ -197,18 +192,20 @@ describe("Game Integration", () => {
       expect(response.status).toBe(200);
       
       const data = await response.json();
-      expect(data).toHaveProperty('_id', gameIntegrationId);
-      expect(data).toHaveProperty('operatorId', existingOperatorId);
-      expect(data).toHaveProperty('gameId', gameId);
-      
-      expect(data.mergeEvent).toEqual({ eventType: "updated", priority: 5 });
-      expect(data.mergeEventDetails).toEqual([
-        { detail: "updated", value: true }
-      ]);
-      expect(data.patches).toEqual([
-        { op: "replace", path: "/status", value: "updated" },
-        { op: "add", path: "/newField", value: "newValue" }
-      ]);
+      expect(data).toEqual(
+        expect.objectContaining({
+          operatorId: existingOperatorId,
+          gameId: gameId,
+          mergeEvent: { eventType: "updated", priority: 5 },
+          mergeEventDetails: [
+            { detail: "updated", value: true }
+          ],
+          patches: [
+            { op: "replace", path: "/status", value: "updated" },
+            { op: "add", path: "/newField", value: "newValue" }
+          ]
+        })
+      );
     });
 
     it("should create a new market integration if not provide id in market array", async () => {

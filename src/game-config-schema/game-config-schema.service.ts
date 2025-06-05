@@ -26,14 +26,12 @@ export class GameConfigSchemaService {
   async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
     const { gameId, schema } = args;
 
-    const gameConfigSchemaUpdateResult =
-      await this.gameConfigJsonSchemaModel.findOneAndUpdate(
+   
+    return this.gameConfigJsonSchemaModel.findOneAndUpdate(
         { gameId },
         { schema },
         { upsert: true, new: true }
       ).select('-_id -__v');
-
-    return gameConfigSchemaUpdateResult;
   }
 
   async validateGameConfigSchema(args: ValidateGameConfigSchemaArgs) {
