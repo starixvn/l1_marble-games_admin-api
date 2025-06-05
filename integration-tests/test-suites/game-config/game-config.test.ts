@@ -166,7 +166,7 @@ describe("Game Config", () => {
           headers: addAdminAuth(),
           body: JSON.stringify(config),
         });
-
+        console.log(await response.json());
         // Assert
         expect(response.status).toBe(404);
       });
