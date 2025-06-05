@@ -154,7 +154,7 @@ describe("Game Config", () => {
     describe("no schema found", () => {
       it("should throw 404", async () => {
         // Arrange
-        const gameId = 999;
+        const gameId = 9999;
         const config = {
           level: 5,
           difficulty: 'medium'
@@ -166,7 +166,6 @@ describe("Game Config", () => {
           headers: addAdminAuth(),
           body: JSON.stringify(config),
         });
-        console.log(await response.json());
         // Assert
         expect(response.status).toBe(404);
       });
