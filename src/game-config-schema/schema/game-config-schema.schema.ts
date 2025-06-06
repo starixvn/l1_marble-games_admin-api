@@ -3,19 +3,23 @@ import { Document, ObjectId,  } from "mongoose";
 
 
 export interface GameConfigJsonSchema {
-  gameId: number;
+  displayName: string;
   schema: object;
+  uiSchema: object;
 }
 
 export type GameConfigJsonSchemaDocument = GameConfigJsonSchema & Document<ObjectId>;
 
 @Schema()
 export class GameConfigJsonSchema {
-  @Prop({ type: Number, required: true })
-  gameId: number;
+  @Prop({ type: String, required: true })
+  displayName: string;
 
   @Prop({ type: Object, required: true })
   schema: object;
+
+  @Prop({ type: Object, required: true })
+  uiSchema: object;
 } 
 
 export const GameConfigJsonSchemaSchema = SchemaFactory.createForClass(GameConfigJsonSchema);

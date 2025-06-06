@@ -3,15 +3,16 @@ import { addAdminAuth } from '../../utils/auth';
 describe("Game Config", () => {
   const baseUrl = global.__API_SERVICE__.getBaseUrl();
 
-  describe("upsertGameConfig", () => {
+  describe("upsert", () => {
     describe("unauthenticated", () => {
       it("should throw 401", async () => {
         // Arrange
         const gameId = 123;
+        const schemaId = '507f1f77bcf86cd799439001';
         const config = { level: 5 };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsertGameConfig?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -29,19 +30,30 @@ describe("Game Config", () => {
         // Arrange
         const gameId = 456;
         const schema = {
-          type: 'object',
-          properties: {
-            level: { type: 'number', minimum: 1, maximum: 100 },
-            difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+          schema: {
+            type: 'object',
+            properties: {
+              level: { type: 'number', minimum: 1, maximum: 100 },
+              difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+            },
+            required: ['level', 'difficulty']
           },
-          required: ['level', 'difficulty']
+          displayName: 'Game Config Schema',
+          uiSchema: {}
         };
 
-        await fetch(`${baseUrl}/api/gameConfigSchema/upsertSchema?gameId=${gameId}`, {
+        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
           method: 'POST',
-          headers: addAdminAuth(),
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(schema),
         });
+
+        expect(schemaResponse.status).toBe(200);
+        const schemaData = await schemaResponse.json();
+        const schemaId = schemaData._id;
 
         const config = {
           level: 5,
@@ -49,9 +61,12 @@ describe("Game Config", () => {
         };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsertGameConfig?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
-          headers: addAdminAuth(),
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(config),
         });
 
@@ -73,19 +88,30 @@ describe("Game Config", () => {
         // Arrange
         const gameId = 789;
         const schema = {
-          type: 'object',
-          properties: {
-            level: { type: 'number', minimum: 1, maximum: 100 },
-            difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+          schema: {
+            type: 'object',
+            properties: {
+              level: { type: 'number', minimum: 1, maximum: 100 },
+              difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+            },
+            required: ['level', 'difficulty']
           },
-          required: ['level', 'difficulty']
+          displayName: 'Game Config Schema',
+          uiSchema: {}
         };
 
-        await fetch(`${baseUrl}/api/gameConfigSchema/upsertSchema?gameId=${gameId}`, {
+        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
           method: 'POST',
-          headers: addAdminAuth(),
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(schema),
         });
+
+        expect(schemaResponse.status).toBe(200);
+        const schemaData = await schemaResponse.json();
+        const schemaId = schemaData._id;
 
         const invalidConfig = {
           level: 150,
@@ -93,9 +119,12 @@ describe("Game Config", () => {
         };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsertGameConfig?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
-          headers: addAdminAuth(),
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(invalidConfig),
         });
 
@@ -107,19 +136,30 @@ describe("Game Config", () => {
         // Arrange
         const gameId = 790;
         const schema = {
-          type: 'object',
-          properties: {
-            level: { type: 'number', minimum: 1, maximum: 100 },
-            difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+          schema: {
+            type: 'object',
+            properties: {
+              level: { type: 'number', minimum: 1, maximum: 100 },
+              difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+            },
+            required: ['level', 'difficulty']
           },
-          required: ['level', 'difficulty']
+          displayName: 'Game Config Schema',
+          uiSchema: {}
         };
 
-        await fetch(`${baseUrl}/api/gameConfigSchema/upsertSchema?gameId=${gameId}`, {
+        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
           method: 'POST',
-          headers: addAdminAuth(),
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(schema),
         });
+
+        expect(schemaResponse.status).toBe(200);
+        const schemaData = await schemaResponse.json();
+        const schemaId = schemaData._id;
 
         const invalidConfig = {
           level: 150,
@@ -127,19 +167,21 @@ describe("Game Config", () => {
         };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsertGameConfig?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
-          headers: addAdminAuth(),
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(invalidConfig),
         });
 
         // Assert
+        expect(response.status).toBe(400);
         const data = await response.json();
         expect(data).toEqual(
           expect.objectContaining({
-            statusCode: 400,
-            error: "Bad Request",
-            message: expect.arrayContaining([
+            validationErrors: expect.arrayContaining([
               expect.objectContaining({
                 instancePath: "/level",
                 keyword: "maximum",
@@ -150,24 +192,152 @@ describe("Game Config", () => {
         );
       });
     });
+  });
 
-    describe("no schema found", () => {
-      it("should throw 404", async () => {
+  describe("get", () => {
+    describe("unauthenticated", () => {
+      it("should throw 401", async () => {
         // Arrange
-        const gameId = 9999;
-        const config = {
-          level: 5,
-          difficulty: 'medium'
-        };
+        const gameId = 999;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsertGameConfig?gameId=${gameId}`, {
-          method: 'POST',
-          headers: addAdminAuth(),
-          body: JSON.stringify(config),
+        const response = await fetch(`${baseUrl}/api/gameConfig/get?gameId=${gameId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
+
+        // Assert
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe("Not found", () => {
+      it("should throw 404", async () => {
+        // Arrange
+        const nonExistentGameId = 999999;
+
+        // Act
+        const response = await fetch(`${baseUrl}/api/gameConfig/get?gameId=${nonExistentGameId}`, {
+          method: 'GET',
+          headers: addAdminAuth(),
+        });
+
         // Assert
         expect(response.status).toBe(404);
+        
+        const data = await response.json();
+        expect(data).toEqual(
+          expect.objectContaining({
+            statusCode: 404,
+            message: expect.stringContaining('Game config not found')
+          })
+        );
+      });
+    });
+
+    describe("valid game id", () => {
+      it("should return game config", async () => {
+        // Arrange - First create a game config
+        const gameId = 456;
+        const schema = {
+          schema: {
+            type: 'object',
+            properties: {
+              level: { type: 'number', minimum: 1, maximum: 100 },
+              difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] }
+            },
+            required: ['level', 'difficulty']
+          },
+          displayName: 'Game Config Schema',
+          uiSchema: {}
+        };
+
+        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+          method: 'POST',
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(schema),
+        });
+
+        expect(schemaResponse.status).toBe(200);
+        const schemaData = await schemaResponse.json();
+        const schemaId = schemaData._id;
+
+        const config = {
+          level: 25,
+          difficulty: 'hard'
+        };
+
+        const createResponse = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
+          method: 'POST',
+          headers: {
+            ...addAdminAuth(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config),
+        });
+
+        expect(createResponse.status).toBe(200);
+
+        // Act
+        const response = await fetch(`${baseUrl}/api/gameConfig/get?gameId=${gameId}`, {
+          method: 'GET',
+          headers: addAdminAuth(),
+        });
+
+        // Assert
+        expect(response.status).toBe(200);
+        
+        const data = await response.json();
+        expect(data).toEqual(
+          expect.objectContaining({
+            gameId: gameId,
+            config: config
+          })
+        );
+      });
+    });
+  });
+
+  describe("list", () => {
+    describe("unauthenticated", () => {
+      it("should throw 401", async () => {
+        // Act
+        const response = await fetch(`${baseUrl}/api/gameConfig/list`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // Assert
+        expect(response.status).toBe(401);
+      });
+    });
+    
+    it("should return all game configs", async () => {
+      // Act
+      const response = await fetch(`${baseUrl}/api/gameConfig/list`, {
+        method: 'GET',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(response.status).toBe(200);
+      
+      const data = await response.json();
+      expect(Array.isArray(data)).toBe(true);
+      data.forEach(gameConfig => {
+        expect(gameConfig).toEqual(
+          expect.objectContaining({
+            gameId: expect.any(Number),
+            config: expect.any(Object)
+          })
+        );
       });
     });
   });

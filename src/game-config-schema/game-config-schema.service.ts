@@ -1,16 +1,18 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { GameConfigJsonSchema, GameConfigJsonSchemaDocument } from "./schema/game-config-schema.schema";
 import Ajv from "ajv";
 
 export type UpsertGameConfigSchemaArgs = {
-  gameId: number;
+  id?: string;
   schema: object;
+  displayName: string;
+  uiSchema: object;
 }
 
 export type ValidateGameConfigSchemaArgs = {
-  gameId: number;
+  id: string;
   config: object;
 }
 
@@ -23,24 +25,55 @@ export class GameConfigSchemaService {
     private readonly gameConfigJsonSchemaModel: Model<GameConfigJsonSchemaDocument>
   ) {}
 
-  async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
-    const { gameId, schema } = args;
+  async getGameConfigSchema(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Invalid ObjectId format: ${id}`);
+    }
+    
+    const schema = await this.gameConfigJsonSchemaModel.findById(id).select('-__v');
+    if (!schema) {
+      throw new NotFoundException(`Game config schema not found for id: ${id}`);
+    }
+    return schema;
+  }
 
-   
-    return this.gameConfigJsonSchemaModel.findOneAndUpdate(
-        { gameId },
-        { schema },
-        { upsert: true, new: true }
-      ).select('-_id -__v');
+  async getAllGameConfigSchemas() {
+    return this.gameConfigJsonSchemaModel.find().select('-__v -schema -uiSchema');
+  }
+
+  async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
+    const { id, schema, displayName, uiSchema } = args;
+
+    if (id) {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ObjectId format: ${id}`);
+      }
+      
+      return this.gameConfigJsonSchemaModel.findByIdAndUpdate(
+        id, { schema, displayName, uiSchema }, { new: true }
+      ).select('-__v');
+    }
+    
+    const newSchema = new this.gameConfigJsonSchemaModel({
+      schema,
+      displayName,
+      uiSchema
+    });
+    const saved = await newSchema.save();
+    return saved.toObject({ transform: (_, ret) => { delete ret.__v; return ret; } });
   }
 
   async validateGameConfigSchema(args: ValidateGameConfigSchemaArgs) {
-    const { gameId, config } = args;
+    const { id, config } = args;
 
-    const gameConfigSchema = await this.gameConfigJsonSchemaModel.findOne({ gameId });
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Invalid ObjectId format: ${id}`);
+    }
+
+    const gameConfigSchema = await this.gameConfigJsonSchemaModel.findById(id);
 
     if (!gameConfigSchema) {
-      throw new NotFoundException(`Game config schema not found for gameId: ${gameId}`);
+      throw new NotFoundException(`Game config schema not found for id: ${id}`);
     }
 
     const validate = this.ajv.compile(gameConfigSchema.schema);
@@ -48,7 +81,11 @@ export class GameConfigSchemaService {
     const isValid = validate(config);
 
     if (!isValid) {
-      throw new BadRequestException(validate.errors);
+      throw new BadRequestException({
+        validationErrors: validate.errors,
+        config,
+        schema: gameConfigSchema.schema
+      });
     }
   }
 }

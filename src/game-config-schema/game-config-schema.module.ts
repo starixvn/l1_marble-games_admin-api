@@ -6,7 +6,7 @@ import { GameConfigJsonSchema, GameConfigJsonSchemaSchema } from "./schema/game-
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: GameConfigJsonSchema.name, schema: GameConfigJsonSchemaSchema, collection: 'game-config-schemas' }])
+    MongooseModule.forFeature([{ name: GameConfigJsonSchema.name, schema: GameConfigJsonSchemaSchema, collection: 'game_config_schemas' }])
   ],
   controllers: [GameConfigSchemaController],
   providers: [GameConfigSchemaService],

@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Query, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 import { GameConfigSchemaService } from "./game-config-schema.service";
 import { GameConfigSchemaUpsertRequestDto } from "../game-config/dto/game-config-schema.dto";
@@ -13,14 +13,42 @@ export class GameConfigSchemaController {
     private readonly gameConfigSchemaService: GameConfigSchemaService
   ) {}
 
-  @Post('upsertSchema')
+  @Get('get')
+  @ApiQuery({ name: 'id', required: false, description: 'Game config schema ID' })
+  async getSchema(
+    @Query('id') id?: string,
+  ) {
+    if (id) {
+      return this.gameConfigSchemaService.getGameConfigSchema(id);
+    }
+    return this.gameConfigSchemaService.getAllGameConfigSchemas();
+  }
+
+  @Post('upsert')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Upsert game config schema',
+    description: 'Upsert game config schema, upsert mean update if id is provided, create new if not, you can even update non existent schema with valid object id provided in the id query parameter'
+  })
+  @ApiQuery({ name: 'id', required: false, description: 'Game config schema ID (optional for creating new schema)' })
   async upsertSchema(
-    @Query('gameId') gameId: number, 
-    @Body() body: GameConfigSchemaUpsertRequestDto) {
+    @Body() body: GameConfigSchemaUpsertRequestDto,
+    @Query('id') id?: string, 
+  ) {
     return this.gameConfigSchemaService.upsertGameConfigSchema({
-      gameId,
-      schema: body
+      id,
+      schema: body.schema,
+      displayName: body.displayName,
+      uiSchema: body.uiSchema
     });
+  }
+
+  @Get('list')
+  @ApiOperation({
+    summary: 'Get all game config schemas',
+    description: 'Get all game config schemas'
+  })
+  async listSchemas() {
+    return this.gameConfigSchemaService.getAllGameConfigSchemas();
   }
 }
