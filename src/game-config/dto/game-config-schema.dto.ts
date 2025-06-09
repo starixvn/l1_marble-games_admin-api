@@ -11,7 +11,7 @@ export class GameConfigSchemaUpsertRequestDto {
     type: String,
     description: 'Display name for the game configuration',
   })
-  displayName: string;
+  name: string;
 
   @ApiProperty({
     type: Object,

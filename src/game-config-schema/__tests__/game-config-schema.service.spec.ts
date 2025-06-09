@@ -27,7 +27,7 @@ describe('GameConfigSchemaService', () => {
       },
       required: ['level', 'difficulty', 'settings']
     },
-    displayName: 'Test Game Configuration',
+    name: 'Test Game Configuration',
     uiSchema: {
       level: { 'ui:widget': 'range' },
       difficulty: { 'ui:widget': 'select' },
@@ -104,8 +104,8 @@ describe('GameConfigSchemaService', () => {
     it('should return all game config schemas', async () => {
       // Arrange
       const mockSchemas = [
-        { _id: mockId, displayName: 'Schema 1' },
-        { _id: '507f1f77bcf86cd799439012', displayName: 'Schema 2' }
+        { _id: mockId, name: 'Schema 1' },
+        { _id: '507f1f77bcf86cd799439012', name: 'Schema 2' }
       ];
       const mockReturnValue = {
         select: jest.fn().mockResolvedValue(mockSchemas)
@@ -127,7 +127,7 @@ describe('GameConfigSchemaService', () => {
       // Arrange
       const args = {
         schema: mockGameConfigSchema.schema,
-        displayName: mockGameConfigSchema.displayName,
+        name: mockGameConfigSchema.name,
         uiSchema: mockGameConfigSchema.uiSchema
       };
 
@@ -163,7 +163,7 @@ describe('GameConfigSchemaService', () => {
       // Assert
       expect(mockConstructor).toHaveBeenCalledWith({
         schema: args.schema,
-        displayName: args.displayName,
+        name: args.name,
         uiSchema: args.uiSchema
       });
       expect(mockSave).toHaveBeenCalled();
@@ -175,11 +175,11 @@ describe('GameConfigSchemaService', () => {
       const args = {
         id: mockId,
         schema: mockGameConfigSchema.schema,
-        displayName: 'Updated Display Name',
+        name: 'Updated Display Name',
         uiSchema: mockGameConfigSchema.uiSchema
       };
       
-      const updatedSchema = { ...mockGameConfigSchema, displayName: args.displayName };
+      const updatedSchema = { ...mockGameConfigSchema, name: args.name };
       const mockReturnValue = {
         select: jest.fn().mockResolvedValue(updatedSchema)
       };
@@ -193,7 +193,7 @@ describe('GameConfigSchemaService', () => {
         mockId,
         {
           schema: args.schema,
-          displayName: args.displayName,
+          name: args.name,
           uiSchema: args.uiSchema
         },
         { new: true }
@@ -207,7 +207,7 @@ describe('GameConfigSchemaService', () => {
       const args = {
         id: 'invalid-id',
         schema: mockGameConfigSchema.schema,
-        displayName: mockGameConfigSchema.displayName,
+        name: mockGameConfigSchema.name,
         uiSchema: mockGameConfigSchema.uiSchema
       };
 

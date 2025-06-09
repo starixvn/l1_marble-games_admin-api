@@ -3,7 +3,7 @@ import { Document, ObjectId,  } from "mongoose";
 
 
 export interface GameConfigJsonSchema {
-  displayName: string;
+  name: string;
   schema: object;
   uiSchema: object;
 }
@@ -13,7 +13,7 @@ export type GameConfigJsonSchemaDocument = GameConfigJsonSchema & Document<Objec
 @Schema()
 export class GameConfigJsonSchema {
   @Prop({ type: String, required: true })
-  displayName: string;
+  name: string;
 
   @Prop({ type: Object, required: true })
   schema: object;

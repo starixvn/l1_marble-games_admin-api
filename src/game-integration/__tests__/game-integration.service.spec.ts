@@ -210,7 +210,7 @@ describe('GameIntegrationService', () => {
         expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
           { _id: mockMarketIntegrationId.toString() },
           { $set: updateRequest.markets![0] },
-          { new: true }
+          { new: true, upsert: true }
         );
         expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
           { operatorId: mockOperatorId, gameId: 1001 },
@@ -400,7 +400,7 @@ describe('GameIntegrationService', () => {
         expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
           { _id: mockMarketIntegrationId.toString() },
           { $set: updateRequest.markets![0] },
-          { new: true }
+          { new: true, upsert: true }
         );
       });
     });

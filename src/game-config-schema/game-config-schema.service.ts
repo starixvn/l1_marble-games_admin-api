@@ -7,7 +7,7 @@ import Ajv from "ajv";
 export type UpsertGameConfigSchemaArgs = {
   id?: string;
   schema: object;
-  displayName: string;
+  name: string;
   uiSchema: object;
 }
 
@@ -42,7 +42,7 @@ export class GameConfigSchemaService {
   }
 
   async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
-    const { id, schema, displayName, uiSchema } = args;
+    const { id, schema, name, uiSchema } = args;
 
     if (id) {
       if (!Types.ObjectId.isValid(id)) {
@@ -50,13 +50,13 @@ export class GameConfigSchemaService {
       }
       
       return this.gameConfigJsonSchemaModel.findByIdAndUpdate(
-        id, { schema, displayName, uiSchema }, { new: true }
+        id, { schema, name, uiSchema }, { new: true }
       ).select('-__v');
     }
     
     const newSchema = new this.gameConfigJsonSchemaModel({
       schema,
-      displayName,
+      name,
       uiSchema
     });
     const saved = await newSchema.save();

@@ -14,7 +14,7 @@ describe("Game Config Schema", () => {
           },
           required: ['level']
         },
-        displayName: 'Test Schema',
+        name: 'Test Schema',
         uiSchema: {}
       };
 
@@ -50,7 +50,7 @@ describe("Game Config Schema", () => {
           },
           required: ['level', 'difficulty', 'settings']
         },
-        displayName: 'Game Settings Schema',
+        name: 'Game Settings Schema',
         uiSchema: {
           'ui:order': ['level', 'difficulty', 'settings']
         }
@@ -73,7 +73,7 @@ describe("Game Config Schema", () => {
       expect(data).toEqual(
         expect.objectContaining({
           schema: schema.schema,
-          displayName: schema.displayName,
+          name: schema.name,
           uiSchema: schema.uiSchema,
           _id: expect.any(String)
         })
@@ -91,7 +91,7 @@ describe("Game Config Schema", () => {
           },
           required: ['score', 'playerName']
         },
-        displayName: 'Player Score Schema',
+        name: 'Player Score Schema',
         uiSchema: {
           playerName: { 'ui:placeholder': 'Enter player name' }
         }
@@ -114,7 +114,7 @@ describe("Game Config Schema", () => {
       expect(data).toEqual(
         expect.objectContaining({
           schema: schema.schema,
-          displayName: schema.displayName,
+          name: schema.name,
           uiSchema: schema.uiSchema,
           _id: expect.any(String)
         })
@@ -131,7 +131,7 @@ describe("Game Config Schema", () => {
           },
           required: ['level']
         },
-        displayName: 'Initial Schema',
+        name: 'Initial Schema',
         uiSchema: {}
       };
 
@@ -158,7 +158,7 @@ describe("Game Config Schema", () => {
           },
           required: ['score', 'playerName']
         },
-        displayName: 'Updated Player Schema',
+        name: 'Updated Player Schema',
         uiSchema: {
           score: { 'ui:widget': 'updown' },
           achievements: { 'ui:options': { addable: true, removable: true } }
@@ -183,7 +183,7 @@ describe("Game Config Schema", () => {
         expect.objectContaining({
           _id: schemaId,
           schema: updatedSchema.schema,
-          displayName: updatedSchema.displayName,
+          name: updatedSchema.name,
           uiSchema: updatedSchema.uiSchema
         })
       );
@@ -199,7 +199,7 @@ describe("Game Config Schema", () => {
             test: { type: 'string' }
           }
         },
-        displayName: 'Test Schema',
+        name: 'Test Schema',
         uiSchema: {}
       };
 
@@ -237,7 +237,7 @@ describe("Game Config Schema", () => {
           },
           required: ['gameMode', 'duration']
         },
-        displayName: 'Game Mode Schema',
+        name: 'Game Mode Schema',
         uiSchema: {
           gameMode: { 'ui:widget': 'radio' },
           duration: { 'ui:help': 'Duration in seconds' }
@@ -273,7 +273,7 @@ describe("Game Config Schema", () => {
         expect.objectContaining({
           _id: validObjectId,
           schema: schema.schema,
-          displayName: schema.displayName,
+          name: schema.name,
           uiSchema: schema.uiSchema
         })
       );
@@ -352,7 +352,7 @@ describe("Game Config Schema", () => {
           },
           required: ['health']
         },
-        displayName: 'Character Stats Schema',
+        name: 'Character Stats Schema',
         uiSchema: {
           health: { 'ui:widget': 'range' }
         }
@@ -385,7 +385,7 @@ describe("Game Config Schema", () => {
         expect.objectContaining({
           _id: schemaId,
           schema: schema.schema,
-          displayName: schema.displayName,
+          name: schema.name,
           uiSchema: schema.uiSchema
         })
       );
@@ -407,7 +407,7 @@ describe("Game Config Schema", () => {
         expect(schema).toEqual(
           expect.objectContaining({
             _id: expect.any(String),
-            displayName: expect.any(String)
+            name: expect.any(String)
           })
         );
       });
@@ -444,7 +444,7 @@ describe("Game Config Schema", () => {
         expect(schema).toEqual(
           expect.objectContaining({
             _id: expect.any(String),
-            displayName: expect.any(String)
+            name: expect.any(String)
           })
         );
       });

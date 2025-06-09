@@ -103,7 +103,7 @@ export class GameIntegrationService {
     const updatedMarketIntegration = await this.marketIntegrationModel.findOneAndUpdate(
       { _id: marketIntegration.id },
       { $set: marketIntegration },
-      { new: true }
+      { new: true, upsert: true }
     );
 
     if (!updatedMarketIntegration) {

@@ -38,7 +38,7 @@ export class GameConfigSchemaController {
     return this.gameConfigSchemaService.upsertGameConfigSchema({
       id,
       schema: body.schema,
-      displayName: body.displayName,
+      name: body.name,
       uiSchema: body.uiSchema
     });
   }
