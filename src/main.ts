@@ -18,22 +18,28 @@ async function bootstrap() {
     ]
   });
 
-  const config = new DocumentBuilder()
+  let config = new DocumentBuilder()
   .setTitle('Marble Odds Feed API')
   .setDescription('The API documentation for Marble Odds Feed')
   .setVersion('0.0')
   .addBearerAuth()
+  .addServer(process.env.PROXY_PATH ?? '', 'Proxy Server')
   .build();
+  
+
   const document = SwaggerModule.createDocument(app, config);
+  
   SwaggerModule.setup('swagger', app, document);
 
   const port = process.env.PORT ?? 3000;
   const serverIp = getServerIp();
+  
   await app.listen(port, () => {
     console.log(`Application is running on: http://${serverIp}:${port}`);
     console.info(
       `Swagger documentation available at: http://${serverIp}:${port}/swagger`,
     );
+    console.info('Proxy-aware configuration enabled - will work behind any reverse proxy');
   });
 }
 
