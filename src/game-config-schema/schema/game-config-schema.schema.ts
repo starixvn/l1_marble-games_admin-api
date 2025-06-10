@@ -18,7 +18,7 @@ export class GameConfigJsonSchema {
   @Prop({ type: Object, required: true })
   schema: object;
 
-  @Prop({ type: Object, required: true })
+  @Prop({ type: Object, required: false })
   uiSchema: object;
 } 
 

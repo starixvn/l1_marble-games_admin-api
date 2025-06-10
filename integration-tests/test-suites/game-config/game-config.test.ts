@@ -38,7 +38,7 @@ describe("Game Config", () => {
             },
             required: ['level', 'difficulty']
           },
-          displayName: 'Game Config Schema',
+          name: 'Game Config Schema',
           uiSchema: {}
         };
 
@@ -96,7 +96,7 @@ describe("Game Config", () => {
             },
             required: ['level', 'difficulty']
           },
-          displayName: 'Game Config Schema',
+          name: 'Game Config Schema',
           uiSchema: {}
         };
 
@@ -144,7 +144,7 @@ describe("Game Config", () => {
             },
             required: ['level', 'difficulty']
           },
-          displayName: 'Game Config Schema',
+          name: 'Game Config Schema',
           uiSchema: {}
         };
 
@@ -250,7 +250,7 @@ describe("Game Config", () => {
             },
             required: ['level', 'difficulty']
           },
-          displayName: 'Game Config Schema',
+          name: 'Game Config Schema',
           uiSchema: {}
         };
 

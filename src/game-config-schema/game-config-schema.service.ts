@@ -8,7 +8,7 @@ export type UpsertGameConfigSchemaArgs = {
   id?: string;
   schema: object;
   name: string;
-  uiSchema: object;
+  uiSchema?: object;
 }
 
 export type ValidateGameConfigSchemaArgs = {
