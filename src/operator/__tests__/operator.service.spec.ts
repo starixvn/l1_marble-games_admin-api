@@ -4,7 +4,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { OperatorCredential } from '../schema/operator-credential.schema';
 import * as bcrypt from 'bcryptjs';
 import * as randomUtils from '../../utils/random';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 
 describe('OperatorService', () => {
   let service: OperatorService;
@@ -108,6 +108,31 @@ describe('OperatorService', () => {
       await expect(
         service.updateName({ operatorId: 'non-existent-id', name: 'new-name' })
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException if operator with same name already exists', async () => {
+      // Arrange
+      const existingOperator = {
+        _id: 'existing-operator-id',
+        name: 'duplicate-name',
+      };
+      const operatorToUpdate = {
+        _id: 'operator-id-123',
+        password: 'hashed-password',
+        name: 'old-name',
+        save: jest.fn().mockResolvedValue(true),
+      };
+      
+      jest.spyOn(service, 'getOperatorByName').mockResolvedValue(existingOperator as any);
+      mockOperatorModel.findById.mockResolvedValue(operatorToUpdate);
+
+      // Act
+      const promise = service.updateName({ operatorId: 'operator-id-123', name: 'duplicate-name' });
+
+      // Assert
+      await expect(promise).rejects.toThrow(ConflictException);
+      expect(service.getOperatorByName).toHaveBeenCalledWith('duplicate-name');
+      expect(operatorToUpdate.save).not.toHaveBeenCalled();
     });
   });
 

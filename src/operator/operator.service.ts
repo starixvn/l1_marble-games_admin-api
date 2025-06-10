@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   OperatorCredential,
@@ -58,6 +58,12 @@ export class OperatorService {
   async updateName(args: UpdateNameArgs) {
     const { operatorId, name } = args;
 
+    const existingOperator = await this.getOperatorByName(name);
+
+    if (existingOperator) {
+      throw new ConflictException('Operator with this name already exists');
+    }
+
     const operator = await this.operatorModel.findById(operatorId);
 
     if (!operator) {
@@ -95,5 +101,9 @@ export class OperatorService {
       operatorId: (operator._id as unknown as string).toString(),
       password,
     }
+  }
+
+  async getOperatorByName(name: string) {
+    return this.operatorModel.findOne({ name });
   }
 }

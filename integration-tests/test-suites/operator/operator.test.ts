@@ -99,6 +99,35 @@ describe("Operator", () => {
             const errorData = await response.json();
             expect(errorData.message).toBe('Operator not found');
         });
+
+        it("should throw 409 if operator with same name already exists", async () => {
+            // Arrange
+            const firstOperatorId = "67d291d943a96fad7f14ddae";
+            const secondOperatorId = "507f1f77bcf86cd799439011";
+            const duplicateName = "duplicate-test-operator";
+            
+            await fetch(`${baseUrl}/api/operator/updateName`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({
+                    operatorId: firstOperatorId,
+                    name: duplicateName,
+                }),
+            });
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/updateName`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({
+                    operatorId: secondOperatorId,
+                    name: duplicateName,
+                }),
+            });
+            
+            // Assert
+            expect(response.status).toBe(409);
+        });
     });
     
     describe("Change password", () => {
