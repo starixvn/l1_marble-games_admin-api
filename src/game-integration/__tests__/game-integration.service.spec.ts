@@ -221,11 +221,11 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when alias is provided', () => {
+    describe('when name is provided', () => {
       it('should upsert game integration successfully', async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          alias: 'test-operator',
+          name: 'test-operator',
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
@@ -253,7 +253,7 @@ describe('GameIntegrationService', () => {
         const result = await service.upsertGameIntegration(query, updateRequest);
 
         // Assert
-        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ alias: 'test-operator' });
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator' });
         expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
           { operatorId: mockOperatorId, gameId: 1001 },
           { $set: { ...updateRequest, markets: [] } },
@@ -266,7 +266,7 @@ describe('GameIntegrationService', () => {
         it('should throw NotFoundException', async () => {
           // Arrange
           const query: GameIntegrationQueryDto = {
-            alias: 'non-existent-operator',
+            name: 'non-existent-operator',
             gameId: 1001,
           };
           const updateRequest: GameIntegrationUpdateRequestDto = {
@@ -283,12 +283,12 @@ describe('GameIntegrationService', () => {
           await expect(service.upsertGameIntegration(query, updateRequest)).rejects.toThrow(
             NotFoundException
           );
-          expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ alias: 'non-existent-operator' });
+          expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'non-existent-operator' });
         });
       });
     });
 
-    describe('when neither operatorId nor alias is provided', () => {
+    describe('when neither operatorId nor name is provided', () => {
       it('should throw NotFoundException', async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {

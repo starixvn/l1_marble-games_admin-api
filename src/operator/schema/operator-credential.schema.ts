@@ -11,7 +11,7 @@ export type OperatorDocument = OperatorCredential & Document<ObjectId>;
 export class OperatorCredential {
 
     @Prop({ type: String, required: false })
-    alias?: string;
+    name?: string;
 
     @Prop({ type: String })
     password: string;

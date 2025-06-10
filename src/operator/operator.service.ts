@@ -11,12 +11,12 @@ import { generateRandomPassword } from '../utils/random';
 const SALT_ROUND = 10;
 
 export type OperatorCreateOptions = {
-  alias?: string;
+  name?: string;
 };
 
-export type UpdateAliasArgs = {
+export type UpdateNameArgs = {
   operatorId: string;
-  alias: string;
+  name: string;
 }
 
 export type OperatorCreateResponse = {
@@ -26,7 +26,7 @@ export type OperatorCreateResponse = {
 
 export type ChangePasswordArgs = {
   operatorId?: string;
-  alias?: string;
+  name?: string;
 }
 
 @Injectable()
@@ -44,7 +44,7 @@ export class OperatorService {
 
     const newOperator = new this.operatorModel({
       password: hashedPassword,
-      alias: options?.alias,
+      name: options?.name,
     });
 
     await newOperator.save();
@@ -55,8 +55,8 @@ export class OperatorService {
     };
   }
 
-  async updateAlias(args: UpdateAliasArgs) {
-    const { operatorId, alias } = args;
+  async updateName(args: UpdateNameArgs) {
+    const { operatorId, name } = args;
 
     const operator = await this.operatorModel.findById(operatorId);
 
@@ -64,21 +64,21 @@ export class OperatorService {
       throw new NotFoundException('Operator not found');
     }
 
-    operator.alias = alias;
+    operator.name = name;
 
     await operator.save();
   }
  
   async changePassword(args: ChangePasswordArgs) {
-    const { operatorId, alias } = args;
+    const { operatorId, name } = args;
 
-    if (!operatorId && !alias) {
-      throw new BadRequestException('Either operatorId or alias must be provided');
+    if (!operatorId && !name) {
+      throw new BadRequestException('Either operatorId or name must be provided');
     }
 
     const operator = 
       operatorId && await this.operatorModel.findById(operatorId) ||
-      alias && await this.operatorModel.findOne({ alias })
+      name && await this.operatorModel.findOne({ name })
 
     if (!operator) {
       throw new NotFoundException('Operator not found');

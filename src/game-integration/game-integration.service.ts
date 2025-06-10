@@ -42,12 +42,12 @@ export class GameIntegrationService {
   }
 
   private async getOperator(query: GameIntegrationQueryDto) {
-    let operatorQuery: { _id: string } | { alias: string } | null = null;
+    let operatorQuery: { _id: string } | { name: string } | null = null;
     
     if (query.operatorId) {
       operatorQuery = { _id: query.operatorId };
-    } else if (query.alias) {
-      operatorQuery = { alias: query.alias };
+    } else if (query.name) {
+      operatorQuery = { name: query.name };
     }
 
     if (!operatorQuery) {

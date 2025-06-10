@@ -14,7 +14,7 @@ describe('OperatorController', () => {
           provide: OperatorService,
           useValue: {
             createOperator: jest.fn(),
-            updateAlias: jest.fn(),
+            updateName: jest.fn(),
             changePassword: jest.fn(),
           },
         },
@@ -47,20 +47,20 @@ describe('OperatorController', () => {
     });
   });
 
-  describe('updateAlias', () => {
-    it('should call updateAlias method from service with correct parameters', async () => {
+  describe('updateName', () => {
+    it('should call updateName method from service with correct parameters', async () => {
       // Arrange
-      const updateAliasArgs = {
+      const updateNameArgs = {
         operatorId: 'op-123',
-        alias: 'new-alias',
+        name: 'new-name',
       };
-      jest.spyOn(service, 'updateAlias').mockResolvedValue(undefined);
+      jest.spyOn(service, 'updateName').mockResolvedValue(undefined);
 
       // Act
-      const response = await controller.updateAlias(updateAliasArgs);
+      const response = await controller.updateName(updateNameArgs);
 
       // Assert
-      expect(service.updateAlias).toHaveBeenCalledWith(updateAliasArgs);
+      expect(service.updateName).toHaveBeenCalledWith(updateNameArgs);
       expect(response).toBeUndefined();
     });
   });
@@ -85,10 +85,10 @@ describe('OperatorController', () => {
       expect(response).toEqual(result);
     });
 
-    it('should call changePassword method from service with alias', async () => {
+    it('should call changePassword method from service with name', async () => {
       // Arrange
       const changePasswordArgs = {
-        alias: 'operator1',
+        name: 'operator1',
       };
       const result = { 
         operatorId: 'op-123', 

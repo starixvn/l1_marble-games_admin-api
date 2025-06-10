@@ -1,22 +1,22 @@
 import { Body, Controller, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
-import { ChangePasswordArgs, OperatorService, UpdateAliasArgs } from "./operator.service";
+import { ChangePasswordArgs, OperatorService, UpdateNameArgs } from "./operator.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 
-class UpdateAliasDto implements UpdateAliasArgs {
+class UpdateNameDto implements UpdateNameArgs {
   @ApiProperty({ description: 'Operator ID string' })
   operatorId: string = '';
   
-  @ApiProperty({ description: 'New alias for the operator' })
-  alias: string = '';
+  @ApiProperty({ description: 'New name for the operator' })
+  name: string = '';
 }
 
 class ChangePasswordDto implements ChangePasswordArgs {
   @ApiProperty({ description: 'Operator ID string', required: false })
   operatorId?: string;
   
-  @ApiProperty({ description: 'Operator alias', required: false })
-  alias?: string;
+  @ApiProperty({ description: 'Operator name', required: false })
+  name?: string;
 }
 
 @Controller('operator')
@@ -36,14 +36,14 @@ export class OperatorController {
     }
 
     @ApiOperation({
-        summary: "Update operator alias",
-        description: "Update the alias of the operator"
+        summary: "Update operator name",
+        description: "Update the name of the operator"
     })
-    @ApiBody({ type: UpdateAliasDto })
+    @ApiBody({ type: UpdateNameDto })
     @HttpCode(200)
-    @Post('updateAlias')
-    async updateAlias(@Body() body: UpdateAliasArgs) {
-        return this.operatorServcice.updateAlias(body);
+    @Post('updateName')
+    async updateName(@Body() body: UpdateNameArgs) {
+        return this.operatorServcice.updateName(body);
     }
 
     @ApiOperation({

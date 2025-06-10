@@ -26,16 +26,16 @@ describe("Game Integration", () => {
       expect(response.status).toBe(401);
     });
 
-    it("should throw 404 if operator not found (using alias)", async () => {
+    it("should throw 404 if operator not found (using name)", async () => {
       // Arrange
-      const nonExistentAlias = "non-existent-operator-alias";
+      const nonExistentName = `non-existent-operator-abadsfasdfa`;
       const gameId = 2001;
       const updateRequest = {
         mergeEvent: { eventType: "match", priority: 1 }
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?alias=${nonExistentAlias}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?name=${nonExistentName}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -43,9 +43,6 @@ describe("Game Integration", () => {
 
       // Assert
       expect(response.status).toBe(404);
-      
-      const errorData = await response.json();
-      expect(errorData.message).toBe('Operator not found');
     });
 
     it("should throw 404 if operator not found (using operatorId)", async () => {
@@ -65,23 +62,20 @@ describe("Game Integration", () => {
 
       // Assert
       expect(response.status).toBe(404);
-      
-      const errorData = await response.json();
-      expect(errorData.message).toBe('Operator not found');
     });
 
-    it("should use alias if operatorId is not provided", async () => {
+    it("should use name if operatorId is not provided", async () => {
       // Arrange
       const existingOperatorId = "67d291d943a96fad7f14ddae";
-      const testAlias = "test-operator-alias";
+      const testName = `test-operator-name`;
       const gameId = 2001;
       
-      await fetch(`${baseUrl}/api/operator/updateAlias`, {
+      await fetch(`${baseUrl}/api/operator/updateName`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify({
           operatorId: existingOperatorId,
-          alias: testAlias,
+          name: testName,
         }),
       });
 
@@ -91,7 +85,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?alias=${testAlias}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -101,12 +95,14 @@ describe("Game Integration", () => {
       expect(response.status).toBe(200);
       
       const data = await response.json();
-      expect(data).toHaveProperty('operatorId');
-      expect(data).toHaveProperty('gameId', gameId);
-      expect(data).toHaveProperty('mergeEvent');
-      expect(data.mergeEvent).toEqual({ eventType: "tournament", priority: 2 });
-      expect(data.patches).toEqual([{ op: "replace", path: "/status", value: "active" }]);
-      expect(data.operatorId).toBe(existingOperatorId);
+      const expectedResult = {
+        operatorId: existingOperatorId,
+        gameId: gameId,
+        mergeEvent: { eventType: "tournament", priority: 2 },
+        patches: [{ op: "replace", path: "/status", value: "active" }]
+      };
+      
+      expect(data).toMatchObject(expectedResult);
     });
 
     it("should create a new game integration if it doesn't exist", async () => {

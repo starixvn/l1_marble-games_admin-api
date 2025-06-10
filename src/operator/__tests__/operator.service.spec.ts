@@ -19,13 +19,13 @@ describe('OperatorService', () => {
     // Create a mock class instead of using `this` typing issues
     class MockOperatorModel {
       password: string;
-      alias?: string;
+      name?: string;
       _id: any = 'test-id';
       save = jest.fn().mockReturnValue(this);
 
       constructor(dto: any) {
         this.password = dto.password;
-        this.alias = dto.alias;
+        this.name = dto.name;
       }
 
       static readonly findById = jest.fn();
@@ -63,12 +63,12 @@ describe('OperatorService', () => {
         return Promise.resolve({
           _id: mockSavedOperator,
           password: 'hashed-password',
-          alias: 'new-operator'
+          name: 'new-operator'
         });
       });
 
       // Act
-      const result = await service.createOperator({ alias: 'new-operator' });
+      const result = await service.createOperator({ name: 'new-operator' });
 
       // Assert
       expect(generateRandomPasswordSpy).toHaveBeenCalled();
@@ -80,24 +80,24 @@ describe('OperatorService', () => {
     });
   });
 
-  describe('updateAlias', () => {
-    it('should update operator alias', async () => {
+  describe('updateName', () => {
+    it('should update operator name', async () => {
       // Arrange
       const foundOperator = {
         _id: 'operator-id-123',
         password: 'hashed-password',
-        alias: 'old-alias',
+        name: 'old-name',
         save: jest.fn().mockResolvedValue(true),
       };
       mockOperatorModel.findById.mockResolvedValue(foundOperator);
 
       // Act
-      await service.updateAlias({ operatorId: 'operator-id-123', alias: 'new-alias' });
+      await service.updateName({ operatorId: 'operator-id-123', name: 'new-name' });
 
       // Assert
       expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
       expect(foundOperator.save).toHaveBeenCalled();
-      expect(foundOperator.alias).toBe('new-alias');
+      expect(foundOperator.name).toBe('new-name');
     });
 
     it('should throw NotFoundException if operator not found', async () => {
@@ -106,7 +106,7 @@ describe('OperatorService', () => {
 
       // Act & Assert
       await expect(
-        service.updateAlias({ operatorId: 'non-existent-id', alias: 'new-alias' })
+        service.updateName({ operatorId: 'non-existent-id', name: 'new-name' })
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -119,7 +119,7 @@ describe('OperatorService', () => {
           toString: () => 'operator-id-123'
         },
         password: 'old-hashed-password',
-        alias: 'test-operator',
+        name: 'test-operator',
         save: jest.fn().mockResolvedValue(true),
       };
       mockOperatorModel.findById.mockResolvedValue(foundOperator);
@@ -138,24 +138,24 @@ describe('OperatorService', () => {
       });
     });
 
-    it('should change password when alias is provided', async () => {
+    it('should change password when name is provided', async () => {
       // Arrange
       const foundOperator = {
         _id: {
           toString: () => 'operator-id-123'
         },
         password: 'old-hashed-password',
-        alias: 'test-operator',
+        name: 'test-operator',
         save: jest.fn().mockResolvedValue(true),
       };
       mockOperatorModel.findById.mockResolvedValue(null);
       mockOperatorModel.findOne.mockResolvedValue(foundOperator);
 
       // Act
-      const result = await service.changePassword({ alias: 'test-operator' });
+      const result = await service.changePassword({ name: 'test-operator' });
 
       // Assert
-      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ alias: 'test-operator' });
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator' });
       expect(generateRandomPasswordSpy).toHaveBeenCalled();
       expect(bcryptHashSpy).toHaveBeenCalledWith('random-password', 10);
       expect(foundOperator.save).toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('OperatorService', () => {
       });
     });
 
-    it('should throw BadRequestException if neither operatorId nor alias provided', async () => {
+    it('should throw BadRequestException if neither operatorId nor name provided', async () => {
       // Arrange & Act & Assert
       await expect(service.changePassword({})).rejects.toThrow(BadRequestException);
     });

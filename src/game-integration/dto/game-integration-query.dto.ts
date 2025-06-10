@@ -14,14 +14,14 @@ export class GameIntegrationQueryDto {
   operatorId?: string;
 
   @ApiProperty({ 
-    description: 'Operator alias (alternative to operatorId)', 
+    description: 'Operator name (alternative to operatorId)', 
     required: false,
     example: 'main-operator'
   })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  alias?: string;
+  name?: string;
 
   @ApiProperty({ 
     description: 'Game ID number',
@@ -33,7 +33,7 @@ export class GameIntegrationQueryDto {
   @Transform(({ value }) => parseInt(value, 10))
   gameId: number;
 
-  @ValidateIf((o) => !o.operatorId && !o.alias)
-  @IsNotEmpty({ message: 'Either operatorId or alias must be provided' })
+  @ValidateIf((o) => !o.operatorId && !o.name)
+  @IsNotEmpty({ message: 'Either operatorId or name must be provided' })
   _atLeastOneOperatorField?: never;
 }

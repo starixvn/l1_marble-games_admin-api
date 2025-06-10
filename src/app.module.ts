@@ -26,11 +26,11 @@ import { GameConfigSchemaModule } from './game-config-schema/game-config-schema.
         };
       }
     }),
+    AuthModule,
     OperatorModule,
     GameIntegrationModule,
-    AuthModule,
+    GameConfigSchemaModule,
     GameConfigModule,
-    GameConfigSchemaModule
   ],
   controllers: [AppController],
 })

@@ -39,7 +39,7 @@ describe('GameIntegrationController', () => {
     };
 
     const mockQueryWithAlias: GameIntegrationQueryDto = {
-      alias: 'main-operator',
+      name: 'main-operator',
       gameId: 1001,
     };
 
