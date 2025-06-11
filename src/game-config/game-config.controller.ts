@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Query, UseGu
 import { GameConfigService } from "./game-config.service";
 import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
-import { GameConfigUpdateRequestDto } from "./dto/game-config.dto";
+import { GameConfigUpdateRequestDto, GameConfigUpsertQueryDto } from "./dto/game-config.dto";
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -20,12 +20,11 @@ export class GameConfigController {
   })
   @HttpCode(HttpStatus.OK)
   async upsertGameConfig(
-    @Query('gameId') gameId: number,
-    @Query('schemaId') schemaId: string,
+    @Query() query: GameConfigUpsertQueryDto,
     @Body() body: GameConfigUpdateRequestDto) {
     return this.gameConfigService.upsertGameConfig({
-      schemaId,
-      gameId: Number(gameId),
+      schemaId: query.schemaId,
+      gameId: Number(query.gameId),
       config: body
     });
   }

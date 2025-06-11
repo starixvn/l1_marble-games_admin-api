@@ -12,8 +12,20 @@ export type UpsertGameConfigSchemaArgs = {
 }
 
 export type ValidateGameConfigSchemaArgs = {
-  id: string;
+  id?: string;
   config: object;
+}
+
+export const DEFAULT_GAME_CONFIG_SCHEMA = {
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "enabled"
+  ]
 }
 
 @Injectable()
@@ -66,6 +78,10 @@ export class GameConfigSchemaService {
   async validateGameConfigSchema(args: ValidateGameConfigSchemaArgs) {
     const { id, config } = args;
 
+    if (!id) {
+      return this.valideteConfig(config, DEFAULT_GAME_CONFIG_SCHEMA);
+    }
+
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException(`Invalid ObjectId format: ${id}`);
     }
@@ -76,7 +92,11 @@ export class GameConfigSchemaService {
       throw new NotFoundException(`Game config schema not found for id: ${id}`);
     }
 
-    const validate = this.ajv.compile(gameConfigSchema.schema);
+    return this.valideteConfig(config, gameConfigSchema.schema);
+  }
+
+  private async valideteConfig(config: object, schema: object) {
+    const validate = this.ajv.compile(schema);
 
     const isValid = validate(config);
 
@@ -84,7 +104,7 @@ export class GameConfigSchemaService {
       throw new BadRequestException({
         validationErrors: validate.errors,
         config,
-        schema: gameConfigSchema.schema
+        schema
       });
     }
   }

@@ -5,7 +5,7 @@ import { GameConfigSchemaService } from "../game-config-schema/game-config-schem
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
 
 export type UpsertGameConfigArgs = {
-  schemaId: string;
+  schemaId?: string;
   gameId: number;
   config: object;
 }

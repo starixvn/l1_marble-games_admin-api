@@ -407,6 +407,90 @@ describe('GameConfigSchemaService', () => {
       });
     });
 
+    describe("no schema id provided", () => {
+      it("should validate with default schema and throw BadRequestException when config is invalid", async () => {
+        // Arrange
+        const invalidConfig = {
+          level: 5,
+          difficulty: 'medium'
+        };
+        const args = {
+          config: invalidConfig
+        };
+
+        // Act
+        const act = service.validateGameConfigSchema(args);
+
+        // Assert
+        await expect(act).rejects.toThrow(BadRequestException);
+      });
+
+      it("should validate with default schema for valid game config", async () => {
+        // Arrange
+        const validConfig = {
+          enabled: true
+        };
+        const args = {
+          config: validConfig
+        };
+
+        // Act
+        const act = service.validateGameConfigSchema(args);
+
+        // Assert
+        await expect(act).resolves.not.toThrow();
+      });
+
+      it("should validate with default schema when id is empty string", async () => {
+        // Arrange
+        const validConfig = {
+          enabled: false
+        };
+        const args = {
+          id: '',
+          config: validConfig
+        };
+
+        // Act
+        const act = service.validateGameConfigSchema(args);
+
+        // Assert
+        await expect(act).resolves.not.toThrow();
+      });
+
+      it("should throw BadRequestException with default schema when required field is missing", async () => {
+        // Arrange
+        const invalidConfig = {
+          someOtherField: 'value'
+        };
+        const args = {
+          config: invalidConfig
+        };
+
+        // Act
+        const act = service.validateGameConfigSchema(args);
+
+        // Assert
+        await expect(act).rejects.toThrow(BadRequestException);
+      });
+
+      it("should throw BadRequestException with default schema when enabled field has wrong type", async () => {
+        // Arrange
+        const invalidConfig = {
+          enabled: 'true'
+        };
+        const args = {
+          config: invalidConfig
+        };
+
+        // Act
+        const act = service.validateGameConfigSchema(args);
+
+        // Assert
+        await expect(act).rejects.toThrow(BadRequestException);
+      });
+    });
+
     describe('no schema found', () => {
       it('should throw NotFoundException when schema does not exist for id', async () => {
         // Arrange

@@ -46,7 +46,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.upsertGameConfig.mockResolvedValue(serviceResult as any);
 
-      const result = await controller.upsertGameConfig(gameId, schemaId, body);
+      const result = await controller.upsertGameConfig({ schemaId, gameId }, body);
 
       expect(mockGameConfigService.upsertGameConfig).toHaveBeenCalledWith({
         schemaId,
@@ -65,7 +65,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.upsertGameConfig.mockResolvedValue(serviceResult as any);
 
-      const result = await controller.upsertGameConfig(gameId, schemaId, body);
+      const result = await controller.upsertGameConfig({ schemaId, gameId }, body);
 
       expect(mockGameConfigService.upsertGameConfig).toHaveBeenCalledWith({
         schemaId,
@@ -83,7 +83,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.upsertGameConfig.mockResolvedValue(serviceResult as any);
 
-      const result = await controller.upsertGameConfig(gameId, schemaId, body);
+      const result = await controller.upsertGameConfig({ schemaId, gameId }, body);
 
       expect(mockGameConfigService.upsertGameConfig).toHaveBeenCalledWith({
         schemaId,
@@ -101,7 +101,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.upsertGameConfig.mockRejectedValue(error);
 
-      await expect(controller.upsertGameConfig(gameId, schemaId, body)).rejects.toThrow('Service error');
+      await expect(controller.upsertGameConfig({ schemaId, gameId }, body)).rejects.toThrow('Service error');
       expect(mockGameConfigService.upsertGameConfig).toHaveBeenCalledWith({
         schemaId,
         gameId: Number(gameId),

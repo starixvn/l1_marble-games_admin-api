@@ -192,6 +192,76 @@ describe("Game Config", () => {
         );
       });
     });
+
+    describe("no schema id provided", () => {
+      describe("invalid config object", () => {
+        it("should throw 400 with error message", async () => {
+          // Arrange
+          const gameId = 791;
+          const invalidConfig = {
+            level: 150
+          };
+
+          // Act
+          const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}`, {
+            method: 'POST',
+            headers: {
+              ...addAdminAuth(),
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(invalidConfig),
+          });
+
+          // Assert
+          expect(response.status).toBe(400);
+          const data = await response.json();
+          expect(data).toEqual(
+            expect.objectContaining({
+              validationErrors: expect.arrayContaining([
+                expect.objectContaining({
+                  instancePath: "",
+                  keyword: "required",
+                  message: "must have required property 'enabled'"
+                })
+              ])
+            })
+          );
+        });
+
+      });
+
+      describe("valid config object", () => {
+        it("should upsert game config and return updated game config", async () => {
+          // Arrange
+          const gameId = 792;
+          const validConfig = {
+            enabled: true
+          };
+
+          // Act
+          const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}`, {
+            method: 'POST',
+            headers: {
+              ...addAdminAuth(),
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(validConfig),
+          });
+
+          // Assert
+          expect(response.status).toBe(200);
+          
+          const data = await response.json();
+          expect(data).toEqual(
+            expect.objectContaining({
+              gameId: gameId,
+              config: validConfig
+            })
+          );
+        });
+      });
+
+    });
   });
 
   describe("get", () => {
@@ -239,7 +309,7 @@ describe("Game Config", () => {
 
     describe("valid game id", () => {
       it("should return game config", async () => {
-        // Arrange - First create a game config
+        // Arrange
         const gameId = 456;
         const schema = {
           schema: {
