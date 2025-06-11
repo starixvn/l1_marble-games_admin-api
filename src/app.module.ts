@@ -29,8 +29,8 @@ import { GameConfigSchemaModule } from './game-config-schema/game-config-schema.
     AuthModule,
     OperatorModule,
     GameIntegrationModule,
-    GameConfigSchemaModule,
     GameConfigModule,
+    GameConfigSchemaModule,
   ],
   controllers: [AppController],
 })
