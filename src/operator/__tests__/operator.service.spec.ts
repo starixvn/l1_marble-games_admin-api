@@ -16,7 +16,6 @@ describe('OperatorService', () => {
     bcryptHashSpy = jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password' as never);
     generateRandomPasswordSpy = jest.spyOn(randomUtils, 'generateRandomPassword').mockReturnValue('random-password');
 
-    // Create a mock class instead of using `this` typing issues
     class MockOperatorModel {
       password: string;
       name?: string;
@@ -28,8 +27,13 @@ describe('OperatorService', () => {
         this.name = dto.name;
       }
 
-      static readonly findById = jest.fn();
-      static readonly findOne = jest.fn();
+      static readonly findById = jest.fn().mockImplementation(() => ({
+        select: jest.fn().mockImplementation(() => Promise.resolve(null)),
+      }));
+      
+      static readonly findOne = jest.fn().mockImplementation(() => ({
+        select: jest.fn().mockImplementation(() => Promise.resolve(null)),
+      }));
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -89,7 +93,10 @@ describe('OperatorService', () => {
         name: 'old-name',
         save: jest.fn().mockResolvedValue(true),
       };
-      mockOperatorModel.findById.mockResolvedValue(foundOperator);
+      mockOperatorModel.findById.mockReturnValue(foundOperator);
+      mockOperatorModel.findOne.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(null),
+      }));
 
       // Act
       await service.updateName({ operatorId: 'operator-id-123', name: 'new-name' });
@@ -102,7 +109,10 @@ describe('OperatorService', () => {
 
     it('should throw NotFoundException if operator not found', async () => {
       // Arrange
-      mockOperatorModel.findById.mockResolvedValue(null);
+      mockOperatorModel.findById.mockReturnValue(null);
+      mockOperatorModel.findOne.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(null),
+      }));
 
       // Act & Assert
       await expect(
@@ -123,15 +133,16 @@ describe('OperatorService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
       
-      jest.spyOn(service, 'getOperatorByName').mockResolvedValue(existingOperator as any);
-      mockOperatorModel.findById.mockResolvedValue(operatorToUpdate);
+      mockOperatorModel.findById.mockReturnValue(operatorToUpdate);
+      mockOperatorModel.findOne.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(existingOperator),
+      }));
 
       // Act
       const promise = service.updateName({ operatorId: 'operator-id-123', name: 'duplicate-name' });
 
       // Assert
       await expect(promise).rejects.toThrow(ConflictException);
-      expect(service.getOperatorByName).toHaveBeenCalledWith('duplicate-name');
       expect(operatorToUpdate.save).not.toHaveBeenCalled();
     });
   });
@@ -147,7 +158,8 @@ describe('OperatorService', () => {
         name: 'test-operator',
         save: jest.fn().mockResolvedValue(true),
       };
-      mockOperatorModel.findById.mockResolvedValue(foundOperator);
+      mockOperatorModel.findById.mockReturnValue(foundOperator);
+      mockOperatorModel.findOne.mockReturnValue(null);
 
       // Act
       const result = await service.changePassword({ operatorId: 'operator-id-123' });
@@ -173,8 +185,8 @@ describe('OperatorService', () => {
         name: 'test-operator',
         save: jest.fn().mockResolvedValue(true),
       };
-      mockOperatorModel.findById.mockResolvedValue(null);
-      mockOperatorModel.findOne.mockResolvedValue(foundOperator);
+      mockOperatorModel.findById.mockReturnValue(null);
+      mockOperatorModel.findOne.mockReturnValue(foundOperator);
 
       // Act
       const result = await service.changePassword({ name: 'test-operator' });
@@ -197,13 +209,226 @@ describe('OperatorService', () => {
 
     it('should throw NotFoundException if operator not found', async () => {
       // Arrange
-      mockOperatorModel.findById.mockResolvedValue(null);
-      mockOperatorModel.findOne.mockResolvedValue(null);
+      mockOperatorModel.findById.mockReturnValue(null);
+      mockOperatorModel.findOne.mockReturnValue(null);
 
       // Act & Assert
       await expect(
         service.changePassword({ operatorId: 'non-existent-id' })
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getAllOperators', () => {
+    it('should return all operators with transformed fields', async () => {
+      // Arrange
+      const mockAggregateResult = [
+        { id: 'operator-1', name: 'operator-one' },
+        { id: 'operator-2', name: 'operator-two' },
+        { id: 'operator-3', name: null },
+      ];
+      
+      mockOperatorModel.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      // Act
+      const result = await service.getAllOperators();
+
+      // Assert
+      expect(mockOperatorModel.aggregate).toHaveBeenCalledWith([
+        {
+          $project: {
+            "id": "$_id",
+            "_id": 0,
+            "name": 1,
+          }
+        }
+      ]);
+      expect(result).toEqual(mockAggregateResult);
+    });
+  });
+
+  describe('getOperator', () => {
+    beforeEach(() => {
+      // Reset mocks for getOperator tests
+      mockOperatorModel.findById.mockClear();
+      mockOperatorModel.findOne.mockClear();
+    });
+
+    it('should get operator by operatorId successfully', async () => {
+      // Arrange
+      const mockOperator = {
+        _id: 'operator-id-123',
+        name: 'test-operator',
+        password: 'hashed-password',
+        __v: 0,
+        toObject: () => ({
+          _id: 'operator-id-123',
+          name: 'test-operator',
+        }),
+      };
+
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockImplementation((transformFn) => {
+          const transformed = transformFn(mockOperator);
+          return Promise.resolve(transformed);
+        }),
+      };
+
+      mockOperatorModel.findById.mockReturnValue(mockQuery);
+
+      // Act
+      const result = await service.getOperator({ operatorId: 'operator-id-123' });
+
+      // Assert
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
+      expect(mockQuery.select).toHaveBeenCalledWith('-password -__v');
+      expect(result).toEqual({
+        id: 'operator-id-123',
+        name: 'test-operator',
+      });
+    });
+
+    it('should get operator by name successfully', async () => {
+      // Arrange
+      const mockOperator = {
+        _id: 'operator-id-456',
+        name: 'test-operator-name',
+        password: 'hashed-password',
+        __v: 0,
+        toObject: () => ({
+          _id: 'operator-id-456',
+          name: 'test-operator-name',
+        }),
+      };
+
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockImplementation((transformFn) => {
+          const transformed = transformFn(mockOperator);
+          return Promise.resolve(transformed);
+        }),
+      };
+
+      mockOperatorModel.findById.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockResolvedValue(null),
+      });
+      mockOperatorModel.findOne.mockReturnValue(mockQuery);
+
+      // Act
+      const result = await service.getOperator({ name: 'test-operator-name' });
+
+      // Assert
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator-name' });
+      expect(mockQuery.select).toHaveBeenCalledWith('-password -__v');
+      expect(result).toEqual({
+        id: 'operator-id-456',
+        name: 'test-operator-name',
+      });
+    });
+
+    it('should throw NotFoundException when operator not found by operatorId', async () => {
+      // Arrange
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockResolvedValue(null),
+      };
+      mockOperatorModel.findById.mockReturnValue(mockQuery);
+
+      // Act & Assert
+      await expect(
+        service.getOperator({ operatorId: 'non-existent-id' })
+      ).rejects.toThrow(NotFoundException);
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith('non-existent-id');
+    });
+
+    it('should throw NotFoundException when operator not found by name', async () => {
+      // Arrange
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockResolvedValue(null),
+      };
+      mockOperatorModel.findById.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockResolvedValue(null),
+      });
+      mockOperatorModel.findOne.mockReturnValue(mockQuery);
+
+      // Act & Assert
+      await expect(
+        service.getOperator({ name: 'non-existent-name' })
+      ).rejects.toThrow(NotFoundException);
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'non-existent-name' });
+    });
+
+    it('should throw Error when neither operatorId nor name is provided', async () => {
+      // Act & Assert
+      await expect(service.getOperator({})).rejects.toThrow(
+        'Either operatorId or name must be provided'
+      );
+    });
+
+    it('should prioritize operatorId over name when both are provided', async () => {
+      // Arrange
+      const mockOperator = {
+        _id: 'operator-id-123',
+        name: 'test-operator',
+        password: 'hashed-password',
+        __v: 0,
+        toObject: () => ({
+          _id: 'operator-id-123',
+          name: 'test-operator',
+        }),
+      };
+
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockImplementation((transformFn) => {
+          const transformed = transformFn(mockOperator);
+          return Promise.resolve(transformed);
+        }),
+      };
+
+      mockOperatorModel.findById.mockReturnValue(mockQuery);
+
+      // Act
+      const result = await service.getOperator({
+        operatorId: 'operator-id-123',
+        name: 'some-name',
+      });
+
+      // Assert
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
+      expect(mockOperatorModel.findOne).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        id: 'operator-id-123',
+        name: 'test-operator',
+      });
+    });
+
+    it('should handle operator without toObject method', async () => {
+      // Arrange
+      const mockOperator = {
+        _id: 'operator-id-789',
+        name: 'test-operator-plain',
+      };
+
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        transform: jest.fn().mockImplementation((transformFn) => {
+          const transformed = transformFn(mockOperator);
+          return Promise.resolve(transformed);
+        }),
+      };
+
+      mockOperatorModel.findById.mockReturnValue(mockQuery);
+
+      // Act
+      const result = await service.getOperator({ operatorId: 'operator-id-789' });
+
+      // Assert
+      expect(result).toEqual(mockOperator);
     });
   });
 });

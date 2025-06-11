@@ -216,4 +216,205 @@ describe("Operator", () => {
             expect(errorData.message).toBe('Operator not found');
         });
     });
+
+    describe("Get operator", () => {
+        it("should return 401 if not authenticated", async () => {
+            // Arrange
+            const existingOperatorId = "67d291d943a96fad7f14ddae";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${existingOperatorId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            // Assert
+            expect(response.status).toBe(401);
+        });
+
+        it("should return 400 if operatorId and name are not provided", async () => {
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/get`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 404 if operator not found", async () => {
+            // Arrange
+            const nonExistentOperatorId = "507f1f77bcf86cd799439011";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${nonExistentOperatorId}`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(404);
+            
+            const errorData = await response.json();
+            expect(errorData).toEqual({
+                message: 'Operator not found',
+                error: 'Not Found',
+                statusCode: 404
+            });
+        });
+
+        it("should return the operator if operatorId is provided", async () => {
+            // Arrange
+            const existingOperatorId = "67d291d943a96fad7f14ddae";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${existingOperatorId}`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(200);
+            
+            const data = await response.json();
+            expect(data).toEqual({
+                id: existingOperatorId,
+                name: expect.any(String)
+            });
+        });
+        
+        it("should return the operator if name is provided", async () => {
+            // Arrange
+            const existingOperatorId = "67d291d943a96fad7f14ddae";
+            const testName = "test-operator-get-by-name";
+            
+            await fetch(`${baseUrl}/api/operator/updateName`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({
+                    operatorId: existingOperatorId,
+                    name: testName,
+                }),
+            });
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/get?name=${encodeURIComponent(testName)}`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(200);
+            
+            const data = await response.json();
+            expect(data).toEqual({
+                id: existingOperatorId,
+                name: testName
+            });
+        });
+
+        it("should prioritize operatorId over name when both are provided", async () => {
+            // Arrange
+            const existingOperatorId = "67d291d943a96fad7f14ddae";
+            const someOtherName = "some-other-name";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${existingOperatorId}&name=${encodeURIComponent(someOtherName)}`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(200);
+            
+            const data = await response.json();
+            expect(data).toEqual({
+                id: existingOperatorId,
+                name: expect.any(String)
+            });
+        });
+    });
+
+    describe("Get all operators", () => {
+        it("should return 401 if not authenticated", async () => {
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/list`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            // Assert
+            expect(response.status).toBe(401);
+        });
+
+        it("should return all operators with exact structure", async () => {
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/list`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(200);
+            
+            const data = await response.json();
+            expect(Array.isArray(data)).toBe(true);
+            expect(data.length).toBeGreaterThan(0);
+            
+            data.forEach((operator: any) => {
+                expect(operator).toEqual(
+                    expect.objectContaining({
+                        id: expect.any(String)
+                    })
+                );
+                if (operator.hasOwnProperty('name')) {
+                    expect(typeof operator.name === 'string' || operator.name === null).toBe(true);
+                }
+                const allowedKeys = ['id', 'name'];
+                const actualKeys = Object.keys(operator);
+                expect(actualKeys.every(key => allowedKeys.includes(key))).toBe(true);
+            });
+        });
+
+        it("should return operators with field transformation", async () => {
+            // Arrange
+            const createResponse = await fetch(`${baseUrl}/api/operator/generate`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+            });
+            const createdOperator = await createResponse.json();
+            const testName = "test-list-operator";
+            
+            await fetch(`${baseUrl}/api/operator/updateName`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({
+                    operatorId: createdOperator.operatorId,
+                    name: testName,
+                }),
+            });
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/list`, {
+                method: 'GET',
+                headers: addAdminAuth(),
+            });
+            
+            // Assert
+            expect(response.status).toBe(200);
+            
+            const data = await response.json();
+            const testOperator = data.find((op: any) => op.id === createdOperator.operatorId);
+            
+            expect(testOperator).toEqual({
+                id: createdOperator.operatorId,
+                name: testName
+            });
+        });
+    });
 });

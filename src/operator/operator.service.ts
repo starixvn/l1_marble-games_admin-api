@@ -19,6 +19,11 @@ export type UpdateNameArgs = {
   name: string;
 }
 
+export type GetOperatorArgs = {
+  operatorId?: string;
+  name?: string;
+}
+
 export type OperatorCreateResponse = {
   operatorId: string;
   password: string;
@@ -58,7 +63,7 @@ export class OperatorService {
   async updateName(args: UpdateNameArgs) {
     const { operatorId, name } = args;
 
-    const existingOperator = await this.getOperatorByName(name);
+    const existingOperator = await this.operatorModel.findOne({ name }).select('-password -__v');
 
     if (existingOperator) {
       throw new ConflictException('Operator with this name already exists');
@@ -103,7 +108,57 @@ export class OperatorService {
     }
   }
 
-  async getOperatorByName(name: string) {
-    return this.operatorModel.findOne({ name });
+  async getOperator(args: GetOperatorArgs) {
+    const { operatorId, name } = args;
+
+    if (operatorId) {
+      const operator = await this.getOperatorById(operatorId);
+      if (!operator) {
+        throw new NotFoundException('Operator not found');
+      }
+      return operator;
+    }
+
+    if (name) { 
+      const operator = await this.getOperatorByName(name);
+      if (!operator) {
+        throw new NotFoundException('Operator not found');
+      }
+      return operator;
+    }
+
+    throw new Error('Either operatorId or name must be provided'); // this is developer fault to not provide either operatorId or name
+  }
+
+  async getAllOperators() {
+    return this
+      .operatorModel
+      .aggregate([
+        {
+          $project: {
+            "id": "$_id",
+            "_id": 0,
+            "name": 1,
+          }
+        }
+      ]);
+  }
+  private async getOperatorById(operatorId: string) {
+    return this.filterOperatorFields(this.operatorModel.findById(operatorId));
+  }
+
+  private async getOperatorByName(name: string) {
+    return this.filterOperatorFields(this.operatorModel.findOne({ name }));
+  }
+
+  private filterOperatorFields(query: ReturnType<typeof this.operatorModel.findOne>) {
+    return query.select('-password -__v').transform((doc) => {
+      if (doc && typeof (doc as any).toObject === 'function') {
+        const obj = (doc as OperatorDocument).toObject();
+        const { _id, ...rest } = obj;
+        return { id: _id.toString(), ...rest };
+      }
+      return doc;
+    });
   }
 }

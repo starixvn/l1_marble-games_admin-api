@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsOptional, IsString, IsNotEmpty, IsNumber, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
+import { IsMongoObjectId } from "../../common/validators/mongoid.validator";
 
 export class GameIntegrationQueryDto {
   @ApiProperty({ 
@@ -10,6 +11,7 @@ export class GameIntegrationQueryDto {
   })
   @IsOptional()
   @IsString()
+  @IsMongoObjectId()
   @IsNotEmpty()
   operatorId?: string;
 

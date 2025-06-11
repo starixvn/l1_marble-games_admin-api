@@ -1,0 +1,37 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { UpdateNameArgs, ChangePasswordArgs, GetOperatorArgs } from "../operator.service";
+import { IsNotEmpty, IsOptional, IsString, ValidateIf } from "class-validator";
+import { IsMongoObjectId } from "../../common/validators/mongoid.validator";
+
+export class UpdateNameDto implements UpdateNameArgs {
+  @ApiProperty({ description: 'Operator ID string' })
+  operatorId: string = '';
+  
+  @ApiProperty({ description: 'New name for the operator' })
+  name: string = '';
+}
+
+export class ChangePasswordDto implements ChangePasswordArgs {
+  @ApiProperty({ description: 'Operator ID string', required: false })
+  operatorId?: string;
+  
+  @ApiProperty({ description: 'Operator name', required: false })
+  name?: string;
+}
+
+export class GetOperatorDto implements GetOperatorArgs {
+  @ApiProperty({ description: 'Operator ID string', required: false })
+  @IsString()
+  @IsMongoObjectId()
+  @IsOptional()
+  operatorId?: string;
+  
+  @ApiProperty({ description: 'Operator name', required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ValidateIf((o) => !o.operatorId && !o.name)
+  @IsNotEmpty({ message: 'Either operatorId or name must be provided' })
+  _atLeastOneOperatorField?: never;
+}

@@ -1,23 +1,10 @@
-import { Body, Controller, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
-import { ChangePasswordArgs, OperatorService, UpdateNameArgs } from "./operator.service";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
+import { OperatorService, } from "./operator.service";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
+import { UpdateNameDto, ChangePasswordDto, GetOperatorDto } from "./dto/operator.dto"
 
-class UpdateNameDto implements UpdateNameArgs {
-  @ApiProperty({ description: 'Operator ID string' })
-  operatorId: string = '';
-  
-  @ApiProperty({ description: 'New name for the operator' })
-  name: string = '';
-}
 
-class ChangePasswordDto implements ChangePasswordArgs {
-  @ApiProperty({ description: 'Operator ID string', required: false })
-  operatorId?: string;
-  
-  @ApiProperty({ description: 'Operator name', required: false })
-  name?: string;
-}
 
 @Controller('operator')
 @UseGuards(JwtAuthGuard)
@@ -26,24 +13,24 @@ export class OperatorController {
     constructor(private readonly operatorServcice: OperatorService) {}
 
     @ApiOperation({
-        summary: "Generate new operator credential",
-        description: "Please copy the result and saved it because you wont get this credential again. And NEVER SHARE THIS TO UNAUTHORIZED ONE"
+      summary: "Generate new operator credential",
+      description: "Please copy the result and saved it because you wont get this credential again. And NEVER SHARE THIS TO UNAUTHORIZED ONE"
     })
     @HttpCode(200)
     @Post('generate')
     async generateOperator() {
-        return await this.operatorServcice.createOperator();
+      return await this.operatorServcice.createOperator();
     }
 
     @ApiOperation({
-        summary: "Update operator name",
-        description: "Update the name of the operator"
+      summary: "Update operator name",
+      description: "Update the name of the operator"
     })
     @ApiBody({ type: UpdateNameDto })
     @HttpCode(200)
     @Post('updateName')
-    async updateName(@Body() body: UpdateNameArgs) {
-        return this.operatorServcice.updateName(body);
+    async updateName(@Body() body: UpdateNameDto) {
+      return this.operatorServcice.updateName(body);
     }
 
     @ApiOperation({
@@ -53,7 +40,17 @@ export class OperatorController {
     @ApiQuery({ type: ChangePasswordDto })
     @HttpCode(200)
     @Post('changePassword')
-    async changePassword(@Query() query: ChangePasswordArgs) {
-        return this.operatorServcice.changePassword(query);
+    async changePassword(@Query() query: ChangePasswordDto) {
+      return this.operatorServcice.changePassword(query);
+    }
+
+    @Get('get')
+    async getOperator(@Query() query: GetOperatorDto) {
+      return this.operatorServcice.getOperator(query);
+    }
+
+    @Get('list')
+    async getAllOperators() {
+      return this.operatorServcice.getAllOperators();
     }
 }
