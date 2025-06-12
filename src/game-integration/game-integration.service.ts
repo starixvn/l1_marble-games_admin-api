@@ -30,7 +30,8 @@ export class GameIntegrationService {
       markets: processedMarketIntegrations,
     };
 
-    return this.updateOrCreateGameIntegration(operatorId as unknown as string, query.gameId, processedUpdateRequest);
+    await this.updateOrCreateGameIntegration(operatorId as unknown as string, query.gameId, processedUpdateRequest);
+    return this.getGameIntegration(query);
   }
 
   async getGameIntegration(query: GameIntegrationQueryDto) {
@@ -39,7 +40,7 @@ export class GameIntegrationService {
     const gameIntegration = await this
       .gameIntegrationModel
       .findOne({ operatorId, gameId: query.gameId })
-      .select('-_id -__v')
+      .select('-_id -__v -gameId -operatorId')
       .populate({
         path: 'markets',
         select: '-__v',
