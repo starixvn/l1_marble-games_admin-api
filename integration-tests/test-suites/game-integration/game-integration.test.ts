@@ -96,8 +96,6 @@ describe("Game Integration", () => {
       
       const data = await response.json();
       const expectedResult = {
-        operatorId: existingOperatorId,
-        gameId: gameId,
         mergeEvent: { eventType: "tournament", priority: 2 },
         patches: [{ op: "replace", path: "/status", value: "active" }]
       };
@@ -134,8 +132,6 @@ describe("Game Integration", () => {
       const data = await response.json();
       expect(data).toEqual(
         expect.objectContaining({
-          operatorId: existingOperatorId,
-          gameId: gameId,
           mergeEvent: { eventType: "live", priority: 3 },
           mergeEventDetails: [
             { detail: "live", value: true },
@@ -190,8 +186,6 @@ describe("Game Integration", () => {
       const data = await response.json();
       expect(data).toEqual(
         expect.objectContaining({
-          operatorId: existingOperatorId,
-          gameId: gameId,
           mergeEvent: { eventType: "updated", priority: 5 },
           mergeEventDetails: [
             { detail: "updated", value: true }
@@ -237,9 +231,11 @@ describe("Game Integration", () => {
       expect(Array.isArray(data.markets)).toBe(true);
       expect(data.markets.length).toBe(1);
       
-      const marketId = data.markets[0];
-      expect(typeof marketId).toBe('string');
-      expect(marketId.length).toBe(24);
+      const market = data.markets[0];
+      expect(typeof market).toBe('object');
+      expect(market).toHaveProperty('id');
+      expect(typeof market.id).toBe('string');
+      expect(market.id.length).toBe(24);
     });
 
     it("should update market integration if id and fields are provided", async () => {
@@ -287,8 +283,8 @@ describe("Game Integration", () => {
       expect(Array.isArray(data.markets)).toBe(true);
       expect(data.markets.length).toBe(1);
       
-      const marketId = data.markets[0];
-      expect(marketId).toBe(existingMarketId);
+      const market = data.markets[0];
+      expect(market.id).toBe(existingMarketId);
 
       expect(marketIntegration).toEqual(expect.objectContaining({
         merge: expect.objectContaining({
@@ -333,8 +329,8 @@ describe("Game Integration", () => {
       expect(Array.isArray(data.markets)).toBe(true);
       expect(data.markets.length).toBe(1);
       
-      const marketId = data.markets[0];
-      expect(marketId).toBe(existingMarketId);
+      const market = data.markets[0];
+      expect(market.id).toBe(existingMarketId);
     });
   });
 
@@ -658,8 +654,6 @@ describe("Game Integration", () => {
       };
 
       const expectedResponse = {
-        operatorId: existingOperatorId,
-        gameId: gameId,
         ...upsertRequest
       };
 
