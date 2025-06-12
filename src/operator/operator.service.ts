@@ -29,7 +29,7 @@ export type OperatorCreateResponse = {
   password: string;
 };
 
-export type ChangePasswordArgs = {
+export type GeneratePasswordArgs = {
   operatorId?: string;
   name?: string;
 }
@@ -80,7 +80,7 @@ export class OperatorService {
     await operator.save();
   }
  
-  async changePassword(args: ChangePasswordArgs) {
+  async generatePassword(args: GeneratePasswordArgs) {
     const { operatorId, name } = args;
 
     if (!operatorId && !name) {

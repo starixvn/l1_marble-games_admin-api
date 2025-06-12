@@ -3,10 +3,10 @@ import { addAdminAuth } from '../../utils/auth';
 describe("Operator", () => {
     const baseUrl = global.__API_SERVICE__.getBaseUrl();
     
-    describe("Generate", () => {
+    describe("Create", () => {
         it("should return 401 if not authenticated", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/generate`, {
+            const response = await fetch(`${baseUrl}/api/operator/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -17,9 +17,9 @@ describe("Operator", () => {
             expect(response.status).toBe(401);
         });
       
-        it("should generate an operator", async () => {
+        it("should create an operator", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/generate`, {
+            const response = await fetch(`${baseUrl}/api/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -130,13 +130,13 @@ describe("Operator", () => {
         });
     });
     
-    describe("Change password", () => {
+    describe("Generate password", () => {
         it("should return 401 if not authenticated", async () => {
             // Arrange
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/changePassword?operatorId=${existingOperatorId}`, {
+            const response = await fetch(`${baseUrl}/api/operator/generatePassword?operatorId=${existingOperatorId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/changePassword?operatorId=${existingOperatorId}`, {
+            const response = await fetch(`${baseUrl}/api/operator/generatePassword?operatorId=${existingOperatorId}`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -183,7 +183,7 @@ describe("Operator", () => {
             });
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/changePassword?name=${testName}`, {
+            const response = await fetch(`${baseUrl}/api/operator/generatePassword?name=${testName}`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -204,7 +204,7 @@ describe("Operator", () => {
             const nonExistentOperatorId = "507f1f77bcf86cd799439011";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/changePassword?operatorId=${nonExistentOperatorId}`, {
+            const response = await fetch(`${baseUrl}/api/operator/generatePassword?operatorId=${nonExistentOperatorId}`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -383,7 +383,7 @@ describe("Operator", () => {
 
         it("should return operators with field transformation", async () => {
             // Arrange
-            const createResponse = await fetch(`${baseUrl}/api/operator/generate`, {
+            const createResponse = await fetch(`${baseUrl}/api/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });

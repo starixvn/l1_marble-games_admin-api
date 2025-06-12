@@ -15,7 +15,7 @@ describe('OperatorController', () => {
           useValue: {
             createOperator: jest.fn(),
             updateName: jest.fn(),
-            changePassword: jest.fn(),
+            generatePassword: jest.fn(),
           },
         },
       ],
@@ -39,7 +39,7 @@ describe('OperatorController', () => {
       jest.spyOn(service, 'createOperator').mockResolvedValue(result);
 
       // Act
-      const response = await controller.generateOperator();
+      const response = await controller.createOperator();
 
       // Assert
       expect(service.createOperator).toHaveBeenCalled();
@@ -75,13 +75,13 @@ describe('OperatorController', () => {
         operatorId: 'op-123', 
         password: 'new-password' 
       };
-      jest.spyOn(service, 'changePassword').mockResolvedValue(result);
+      jest.spyOn(service, 'generatePassword').mockResolvedValue(result);
 
       // Act
-      const response = await controller.changePassword(changePasswordArgs);
+      const response = await controller.generatePassword(changePasswordArgs);
 
       // Assert
-      expect(service.changePassword).toHaveBeenCalledWith(changePasswordArgs);
+      expect(service.generatePassword).toHaveBeenCalledWith(changePasswordArgs);
       expect(response).toEqual(result);
     });
 
@@ -94,13 +94,13 @@ describe('OperatorController', () => {
         operatorId: 'op-123', 
         password: 'new-password' 
       };
-      jest.spyOn(service, 'changePassword').mockResolvedValue(result);
+      jest.spyOn(service, 'generatePassword').mockResolvedValue(result);
 
       // Act
-      const response = await controller.changePassword(changePasswordArgs);
+      const response = await controller.generatePassword(changePasswordArgs);
 
       // Assert
-      expect(service.changePassword).toHaveBeenCalledWith(changePasswordArgs);
+      expect(service.generatePassword).toHaveBeenCalledWith(changePasswordArgs);
       expect(response).toEqual(result);
     });
   });

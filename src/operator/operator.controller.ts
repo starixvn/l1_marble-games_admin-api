@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs
 import { OperatorService, } from "./operator.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
-import { UpdateNameDto, ChangePasswordDto, GetOperatorDto } from "./dto/operator.dto"
+import { UpdateNameDto, GeneratePasswordDto, GetOperatorDto } from "./dto/operator.dto"
 
 
 
@@ -13,12 +13,12 @@ export class OperatorController {
     constructor(private readonly operatorServcice: OperatorService) {}
 
     @ApiOperation({
-      summary: "Generate new operator credential",
+      summary: "Create new operator credential",
       description: "Please copy the result and saved it because you wont get this credential again. And NEVER SHARE THIS TO UNAUTHORIZED ONE"
     })
     @HttpCode(200)
-    @Post('generate')
-    async generateOperator() {
+    @Post('create')
+    async createOperator() {
       return await this.operatorServcice.createOperator();
     }
 
@@ -34,14 +34,14 @@ export class OperatorController {
     }
 
     @ApiOperation({
-        summary: "Change operator password",
-        description: "Change the password of the operator"
+        summary: "Generate new operator password",
+        description: "Generate the new password of the operator"
     })
-    @ApiQuery({ type: ChangePasswordDto })
+    @ApiQuery({ type: GeneratePasswordDto })
     @HttpCode(200)
-    @Post('changePassword')
-    async changePassword(@Query() query: ChangePasswordDto) {
-      return this.operatorServcice.changePassword(query);
+    @Post('generatePassword')
+    async generatePassword(@Query() query: GeneratePasswordDto) {
+      return this.operatorServcice.generatePassword(query);
     }
 
     @Get('get')

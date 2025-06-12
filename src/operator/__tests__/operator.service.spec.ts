@@ -162,7 +162,7 @@ describe('OperatorService', () => {
       mockOperatorModel.findOne.mockReturnValue(null);
 
       // Act
-      const result = await service.changePassword({ operatorId: 'operator-id-123' });
+      const result = await service.generatePassword({ operatorId: 'operator-id-123' });
 
       // Assert
       expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
@@ -189,7 +189,7 @@ describe('OperatorService', () => {
       mockOperatorModel.findOne.mockReturnValue(foundOperator);
 
       // Act
-      const result = await service.changePassword({ name: 'test-operator' });
+      const result = await service.generatePassword({ name: 'test-operator' });
 
       // Assert
       expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator' });
@@ -204,7 +204,7 @@ describe('OperatorService', () => {
 
     it('should throw BadRequestException if neither operatorId nor name provided', async () => {
       // Arrange & Act & Assert
-      await expect(service.changePassword({})).rejects.toThrow(BadRequestException);
+      await expect(service.generatePassword({})).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFoundException if operator not found', async () => {
@@ -214,7 +214,7 @@ describe('OperatorService', () => {
 
       // Act & Assert
       await expect(
-        service.changePassword({ operatorId: 'non-existent-id' })
+        service.generatePassword({ operatorId: 'non-existent-id' })
       ).rejects.toThrow(NotFoundException);
     });
   });

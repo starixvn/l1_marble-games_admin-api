@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { UpdateNameArgs, ChangePasswordArgs, GetOperatorArgs } from "../operator.service";
+import { UpdateNameArgs, GeneratePasswordArgs, GetOperatorArgs } from "../operator.service";
 import { IsNotEmpty, IsOptional, IsString, ValidateIf } from "class-validator";
 import { IsMongoObjectId } from "../../common/validators/mongoid.validator";
 
@@ -11,7 +11,7 @@ export class UpdateNameDto implements UpdateNameArgs {
   name: string = '';
 }
 
-export class ChangePasswordDto implements ChangePasswordArgs {
+export class GeneratePasswordDto implements GeneratePasswordArgs {
   @ApiProperty({ description: 'Operator ID string', required: false })
   operatorId?: string;
   
