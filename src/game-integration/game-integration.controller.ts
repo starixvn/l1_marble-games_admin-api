@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { GameIntegrationService } from "./game-integration.service";
 import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
@@ -42,5 +42,26 @@ export class GameIntegrationController {
     updateRequest: GameIntegrationUpdateRequestDto
   ) {
     return this.gameIntegrationService.upsertGameIntegration(query, updateRequest);
+  }
+
+  @Get('get')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get game integration',
+    description: 'Retrieves game integration details based on operatorId/alias and gameId'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Game integration successfully retrieved'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Game integration not found'
+  })
+  async getGameIntegration(
+    @Query()
+    query: GameIntegrationQueryDto
+  ) {
+    return this.gameIntegrationService.getGameIntegration(query);
   }
 }

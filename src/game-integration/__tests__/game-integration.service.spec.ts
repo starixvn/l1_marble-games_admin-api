@@ -22,6 +22,7 @@ describe('GameIntegrationService', () => {
   beforeEach(async () => {
     const mockGameIntegrationModelFactory = {
       findOneAndUpdate: jest.fn(),
+      findOne: jest.fn(),
     };
 
     const mockMarketIntegrationModelFactory = {
@@ -483,6 +484,268 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true }
         );
         expect(result).toEqual(mockUpsertedIntegration);
+      });
+    });
+  });
+
+  describe('getGameIntegration', () => {
+    describe('when operatorId is provided', () => {
+      it('should return game integration successfully', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockMarketIntegration = {
+          _id: mockMarketIntegrationId,
+          name: 'Test Market',
+          selections: ['Selection 1', 'Selection 2'],
+          merge: { key: 'value' },
+        };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: 'match' },
+          markets: [mockMarketIntegration],
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+        mockGameIntegrationModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            populate: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(mockGameIntegration),
+            }),
+          }),
+        });
+
+        // Act
+        const result = await service.getGameIntegration(query);
+
+        // Assert
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ _id: mockOperatorId.toString() });
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({ 
+          operatorId: mockOperatorId, 
+          gameId: 1001 
+        });
+        expect(result).toEqual(mockGameIntegration);
+      });
+
+      it('should throw NotFoundException when operator does not exist', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(null),
+          }),
+        });
+
+        // Act & Assert
+        await expect(service.getGameIntegration(query)).rejects.toThrow(NotFoundException);
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ _id: mockOperatorId.toString() });
+      });
+    });
+
+    describe('when name is provided', () => {
+      it('should return game integration successfully', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          name: 'test-operator',
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: 'match' },
+          markets: [],
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+        mockGameIntegrationModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            populate: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(mockGameIntegration),
+            }),
+          }),
+        });
+
+        // Act
+        const result = await service.getGameIntegration(query);
+
+        // Assert
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator' });
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({ 
+          operatorId: mockOperatorId, 
+          gameId: 1001 
+        });
+        expect(result).toEqual(mockGameIntegration);
+      });
+
+      it('should throw NotFoundException when operator does not exist', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          name: 'non-existent-operator',
+          gameId: 1001,
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(null),
+          }),
+        });
+
+        // Act & Assert
+        await expect(service.getGameIntegration(query)).rejects.toThrow(NotFoundException);
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'non-existent-operator' });
+      });
+    });
+
+    describe('when neither operatorId nor name is provided', () => {
+      it('should throw NotFoundException', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          gameId: 1001,
+        };
+
+        // Act & Assert
+        await expect(service.getGameIntegration(query)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    describe('when game integration does not exist', () => {
+      it('should throw NotFoundException', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+        mockGameIntegrationModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            populate: jest.fn().mockReturnValue({
+              lean: jest.fn().mockResolvedValue(null),
+            }),
+          }),
+        });
+
+        // Act & Assert
+        await expect(service.getGameIntegration(query)).rejects.toThrow(NotFoundException);
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({ 
+          operatorId: mockOperatorId, 
+          gameId: 1001 
+        });
+      });
+    });
+
+    describe('market population and transformation', () => {
+      it('should populate markets with correct select and transform options', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          markets: [],
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+        
+        const mockPopulate = jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue(mockGameIntegration),
+        });
+        const mockSelect = jest.fn().mockReturnValue({
+          populate: mockPopulate,
+        });
+        mockGameIntegrationModel.findOne.mockReturnValue({
+          select: mockSelect,
+        });
+
+        // Act
+        await service.getGameIntegration(query);
+
+        // Assert
+        expect(mockSelect).toHaveBeenCalledWith('-_id -__v');
+        expect(mockPopulate).toHaveBeenCalledWith({
+          path: 'markets',
+          select: '-__v',
+          transform: expect.any(Function),
+        });
+      });
+
+      it('should transform market documents correctly', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          markets: [],
+        };
+
+        mockOperatorModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue(mockOperator),
+          }),
+        });
+
+        let transformFunction: any;
+        const mockPopulate = jest.fn().mockImplementation((options) => {
+          transformFunction = options.transform;
+          return {
+            lean: jest.fn().mockResolvedValue(mockGameIntegration),
+          };
+        });
+        
+        mockGameIntegrationModel.findOne.mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            populate: mockPopulate,
+          }),
+        });
+
+        // Act
+        await service.getGameIntegration(query);
+        const mockDoc = {
+          _id: mockMarketIntegrationId,
+          name: 'Test Market',
+          selections: ['Selection 1'],
+        };
+        const transformedDoc = transformFunction(mockDoc);
+
+        // Assert
+        expect(transformedDoc).toEqual({
+          id: mockMarketIntegrationId,
+          name: 'Test Market',
+          selections: ['Selection 1'],
+        });
       });
     });
   });

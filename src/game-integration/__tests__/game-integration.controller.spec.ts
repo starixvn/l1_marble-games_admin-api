@@ -11,6 +11,7 @@ describe('GameIntegrationController', () => {
 
   const mockGameIntegrationService = {
     upsertGameIntegration: jest.fn(),
+    getGameIntegration: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -215,6 +216,133 @@ describe('GameIntegrationController', () => {
       expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, complexUpdateRequest);
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
+    });
+  });
+
+  describe('getGameIntegration', () => {
+    const mockQueryWithOperatorId: GameIntegrationQueryDto = {
+      operatorId: '507f1f77bcf86cd799439011',
+      gameId: 1001,
+    };
+
+    const mockQueryWithAlias: GameIntegrationQueryDto = {
+      name: 'main-operator',
+      gameId: 1001,
+    };
+
+    const mockGameIntegrationResponse = {
+      operatorId: '507f1f77bcf86cd799439011',
+      gameId: 1001,
+      mergeEvent: { eventType: 'match', priority: 1 },
+      mergeEventDetails: [{ detail: 'live', value: true }],
+      patches: [{ op: 'replace', path: '/status', value: 'active' }],
+      markets: [
+        {
+          id: '507f1f77bcf86cd799439013',
+          name: 'Test Market',
+          selections: ['Selection 1', 'Selection 2'],
+          merge: { key: 'value' },
+        },
+      ],
+    };
+
+    it('should successfully get game integration with operatorId', async () => {
+      // Arrange
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+
+      // Act
+      const result = await controller.getGameIntegration(mockQueryWithOperatorId);
+
+      // Assert
+      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockGameIntegrationResponse);
+    });
+
+    it('should successfully get game integration with alias', async () => {
+      // Arrange
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+
+      // Act
+      const result = await controller.getGameIntegration(mockQueryWithAlias);
+
+      // Assert
+      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockGameIntegrationResponse);
+    });
+
+    it('should successfully get game integration with empty markets', async () => {
+      // Arrange
+      const responseWithoutMarkets = {
+        ...mockGameIntegrationResponse,
+        markets: [],
+      };
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(responseWithoutMarkets);
+
+      // Act
+      const result = await controller.getGameIntegration(mockQueryWithOperatorId);
+
+      // Assert
+      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(responseWithoutMarkets);
+    });
+
+    it('should throw NotFoundException when operator is not found', async () => {
+      // Arrange
+      const error = new NotFoundException('Operator not found');
+      mockGameIntegrationService.getGameIntegration.mockRejectedValue(error);
+
+      // Act
+      const promise = controller.getGameIntegration(mockQueryWithOperatorId);
+
+      // Assert
+      await expect(promise).rejects.toThrow(NotFoundException);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw NotFoundException when game integration is not found', async () => {
+      // Arrange
+      const error = new NotFoundException('Game integration not found');
+      mockGameIntegrationService.getGameIntegration.mockRejectedValue(error);
+
+      // Act
+      const promise = controller.getGameIntegration(mockQueryWithAlias);
+
+      // Assert
+      await expect(promise).rejects.toThrow(NotFoundException);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle query with only required gameId parameter', async () => {
+      // Arrange
+      const queryWithOnlyGameId = { gameId: 1001 } as GameIntegrationQueryDto;
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+
+      // Act
+      const result = await controller.getGameIntegration(queryWithOnlyGameId);
+
+      // Assert
+      expect(service.getGameIntegration).toHaveBeenCalledWith(queryWithOnlyGameId);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockGameIntegrationResponse);
+    });
+
+    it('should propagate any unexpected error from service', async () => {
+      // Arrange
+      const error = new Error('Unexpected error');
+      mockGameIntegrationService.getGameIntegration.mockRejectedValue(error);
+
+      // Act
+      const promise = controller.getGameIntegration(mockQueryWithOperatorId);
+
+      // Assert
+      await expect(promise).rejects.toThrow('Unexpected error');
+      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
     });
   });
 });

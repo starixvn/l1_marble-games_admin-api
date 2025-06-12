@@ -33,6 +33,33 @@ export class GameIntegrationService {
     return this.updateOrCreateGameIntegration(operatorId as unknown as string, query.gameId, processedUpdateRequest);
   }
 
+  async getGameIntegration(query: GameIntegrationQueryDto) {
+    const operatorId = await this.getOperator(query);
+
+    const gameIntegration = await this
+      .gameIntegrationModel
+      .findOne({ operatorId, gameId: query.gameId })
+      .select('-_id -__v')
+      .populate({
+        path: 'markets',
+        select: '-__v',
+        transform: (doc) => {
+          const { _id, ...rest } = doc;
+          return {
+            id: _id,
+            ...rest
+          };
+        }
+      })
+      .lean();
+
+    if (!gameIntegration) {
+      throw new NotFoundException('Game integration not found');
+    }
+
+    return gameIntegration;
+  }
+
   private async updateOrCreateGameIntegration(operatorId: string, gameId: number, updateRequest: any) {
     return this.gameIntegrationModel.findOneAndUpdate(
         { operatorId, gameId }, 
