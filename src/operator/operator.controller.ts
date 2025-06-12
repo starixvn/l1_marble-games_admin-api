@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
 import { OperatorService, } from "./operator.service";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOperation } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 import { UpdateNameDto, GeneratePasswordDto, GetOperatorDto } from "./dto/operator.dto"
 
@@ -37,7 +37,6 @@ export class OperatorController {
         summary: "Generate new operator password",
         description: "Generate the new password of the operator"
     })
-    @ApiQuery({ type: GeneratePasswordDto })
     @HttpCode(200)
     @Post('generatePassword')
     async generatePassword(@Query() query: GeneratePasswordDto) {
