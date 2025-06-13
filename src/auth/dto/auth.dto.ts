@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../schema/account.schema';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class AuthDto {
   @ApiProperty({
@@ -34,4 +36,22 @@ export class AccountResponseDto {
     example: '1234aaAA',
   })
   password: string;  
+}
+
+export class CreateAccountDto {
+  @ApiProperty({
+    description: 'The type of the account',
+    example: "george.phung",
+  })
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
+  @ApiProperty({
+    description: 'The type of the account',
+    example: Role.ADMIN,
+  })
+  @IsEnum(Role)
+  @IsNotEmpty()
+  role: Role
 }

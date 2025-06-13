@@ -6,10 +6,11 @@ import {
   HttpStatus,
   Post,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { AuthDto, AuthResponseDto, AccountResponseDto } from './dto/auth.dto';
+import { AuthDto, AuthResponseDto, AccountResponseDto, CreateAccountDto } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
 
 @ApiTags('Auth')
@@ -30,18 +31,18 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: AuthDto): Promise<AuthResponseDto> {
-    const accountId = await this.authService.validateAccount({
+    const account = await this.authService.validateAccount({
       username: loginDto.username,
       password: loginDto.password,
     });
 
-    if (!accountId) {
+    if (!account) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-
     const token = await this.authService.generateJwt({
-      id: accountId,
+      id: account.id,
+      role: account.role,
     });
 
     return {
@@ -59,7 +60,16 @@ export class AuthController {
   @ApiBearerAuth()
   @Post('changePassword')
   @HttpCode(HttpStatus.OK)
-  async changePassword(): Promise<AccountResponseDto> {
-    return this.authService.changePassword();
+  async changePassword(@Request() req: any): Promise<AccountResponseDto> {
+    const userId = req.user.id;
+    return this.authService.changePassword(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('createAccount')
+  @HttpCode(HttpStatus.OK)
+  async createAccount(@Body() createAccountDto: CreateAccountDto): Promise<AccountResponseDto> {
+    return this.authService.createAccount(createAccountDto);
   }
 }
