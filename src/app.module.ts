@@ -3,11 +3,11 @@ import { OperatorModule } from './operator/operator.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
 import { GameIntegrationModule } from './game-integration/game-integration.module';
 import { AuthModule } from './auth/auth.module';
 import { GameConfigModule } from './game-config/game-config.module';
 import { GameConfigSchemaModule } from './game-config-schema/game-config-schema.module';
+import { HealthcheckModule } from './healthcheck/healthcheck.module';
 
 @Module({
   imports: [
@@ -26,12 +26,12 @@ import { GameConfigSchemaModule } from './game-config-schema/game-config-schema.
         };
       }
     }),
+    HealthcheckModule,
     AuthModule,
     OperatorModule,
     GameIntegrationModule,
     GameConfigModule,
     GameConfigSchemaModule,
   ],
-  controllers: [AppController],
 })
 export class AppModule {}
