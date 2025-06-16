@@ -56,6 +56,22 @@ describe('RolesGuard', () => {
     expect(guard.canActivate(mockContext)).toBe(false);
   });
 
+  it('should allow access when user is not present but has no roles', () => {
+    jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key) => {
+      if (key === IS_PUBLIC_KEY) return false;
+      if (key === ROLES_KEY) return [Role.ADMIN];
+      return undefined;
+    });
+
+    (mockContext.switchToHttp().getRequest as jest.Mock).mockReturnValue({
+      user: {
+        id: "123123"
+      }
+    });
+
+    expect(guard.canActivate(mockContext)).toBe(true);
+  });
+
   it('should allow access when user has required role', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key) => {
       if (key === IS_PUBLIC_KEY) return false;
