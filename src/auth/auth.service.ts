@@ -5,8 +5,9 @@ import { compare, hash } from 'bcryptjs';
 import { ConfigKeys } from '../config/config-keys';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Account, AccountDocument, Role } from './schema/account.schema';
+import { Account, AccountDocument, } from './schema/account.schema';
 import { generateRandomPassword } from '../utils/random';
+import { Role } from '../common/enums/role.enum';
 
 const SALT_ROUND = 10;
 

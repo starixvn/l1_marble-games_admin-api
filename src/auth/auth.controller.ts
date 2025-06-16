@@ -5,13 +5,14 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UseGuards,
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthDto, AuthResponseDto, AccountResponseDto, CreateAccountDto } from './dto/auth.dto';
-import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
+import { Public } from '../common/decorators/public.decorator';
+import { Role } from '../common/enums/role.enum';
+import { Roles } from '../common/decorators/role.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -28,6 +29,7 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized: Invalid credentials',
   })
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: AuthDto): Promise<AuthResponseDto> {
@@ -52,11 +54,11 @@ export class AuthController {
 
   @Post('oneTimeRegister')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async oneTimeRegister(): Promise<AccountResponseDto> {
     return this.authService.oneTimeRegister();
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post('changePassword')
   @HttpCode(HttpStatus.OK)
@@ -65,8 +67,8 @@ export class AuthController {
     return this.authService.changePassword(userId);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Post('createAccount')
   @HttpCode(HttpStatus.OK)
   async createAccount(@Body() createAccountDto: CreateAccountDto): Promise<AccountResponseDto> {

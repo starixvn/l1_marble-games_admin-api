@@ -1,11 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Query } from "@nestjs/common";
 import { GameConfigService } from "./game-config.service";
 import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 import { GameConfigUpdateRequestDto, GameConfigUpsertQueryDto } from "./dto/game-config.dto";
+import { Roles } from "../common/decorators/role.decorator";
+import { Role } from "../common/enums/role.enum";
 
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@Roles(Role.ADMIN)
 @Controller('gameConfig')
 export class GameConfigController {
   constructor(

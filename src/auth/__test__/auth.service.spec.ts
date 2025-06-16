@@ -3,10 +3,11 @@ import { AuthService } from '../auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { getModelToken } from '@nestjs/mongoose';
-import { Account, Role } from '../schema/account.schema';
+import { Account } from '../schema/account.schema';
 import { Model } from 'mongoose';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcryptjs';
+import { Role } from '../../common/enums/role.enum';
 
 jest.mock('bcryptjs');
 

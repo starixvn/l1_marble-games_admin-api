@@ -1,13 +1,47 @@
 import { JwtAuthGuard } from '../guards/jwt.auth.guard';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 describe('JwtAuthGuard', () => {
   let guard: JwtAuthGuard;
+  let reflector: Reflector;
+  let mockContext: ExecutionContext;
 
   beforeEach(() => {
-    guard = new JwtAuthGuard();
+    reflector = new Reflector();
+    guard = new JwtAuthGuard(reflector);
+    mockContext = {
+      switchToHttp: jest.fn().mockReturnThis(),
+      getRequest: jest.fn(),
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
+    } as any;
   });
 
+  describe('canActivate', () => {
+    it('should allow access to public routes', () => {
+      jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key) => {
+        if (key === IS_PUBLIC_KEY) return true;
+        return undefined;
+      });
+  
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+  
+    it('should proceed with normal authentication when route is not public', () => {
+      jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key) => {
+        if (key === IS_PUBLIC_KEY) return false;
+        return undefined;
+      });
+  
+      const canActivateSpy = jest.spyOn(guard, 'canActivate').mockResolvedValue(true);
+  
+      guard.canActivate(mockContext);
+      expect(canActivateSpy).toHaveBeenCalledWith(mockContext);
+    });
+  });
+  
   it('should call canActivate and return expected result', async () => {
     const mockContext = {
       switchToHttp: jest.fn().mockReturnThis(),
@@ -16,7 +50,7 @@ describe('JwtAuthGuard', () => {
 
     jest.spyOn(guard, 'canActivate').mockResolvedValue(true);
 
-    const result = await guard.canActivate(mockContext);
+  const result = await guard.canActivate(mockContext);
     expect(result).toBe(true);
   });
 

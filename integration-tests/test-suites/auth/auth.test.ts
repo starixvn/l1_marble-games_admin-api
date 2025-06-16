@@ -1,5 +1,5 @@
 import { setAdminCredentials } from '../../utils/auth';
-import { Role } from '../../../src/auth/schema/account.schema';
+import { Role } from '../../../src/common/enums/role.enum';
 
 describe("Auth", () => {
   const baseUrl = global.__API_SERVICE__.getBaseUrl();

@@ -1,10 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, ObjectId } from "mongoose";
-
-export enum Role {
-    ADMIN = "admin",
-    DEVELOPER = "developer",
-}
+import { Role } from "../../common/enums/role.enum";
 
 const roleValues = Object.values(Role);
 

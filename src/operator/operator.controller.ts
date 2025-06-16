@@ -1,14 +1,15 @@
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, Query } from "@nestjs/common";
 import { OperatorService, } from "./operator.service";
 import { ApiBearerAuth, ApiBody, ApiOperation } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
 import { UpdateNameDto, GeneratePasswordDto, GetOperatorDto, CreateOperatorDto } from "./dto/operator.dto"
+import { Roles } from "../common/decorators/role.decorator";
+import { Role } from "../common/enums/role.enum";
 
 
 
-@Controller('operator')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
+@Controller('operator')
+@Roles(Role.ADMIN)
 export class OperatorController {
     constructor(private readonly operatorServcice: OperatorService) {}
 

@@ -7,6 +7,9 @@ import { GameIntegrationModule } from './game-integration/game-integration.modul
 import { AuthModule } from './auth/auth.module';
 import { GameConfigModule } from './game-config/game-config.module';
 import { GameConfigSchemaModule } from './game-config-schema/game-config-schema.module';
+import { RolesGuard } from './common/guards/role.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
 
 @Module({
@@ -32,6 +35,16 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
     GameIntegrationModule,
     GameConfigModule,
     GameConfigSchemaModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

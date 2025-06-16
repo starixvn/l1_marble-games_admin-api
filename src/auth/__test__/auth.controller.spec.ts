@@ -3,7 +3,7 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthDto, AuthResponseDto, AccountResponseDto, CreateAccountDto } from '../dto/auth.dto';
-import { Role } from '../schema/account.schema';
+import { Role } from '../../common/enums/role.enum';
 
 describe('AuthController', () => {
   let controller: AuthController;
