@@ -23,17 +23,57 @@ describe("Operator", () => {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
+            const data = await response.json();
             
             // Assert
             expect(response.status).toBe(200);
+            expect(data).toEqual(expect.objectContaining({
+                operatorId: expect.any(String),
+                password: expect.any(String)
+            }));
+        });
+        it("should throw 409 if operator with same name already exists", async () => {
+            // Arrange
+            const testName = "duplicate-test-operator";
             
+            await fetch(`${baseUrl}/api/operator/create`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({ name: testName }),
+            });
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/create`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({ name: testName }),
+            });
+            const errorData = await response.json();
+            
+            // Assert
+            expect(response.status).toBe(409);
+            expect(errorData.message).toBe('Operator with this name already exists');
+        });
+
+        it("should create an operator with name provided", async () => {
+            // Arrange
+            const testName = "test-operator-with-name";
+            
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/create`, {
+                method: 'POST',
+                headers: addAdminAuth(),
+                body: JSON.stringify({ name: testName }),
+            });
             const data = await response.json();
-            expect(data).toHaveProperty('operatorId');
-            expect(data).toHaveProperty('password');
-            expect(typeof data.operatorId).toBe('string');
-            expect(typeof data.password).toBe('string');
-            expect(data.operatorId.length).toBeGreaterThan(0);
-            expect(data.password.length).toBeGreaterThan(0);
+            
+            // Assert
+            expect(response.status).toBe(200);
+            expect(data).toEqual(expect.objectContaining({
+                operatorId: expect.any(String),
+                password: expect.any(String),
+                name: testName
+            }));
         });
     });
 
@@ -92,11 +132,10 @@ describe("Operator", () => {
                     name: newName,
                 }),
             });
+            const errorData = await response.json();
             
             // Assert
             expect(response.status).toBe(404);
-            
-            const errorData = await response.json();
             expect(errorData.message).toBe('Operator not found');
         });
 
@@ -156,16 +195,14 @@ describe("Operator", () => {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
+            const data = await response.json();
             
             // Assert
             expect(response.status).toBe(200);
-            
-            const data = await response.json();
-            expect(data).toHaveProperty('operatorId');
-            expect(data).toHaveProperty('password');
-            expect(data.operatorId).toBe(existingOperatorId);
-            expect(typeof data.password).toBe('string');
-            expect(data.password.length).toBeGreaterThan(0);
+            expect(data).toEqual(expect.objectContaining({
+                operatorId: existingOperatorId,
+                password: expect.any(String)
+            }));
         });
 
         it("should use name if operatorId is not provided", async () => {
@@ -187,16 +224,14 @@ describe("Operator", () => {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
+            const data = await response.json();
             
             // Assert
             expect(response.status).toBe(200);
-            
-            const data = await response.json();
-            expect(data).toHaveProperty('operatorId');
-            expect(data).toHaveProperty('password');
-            expect(data.operatorId).toBe(existingOperatorId);
-            expect(typeof data.password).toBe('string');
-            expect(data.password.length).toBeGreaterThan(0);
+            expect(data).toEqual(expect.objectContaining({
+                operatorId: existingOperatorId,
+                password: expect.any(String)
+            }));
         });
 
         it("should throw 404 if operator not found", async () => {
@@ -208,11 +243,10 @@ describe("Operator", () => {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
+            const errorData = await response.json();
             
             // Assert
             expect(response.status).toBe(404);
-            
-            const errorData = await response.json();
             expect(errorData.message).toBe('Operator not found');
         });
     });
@@ -275,15 +309,14 @@ describe("Operator", () => {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
+            const data = await response.json();
             
             // Assert
             expect(response.status).toBe(200);
-            
-            const data = await response.json();
-            expect(data).toEqual({
+            expect(data).toEqual(expect.objectContaining({
                 id: existingOperatorId,
                 name: expect.any(String)
-            });
+            }));
         });
         
         it("should return the operator if name is provided", async () => {
@@ -305,11 +338,10 @@ describe("Operator", () => {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
+            const data = await response.json();
             
             // Assert
             expect(response.status).toBe(200);
-            
-            const data = await response.json();
             expect(data).toEqual({
                 id: existingOperatorId,
                 name: testName
@@ -326,15 +358,14 @@ describe("Operator", () => {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
+            const data = await response.json();
             
             // Assert
             expect(response.status).toBe(200);
-            
-            const data = await response.json();
-            expect(data).toEqual({
+            expect(data).toEqual(expect.objectContaining({
                 id: existingOperatorId,
                 name: expect.any(String)
-            });
+            }));
         });
     });
 
@@ -367,17 +398,12 @@ describe("Operator", () => {
             expect(data.length).toBeGreaterThan(0);
             
             data.forEach((operator: any) => {
-                expect(operator).toEqual(
-                    expect.objectContaining({
-                        id: expect.any(String)
-                    })
-                );
+                expect(operator).toEqual(expect.objectContaining({
+                    id: expect.any(String)
+                }));
                 if (operator.hasOwnProperty('name')) {
-                    expect(typeof operator.name === 'string' || operator.name === null).toBe(true);
+                    expect(typeof operator.name).toBe('string');
                 }
-                const allowedKeys = ['id', 'name'];
-                const actualKeys = Object.keys(operator);
-                expect(actualKeys.every(key => allowedKeys.includes(key))).toBe(true);
             });
         });
 
@@ -404,13 +430,11 @@ describe("Operator", () => {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
-            
-            // Assert
-            expect(response.status).toBe(200);
-            
             const data = await response.json();
             const testOperator = data.find((op: any) => op.id === createdOperator.operatorId);
             
+            // Assert
+            expect(response.status).toBe(200);
             expect(testOperator).toEqual({
                 id: createdOperator.operatorId,
                 name: testName

@@ -25,11 +25,7 @@ describe('OperatorController', () => {
     service = module.get<OperatorService>(OperatorService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
-  describe('generateOperator', () => {
+  describe('createOperator', () => {
     it('should call createOperator method from service', async () => {
       // Arrange
       const result: OperatorCreateResponse = { 
@@ -43,6 +39,25 @@ describe('OperatorController', () => {
 
       // Assert
       expect(service.createOperator).toHaveBeenCalled();
+      expect(response).toEqual(result);
+    });
+
+    it('should call createOperator method from service with name parameter', async () => {
+      // Arrange
+      const createOperatorDto = {
+        name: 'test-operator'
+      };
+      const result: OperatorCreateResponse = { 
+        operatorId: 'op-123', 
+        password: 'secret-123' 
+      };
+      jest.spyOn(service, 'createOperator').mockResolvedValue(result);
+
+      // Act
+      const response = await controller.createOperator(createOperatorDto);
+
+      // Assert
+      expect(service.createOperator).toHaveBeenCalledWith(createOperatorDto);
       expect(response).toEqual(result);
     });
   });

@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs
 import { OperatorService, } from "./operator.service";
 import { ApiBearerAuth, ApiBody, ApiOperation } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwt.auth.guard";
-import { UpdateNameDto, GeneratePasswordDto, GetOperatorDto } from "./dto/operator.dto"
+import { UpdateNameDto, GeneratePasswordDto, GetOperatorDto, CreateOperatorDto } from "./dto/operator.dto"
 
 
 
@@ -18,8 +18,8 @@ export class OperatorController {
     })
     @HttpCode(200)
     @Post('create')
-    async createOperator() {
-      return await this.operatorServcice.createOperator();
+    async createOperator(@Body() body?: CreateOperatorDto) {
+      return await this.operatorServcice.createOperator(body);
     }
 
     @ApiOperation({

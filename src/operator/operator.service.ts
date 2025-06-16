@@ -27,6 +27,7 @@ export type GetOperatorArgs = {
 export type OperatorCreateResponse = {
   operatorId: string;
   password: string;
+  name?: string;
 };
 
 export type GeneratePasswordArgs = {
@@ -44,6 +45,14 @@ export class OperatorService {
   async createOperator(
     options?: OperatorCreateOptions,
   ): Promise<OperatorCreateResponse> {
+
+    if (options?.name) {
+      const existingOperator = await this.operatorModel.findOne({ name: options.name }).select('-password -__v');
+      if (existingOperator) {
+        throw new ConflictException('Operator with this name already exists');
+      }
+    }
+
     const password = generateRandomPassword();
     const hashedPassword = await hash(password, SALT_ROUND);
 
@@ -57,6 +66,7 @@ export class OperatorService {
     return {
       operatorId: (newOperator._id as unknown as string).toString(),
       password: password,
+      name: options?.name,
     };
   }
 

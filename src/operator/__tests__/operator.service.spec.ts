@@ -80,6 +80,61 @@ describe('OperatorService', () => {
       expect(result).toEqual({
         operatorId: 'test-id',
         password: 'random-password',
+        name: 'new-operator',
+      });
+    });
+
+    it('should throw ConflictException when creating operator with existing name', async () => {
+      // Arrange
+      const existingOperator = {
+        _id: 'existing-id',
+        name: 'existing-operator',
+      };
+      
+      mockOperatorModel.findOne.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(existingOperator),
+      }));
+
+      mockOperatorModel.prototype.save = jest.fn();
+
+      // Act
+      const createOperatorPromise = service.createOperator({ name: 'existing-operator' });
+
+      // Assert
+      await expect(createOperatorPromise).rejects.toThrow(ConflictException);
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'existing-operator' });
+      expect(mockOperatorModel.prototype.save).not.toHaveBeenCalled();
+    });
+
+    it('should create operator without name when name is not provided', async () => {
+      // Arrange
+      const mockSavedOperator = {
+        _id: 'test-id',
+        toString: () => 'test-id',
+      };
+      
+      mockOperatorModel.findOne.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(null),
+      }));
+
+      mockOperatorModel.prototype.save = jest.fn().mockImplementation(() => {
+        return Promise.resolve({
+          _id: mockSavedOperator,
+          password: 'hashed-password',
+          name: undefined
+        });
+      });
+
+      // Act
+      const result = await service.createOperator();
+
+      // Assert
+      expect(generateRandomPasswordSpy).toHaveBeenCalled();
+      expect(bcryptHashSpy).toHaveBeenCalledWith('random-password', 10);
+      expect(result).toEqual({
+        operatorId: 'test-id',
+        password: 'random-password',
+        name: undefined,
       });
     });
   });
