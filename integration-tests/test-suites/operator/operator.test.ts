@@ -1,9 +1,12 @@
 import { addAdminAuth } from '../../utils/auth';
+import { Role } from '../../../src/common/enums/role.enum';
 
 describe("Operator", () => {
     const baseUrl = global.__API_SERVICE__.getBaseUrl();
     
     describe("Create", () => {
+
+
         it("should return 401 if not authenticated", async () => {
             // Act
             const response = await fetch(`${baseUrl}/api/operator/create`, {
@@ -15,6 +18,51 @@ describe("Operator", () => {
 
             // Assert
             expect(response.status).toBe(401);
+        });
+
+        describe("Use developer account", () => {
+          it("should return 403", async () => {
+            // Arrange
+            const credentials = global.__ADMIN_CREDENTIALS__;
+            const createAccountData = {
+              username: `dev_${Date.now()}`,
+              role: Role.DEVELOPER
+            };
+
+            const createResponse = await fetch(`${baseUrl}/api/auth/createAccount`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${credentials?.access_token}`
+              },
+              body: JSON.stringify(createAccountData),
+            });
+            const devAccount = await createResponse.json();
+
+            const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                username: devAccount.username,
+                password: devAccount.password
+              }),
+            });
+            const loginData = await loginResponse.json();
+
+            // Act
+            const response = await fetch(`${baseUrl}/api/operator/create`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${loginData.access_token}`
+              },
+            });
+            
+            // Assert
+            expect(response.status).toBe(403);
+          });
         });
       
         it("should create an operator", async () => {

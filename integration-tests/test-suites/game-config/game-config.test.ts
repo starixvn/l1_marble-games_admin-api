@@ -1,4 +1,5 @@
 import { addAdminAuth } from '../../utils/auth';
+import { Role } from '../../../src/common/enums/role.enum';
 
 describe("Game Config", () => {
   const baseUrl = global.__API_SERVICE__.getBaseUrl();
@@ -22,6 +23,52 @@ describe("Game Config", () => {
 
         // Assert
         expect(response.status).toBe(401);
+      });
+    });
+
+    describe("developer account", () => {
+      it("should return 403", async () => {
+        // Arrange
+        const credentials = global.__ADMIN_CREDENTIALS__;
+        const createAccountData = {
+          username: `dev_${Date.now()}`,
+          role: Role.DEVELOPER
+        };
+
+        const createResponse = await fetch(`${baseUrl}/api/auth/createAccount`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${credentials?.access_token}`
+          },
+          body: JSON.stringify(createAccountData),
+        });
+        const devAccount = await createResponse.json();
+
+        const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: devAccount.username,
+            password: devAccount.password
+          }),
+        });
+        const loginData = await loginResponse.json();
+
+        // Act
+        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=123&schemaId=507f1f77bcf86cd799439001`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${loginData.access_token}`
+          },
+          body: JSON.stringify({ level: 5 }),
+        });
+        
+        // Assert
+        expect(response.status).toBe(403);
       });
     });
 
