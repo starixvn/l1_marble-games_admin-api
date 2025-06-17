@@ -16,7 +16,16 @@ export class HealthcheckService {
 
   async healthCheck() {
     try {
-      await this.mongoConnection.db?.admin().ping()
+      if (this.mongoConnection.readyState !== 1) {
+        throw new ServiceUnavailableException({
+          message: `API is running but database is unavailable, ${process.env.ENVIRONMENT} environment`,
+          timestamp: new Date().toISOString(),
+          database: {
+            error: 'DB not ready',
+            state: this.getReadyStateText(this.mongoConnection.readyState)
+          }
+        });
+      }
 
       return {
         messge: `API is running in ${process.env.ENVIRONMENT} environment`,
@@ -27,7 +36,7 @@ export class HealthcheckService {
         message: `API is running but database is unavailable, ${process.env.ENVIRONMENT} environment`,
         timestamp: new Date().toISOString(),
         database: {
-          error: 'DB down',
+          error: 'DB not ready',
           state: this.getReadyStateText(this.mongoConnection.readyState)
         }
       });

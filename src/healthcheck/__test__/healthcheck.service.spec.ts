@@ -6,9 +6,6 @@ import { getConnectionToken } from '@nestjs/mongoose';
 describe('HealthcheckService', () => {
   let service: HealthcheckService;
   let mongoConnection: {
-    db: {
-      admin: jest.Mock;
-    };
     readyState: number;
   };
 
@@ -19,9 +16,6 @@ describe('HealthcheckService', () => {
         {
           provide: getConnectionToken(),
           useValue: {
-            db: {
-              admin: jest.fn(),
-            },
             readyState: 1,
           },
         },
@@ -37,10 +31,8 @@ describe('HealthcheckService', () => {
   });
 
   describe('healthCheck', () => {
-    it('should return health status when database is connected', async () => {
+    it('should return health status only when database is fully connected', async () => {
       // arrange
-      const mockPing = jest.fn().mockResolvedValue({});
-      mongoConnection.db.admin = jest.fn().mockReturnValue({ ping: mockPing });
       process.env.ENVIRONMENT = 'test';
       const expectedResponse = {
         messge: 'API is running in test environment',
@@ -52,20 +44,17 @@ describe('HealthcheckService', () => {
 
       // assert
       expect(result).toEqual(expectedResponse);
-      expect(mockPing).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw ServiceUnavailableException when database ping fails', async () => {
+    it('should throw ServiceUnavailableException when database is disconnected', async () => {
       // arrange
-      const mockPing = jest.fn().mockRejectedValue(new Error('Connection failed'));
-      mongoConnection.db.admin = jest.fn().mockReturnValue({ ping: mockPing });
       process.env.ENVIRONMENT = 'test';
       mongoConnection.readyState = 0;
       const expectedError = {
         message: 'API is running but database is unavailable, test environment',
         timestamp: expect.any(String),
         database: {
-          error: 'DB down',
+          error: 'DB not ready',
           state: 'disconnected',
         },
       };
@@ -78,21 +67,18 @@ describe('HealthcheckService', () => {
       await expect(result).rejects.toMatchObject({
         response: expectedError
       });
-      expect(mockPing).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle unknown database state', async () => {
+    it('should throw ServiceUnavailableException when database is connecting', async () => {
       // arrange
-      const mockPing = jest.fn().mockRejectedValue(new Error('Connection failed'));
-      mongoConnection.db.admin = jest.fn().mockReturnValue({ ping: mockPing });
       process.env.ENVIRONMENT = 'test';
-      mongoConnection.readyState = 999;
+      mongoConnection.readyState = 2;
       const expectedError = {
         message: 'API is running but database is unavailable, test environment',
         timestamp: expect.any(String),
         database: {
-          error: 'DB down',
-          state: 'unknown',
+          error: 'DB not ready',
+          state: 'connecting',
         },
       };
 
@@ -104,7 +90,29 @@ describe('HealthcheckService', () => {
       await expect(result).rejects.toMatchObject({
         response: expectedError
       });
-      expect(mockPing).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw ServiceUnavailableException when database is disconnecting', async () => {
+      // arrange
+      process.env.ENVIRONMENT = 'test';
+      mongoConnection.readyState = 3;
+      const expectedError = {
+        message: 'API is running but database is unavailable, test environment',
+        timestamp: expect.any(String),
+        database: {
+          error: 'DB not ready',
+          state: 'disconnecting',
+        },
+      };
+
+      // act
+      const result = service.healthCheck();
+
+      // assert
+      await expect(result).rejects.toThrow(ServiceUnavailableException);
+      await expect(result).rejects.toMatchObject({
+        response: expectedError
+      });
     });
   });
 });
