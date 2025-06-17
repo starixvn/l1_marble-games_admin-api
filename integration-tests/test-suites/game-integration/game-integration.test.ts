@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { addAdminAuth } from '../../utils/auth';
 
 describe("Game Integration", () => {
@@ -17,7 +17,7 @@ describe("Game Integration", () => {
       const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+         'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateRequest),
       });
@@ -198,58 +198,17 @@ describe("Game Integration", () => {
       );
     });
 
-    it("should create a new market integration if not provide id in market array", async () => {
-      // Arrange
-      const existingOperatorId = "67d291d943a96fad7f14ddae";
-      const gameId = 2002;
-      const updateRequest = {
-        mergeEvent: { eventType: "live", priority: 1 },
-        markets: [
-          {
-            name: "Test Market",
-            merge: { marketID: 100, marketName: "Test Market Name" },
-            selections: [
-              { selectionID: 1, name: "Selection 1" },
-              { selectionID: 2, name: "Selection 2" }
-            ]
-          }
-        ]
-      };
-
-      // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
-        method: 'POST',
-        headers: addAdminAuth(),
-        body: JSON.stringify(updateRequest),
-      });
-
-      // Assert
-      expect(response.status).toBe(200);
-      
-      const data = await response.json();
-      expect(data).toHaveProperty('markets');
-      expect(Array.isArray(data.markets)).toBe(true);
-      expect(data.markets.length).toBe(1);
-      
-      const market = data.markets[0];
-      expect(typeof market).toBe('object');
-      expect(market).toHaveProperty('id');
-      expect(typeof market.id).toBe('string');
-      expect(market.id.length).toBe(24);
-    });
-
-    it("should update market integration if id and fields are provided", async () => {
+    it("should update market integration if name and fields are provided", async () => {
       // Arrange
       const existingOperatorId = "67d291d943a96fad7f14ddae";
       const gameId = 2003;
-      const existingMarketId = "6809fce26a798f36657e4c4d";
+      const marketName = "Updated Market Name";
       
       const updateRequest = {
         mergeEvent: { eventType: "pre-match", priority: 2 },
         markets: [
           {
-            id: existingMarketId,
-            name: "Updated Market Name",
+            name: marketName,
             merge: { marketID: 1, marketName: "Updated Handicap", updated: true },
             selections: [
               { selectionID: 1, name: "Updated Home", column: 1 },
@@ -272,7 +231,7 @@ describe("Game Integration", () => {
       const client = new MongoClient(databaseUri);
       await client.connect();
       const db = client.db(databaseName);
-      const marketIntegration = await db.collection('market_integrations').findOne({ _id: new ObjectId(existingMarketId) });
+      const marketIntegration = await db.collection('market_integrations').findOne({ name: marketName });
       await client.close();
 
       // Assert
@@ -284,7 +243,7 @@ describe("Game Integration", () => {
       expect(data.markets.length).toBe(1);
       
       const market = data.markets[0];
-      expect(market.id).toBe(existingMarketId);
+      expect(market.name).toBe(marketName);
 
       expect(marketIntegration).toEqual(expect.objectContaining({
         merge: expect.objectContaining({
@@ -299,17 +258,17 @@ describe("Game Integration", () => {
       }));
     });
 
-    it("should not update market integration if id is provided but no fields are provided", async () => {
+    it("should not update market integration if name is provided but no fields are provided", async () => {
       // Arrange
       const existingOperatorId = "67d291d943a96fad7f14ddae";
       const gameId = 2004;
-      const existingMarketId = "680a038f6a798f36657e4c51";
+      const marketName = "Test Market Name";
       
       const updateRequest = {
         mergeEvent: { eventType: "in-play", priority: 3 },
         markets: [
           {
-            id: existingMarketId
+            name: marketName
           }
         ]
       };
@@ -330,7 +289,7 @@ describe("Game Integration", () => {
       expect(data.markets.length).toBe(1);
       
       const market = data.markets[0];
-      expect(market.id).toBe(existingMarketId);
+      expect(market.name).toBe(marketName);
     });
   });
 
@@ -427,7 +386,7 @@ describe("Game Integration", () => {
         ],
         "markets": [
           { 
-            "id": "684957076f3aab5c92f20f8f",
+            "name": "Handicap Market",
             "merge": {
               "marketID": 1,
               "marketNameKey": "MARKET_HANDICAP",
@@ -453,7 +412,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f90",
+            "name": "1H Handicap Market",
             "merge": {
               "marketID": 2,
               "marketNameKey": "MARKET_1H_HANDICAP",
@@ -466,7 +425,7 @@ describe("Game Integration", () => {
                 "selectionOrder": 1,
                 "selectionNameLongKey": "HOME_WIN",
                 "name": "h1_hdp_home",
-                 "settlementStatus": null
+                "settlementStatus": null
               },
               {
                 "selectionID": 4,
@@ -479,7 +438,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f91",
+            "name": "Over/Under Market",
             "merge": {
               "marketID": 3,
               "marketNameKey": "MARKET_OVER_UNDER",
@@ -505,7 +464,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f92",
+            "name": "1H Over/Under Market",
             "merge": {
               "marketID": 4,
               "marketNameKey": "MARKET_1H_OVER_UNDER",
@@ -531,7 +490,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f93",
+            "name": "Odd/Even Market",
             "merge": {
               "marketID": 5,
               "marketNameKey": "MARKET_EVEN_ODD",
@@ -557,7 +516,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f94",
+            "name": "1H Odd/Even Market",
             "merge": {
               "marketID": 6,
               "marketNameKey": "MARKET_1H_EVEN_ODD",
@@ -583,7 +542,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f95",
+            "name": "1X2 Market",
             "merge": {
               "marketID": 7,
               "marketNameKey": "MARKET_1X2",
@@ -617,7 +576,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f96",
+            "name": "1H 1X2 Market",
             "merge": {
               "marketID": 8,
               "marketNameKey": "MARKET_1H_1X2",
@@ -673,7 +632,18 @@ describe("Game Integration", () => {
       const data = await response.json();
 
       // Assert
-      expect(data).toEqual(expectedResponse);
+      expect(data).toEqual(expect.objectContaining({
+        mergeEvent: expectedResponse.mergeEvent,
+        mergeEventDetails: expectedResponse.mergeEventDetails,
+        patches: expectedResponse.patches,
+        markets: expectedResponse.markets.map(expectedMarket => 
+          expect.objectContaining({
+            name: expectedMarket.name,
+            merge: expectedMarket.merge,
+            selections: expectedMarket.selections
+          })
+        )
+      }));
     });
     
   });

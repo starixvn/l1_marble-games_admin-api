@@ -2,15 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsOptional, IsArray, IsObject, IsString } from "class-validator";
 
 export class MarketIntegrationUpdateRequestDto {
-  @ApiProperty({
-    description: 'Object id of the market integration object',
-    required: false,
-    example: "6809fce26a798f36657e4c4d",
-    type: String
-  })
-  @IsOptional()
-  @IsString()
-  id?: string;
 
   @ApiProperty({
     description: 'Merge configuration object',
@@ -131,6 +122,7 @@ export class GameIntegrationUpdateRequestDto {
     type: MarketIntegrationUpdateRequestDto,
     example: [
       {
+        "name": "MARKET_HANDICAP",
         "merge": {
           "marketID": 1,
           "marketNameKey": "MARKET_HANDICAP",
@@ -153,6 +145,7 @@ export class GameIntegrationUpdateRequestDto {
           }
         ]
       },{
+        "name" : "MARKET_1H_HANDICAP",
         "merge": {
           "marketID": 2,
           "marketNameKey": "MARKET_1H_HANDICAP",
@@ -175,6 +168,7 @@ export class GameIntegrationUpdateRequestDto {
           }
         ]
       },{
+        "name" : "MARKET_OVER_UNDER",
         "merge": {
           "marketID": 3,
           "marketNameKey": "MARKET_OVER_UNDER",
@@ -197,6 +191,7 @@ export class GameIntegrationUpdateRequestDto {
           }
         ]
       },{
+        "name" : "MARKET_1H_OVER_UNDER",
         "merge": {
           "marketID": 4,
           "marketNameKey": "MARKET_1H_OVER_UNDER",
@@ -220,6 +215,7 @@ export class GameIntegrationUpdateRequestDto {
         ]
       },
       {
+        "name" : "MARKET_EVEN_ODD",
        "merge": {
           "marketID": 5,
           "marketNameKey": "MARKET_EVEN_ODD",
@@ -243,6 +239,7 @@ export class GameIntegrationUpdateRequestDto {
         ] 
       },
       {
+        "name" : "MARKET_1H_EVEN_ODD",
         "merge": {
           "marketID": 6,
           "marketNameKey": "MARKET_1H_EVEN_ODD",
@@ -266,6 +263,7 @@ export class GameIntegrationUpdateRequestDto {
         ]
       },
       {
+        "name" : "MARKET_1X2",
         "merge": {
           "marketID": 7,
           "marketNameKey": "MARKET_1X2",
@@ -296,6 +294,7 @@ export class GameIntegrationUpdateRequestDto {
         ]
       },
       {
+        "name" : "MARKET_1H_1X2",
         "merge": {
           "marketID": 8,
           "marketNameKey": "MARKET_1H_1X2",

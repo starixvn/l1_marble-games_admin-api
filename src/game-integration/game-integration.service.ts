@@ -1,13 +1,13 @@
 import {
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   GameIntegration,
   GameIntegrationDocument,
 } from './schema/game-integration.schema';
-import mongoose, { Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   GameIntegrationUpdateRequestDto,
@@ -66,16 +66,12 @@ export class GameIntegrationService {
 
     const gameIntegration = await this.gameIntegrationModel
       .findOne({ operatorId, gameId: query.gameId })
-      .select('-_id -__v -gameId -operatorId')
+      .select('-__v -gameId -operatorId')
       .populate({
         path: 'markets',
         select: '-__v',
         transform: (doc) => {
-          const { _id, ...rest } = doc;
-          return {
-            id: _id,
-            ...rest,
-          };
+          return doc;
         },
       })
       .lean();
@@ -141,59 +137,32 @@ export class GameIntegrationService {
   private async processMarketIntegration(
     marketIntegration: MarketIntegrationUpdateRequestDto,
   ) {
-    if (!marketIntegration.id) {
-      return this.createMarketIntegration(marketIntegration);
-    }
-
     return this.updateMarketIntegration(marketIntegration);
-  }
-
-  private async createMarketIntegration(
-    marketIntegration: MarketIntegrationUpdateRequestDto,
-  ) {
-    const newMarketIntegration = await this.marketIntegrationModel.create({
-      selections: marketIntegration.selections ?? [],
-      merge: marketIntegration.merge ?? {},
-      name: marketIntegration.name ?? '',
-    });
-
-    if (!newMarketIntegration) {
-      throw new InternalServerErrorException(
-        'Failed to create market integration',
-      );
-    }
-
-    return newMarketIntegration._id;
   }
 
   private async updateMarketIntegration(
     marketIntegration: MarketIntegrationUpdateRequestDto,
   ) {
-    if (!marketIntegration.id) {
-      throw new Error('Market integration id is required for this function');
+    const merge = marketIntegration.merge ?? {};
+    const selections = marketIntegration.selections ?? [];
+
+    const existingMarketIntegration = 
+      await this.marketIntegrationModel
+        .findOneAndUpdate(
+          { name: marketIntegration.name },
+          { 
+            $set: {
+              merge,
+              selections,
+            },
+          },
+          { new: true, upsert: true },
+        );
+
+    if (!existingMarketIntegration) {
+      throw new InternalServerErrorException('Failed to create or update market integration');
     }
 
-    if (
-      !marketIntegration.merge &&
-      !marketIntegration.selections &&
-      !marketIntegration.name
-    ) {
-      return mongoose.Types.ObjectId.createFromHexString(marketIntegration.id);
-    }
-
-    const updatedMarketIntegration =
-      await this.marketIntegrationModel.findOneAndUpdate(
-        { _id: marketIntegration.id },
-        { $set: marketIntegration },
-        { new: true, upsert: true },
-      );
-
-    if (!updatedMarketIntegration) {
-      throw new InternalServerErrorException(
-        'Failed to update market integration',
-      );
-    }
-
-    return updatedMarketIntegration._id;
+    return existingMarketIntegration._id;
   }
 }

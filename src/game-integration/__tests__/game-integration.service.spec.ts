@@ -172,7 +172,7 @@ describe('GameIntegrationService', () => {
         };
 
         setupOperatorMock(mockOperator);
-        mockMarketIntegrationModel.create.mockResolvedValue(
+        mockMarketIntegrationModel.findOneAndUpdate.mockResolvedValue(
           mockCreatedMarketIntegration,
         );
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
@@ -185,11 +185,16 @@ describe('GameIntegrationService', () => {
         );
 
         // Assert
-        expect(mockMarketIntegrationModel.create).toHaveBeenCalledWith({
-          selections: ['Selection 1', 'Selection 2'],
-          merge: { key: 'value' },
-          name: 'Test Market',
-        });
+        expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+          { name: 'Test Market' },
+          { 
+            $set: {
+              merge: { key: 'value' },
+              selections: ['Selection 1', 'Selection 2'],
+            },
+          },
+          { new: true, upsert: true },
+        );
         expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
           { operatorId: mockOperatorId, gameId: 1001 },
           {
@@ -205,7 +210,7 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
-      it('should update existing market integration when id is provided', async () => {
+      it('should update existing market integration when name is provided', async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -215,7 +220,6 @@ describe('GameIntegrationService', () => {
           mergeEvent: { eventType: 'match' },
           markets: [
             {
-              id: mockMarketIntegrationId.toString(),
               name: 'Updated Market',
               selections: ['Updated Selection'],
               merge: { updated: true },
@@ -254,8 +258,13 @@ describe('GameIntegrationService', () => {
         expect(
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
-          { _id: mockMarketIntegrationId.toString() },
-          { $set: updateRequest.markets![0] },
+          { name: 'Updated Market' },
+          { 
+            $set: {
+              merge: { updated: true },
+              selections: ['Updated Selection'],
+            },
+          },
           { new: true, upsert: true },
         );
         expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
@@ -406,17 +415,22 @@ describe('GameIntegrationService', () => {
         const mockOperator = { _id: mockOperatorId };
 
         setupOperatorMock(mockOperator);
-        mockMarketIntegrationModel.create.mockResolvedValue(null);
+        mockMarketIntegrationModel.findOneAndUpdate.mockResolvedValue(null);
 
         // Act & Assert
         await expect(
           service.upsertGameIntegration(query, updateRequest),
         ).rejects.toThrow(InternalServerErrorException);
-        expect(mockMarketIntegrationModel.create).toHaveBeenCalledWith({
-          selections: ['Selection 1'],
-          merge: { key: 'value' },
-          name: 'Test Market',
-        });
+        expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+          { name: 'Test Market' },
+          { 
+            $set: {
+              merge: { key: 'value' },
+              selections: ['Selection 1'],
+            },
+          },
+          { new: true, upsert: true },
+        );
       });
     });
 
@@ -431,8 +445,9 @@ describe('GameIntegrationService', () => {
           mergeEvent: { eventType: 'match' },
           markets: [
             {
-              id: mockMarketIntegrationId.toString(),
               name: 'Updated Market',
+              selections: ['Updated Selection'],
+              merge: { updated: true },
             },
           ],
         };
@@ -448,8 +463,13 @@ describe('GameIntegrationService', () => {
         expect(
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
-          { _id: mockMarketIntegrationId.toString() },
-          { $set: updateRequest.markets![0] },
+          { name: 'Updated Market' },
+          { 
+            $set: {
+              merge: { updated: true },
+              selections: ['Updated Selection'],
+            },
+          },
           { new: true, upsert: true },
         );
       });
@@ -717,7 +737,7 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockSelect).toHaveBeenCalledWith(
-          '-_id -__v -gameId -operatorId',
+          '-__v -gameId -operatorId',
         );
         expect(mockPopulate).toHaveBeenCalledWith({
           path: 'markets',
@@ -758,7 +778,6 @@ describe('GameIntegrationService', () => {
         // Act
         await service.getGameIntegration(query);
         const mockDoc = {
-          _id: mockMarketIntegrationId,
           name: 'Test Market',
           selections: ['Selection 1'],
         };
@@ -766,7 +785,6 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(transformedDoc).toEqual({
-          id: mockMarketIntegrationId,
           name: 'Test Market',
           selections: ['Selection 1'],
         });
