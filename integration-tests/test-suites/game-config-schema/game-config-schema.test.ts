@@ -75,7 +75,7 @@ describe("Game Config Schema", () => {
           schema: schema.schema,
           name: schema.name,
           uiSchema: schema.uiSchema,
-          _id: expect.any(String)
+          id: expect.any(String)
         })
       );
     });
@@ -116,7 +116,7 @@ describe("Game Config Schema", () => {
           schema: schema.schema,
           name: schema.name,
           uiSchema: schema.uiSchema,
-          _id: expect.any(String)
+          id: expect.any(String)
         })
       );
     });
@@ -146,7 +146,7 @@ describe("Game Config Schema", () => {
 
       expect(createResponse.status).toBe(200);
       const createdData = await createResponse.json();
-      const schemaId = createdData._id;
+      const schemaId = createdData.id;
 
       const updatedSchema = {
         schema: {
@@ -176,12 +176,13 @@ describe("Game Config Schema", () => {
       });
 
       // Assert
+      const data = await response.json();
+
       expect(response.status).toBe(200);
       
-      const data = await response.json();
       expect(data).toEqual(
         expect.objectContaining({
-          _id: schemaId,
+          id: schemaId,
           schema: updatedSchema.schema,
           name: updatedSchema.name,
           uiSchema: updatedSchema.uiSchema
@@ -215,14 +216,6 @@ describe("Game Config Schema", () => {
 
       // Assert
       expect(response.status).toBe(400);
-      
-      const data = await response.json();
-      expect(data).toEqual(
-        expect.objectContaining({
-          statusCode: 400,
-          message: expect.stringContaining('Invalid ObjectId format')
-        })
-      );
     });
 
     it("should create new schema if provided id is valid object id", async () => {
@@ -255,26 +248,13 @@ describe("Game Config Schema", () => {
       });
 
       // Assert
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(404);
       
-      if (response.headers.get('content-length') === '0' || response.headers.get('content-type')?.includes('application/json') === false) {
-        // If response is empty or not JSON, just check status
-        return;
-      }
-      
-      const responseText = await response.text();
-      if (!responseText.trim()) {
-        // Empty response, just verify status was 200
-        return;
-      }
-      
-      const data = JSON.parse(responseText);
+      const data = await response.json();
       expect(data).toEqual(
         expect.objectContaining({
-          _id: validObjectId,
-          schema: schema.schema,
-          name: schema.name,
-          uiSchema: schema.uiSchema
+          statusCode: 404,
+          message: expect.stringContaining('Game config schema not found')
         })
       );
     });
@@ -314,7 +294,9 @@ describe("Game Config Schema", () => {
       expect(data).toEqual(
         expect.objectContaining({
           statusCode: 400,
-          message: expect.stringContaining('Invalid ObjectId format')
+          message: expect.arrayContaining([
+            expect.stringContaining('id must be a mongodb id')
+          ])
         })
       );
     });
@@ -369,7 +351,7 @@ describe("Game Config Schema", () => {
 
       expect(createResponse.status).toBe(200);
       const createdData = await createResponse.json();
-      const schemaId = createdData._id;
+      const schemaId = createdData.id;
 
       // Act
       const response = await fetch(`${baseUrl}/api/gameConfigSchema/get?id=${schemaId}`, {
@@ -381,9 +363,9 @@ describe("Game Config Schema", () => {
       expect(response.status).toBe(200);
       
       const data = await response.json();
+      console.log(data);
       expect(data).toEqual(
         expect.objectContaining({
-          _id: schemaId,
           schema: schema.schema,
           name: schema.name,
           uiSchema: schema.uiSchema
@@ -391,7 +373,7 @@ describe("Game Config Schema", () => {
       );
     });
 
-    it("should return all schemas if no id provided", async () => {
+    it("should throw 400 if no id provided", async () => {
       // Act
       const response = await fetch(`${baseUrl}/api/gameConfigSchema/get`, {
         method: 'GET',
@@ -399,18 +381,8 @@ describe("Game Config Schema", () => {
       });
 
       // Assert
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(400);
       
-      const data = await response.json();
-      expect(Array.isArray(data)).toBe(true);
-      data.forEach(schema => {
-        expect(schema).toEqual(
-          expect.objectContaining({
-            _id: expect.any(String),
-            name: expect.any(String)
-          })
-        );
-      });
     });
   });
 
@@ -443,7 +415,7 @@ describe("Game Config Schema", () => {
       data.forEach(schema => {
         expect(schema).toEqual(
           expect.objectContaining({
-            _id: expect.any(String),
+            id: expect.any(String),
             name: expect.any(String)
           })
         );

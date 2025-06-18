@@ -66,10 +66,10 @@ export class GameIntegrationService {
 
     const gameIntegration = await this.gameIntegrationModel
       .findOne({ operatorId, gameId: query.gameId })
-      .select('-__v -gameId -operatorId')
+      .select('-_id -__v -gameId -operatorId')
       .populate({
         path: 'markets',
-        select: '-__v',
+        select: '-_id -__v',
         transform: (doc) => {
           return doc;
         },

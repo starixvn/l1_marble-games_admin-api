@@ -737,11 +737,11 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockSelect).toHaveBeenCalledWith(
-          '-__v -gameId -operatorId',
+          '-_id -__v -gameId -operatorId',
         );
         expect(mockPopulate).toHaveBeenCalledWith({
           path: 'markets',
-          select: '-__v',
+          select: '-_id -__v',
           transform: expect.any(Function),
         });
       });

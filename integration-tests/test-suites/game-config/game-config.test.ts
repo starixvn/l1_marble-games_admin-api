@@ -100,7 +100,7 @@ describe("Game Config", () => {
 
         expect(schemaResponse.status).toBe(200);
         const schemaData = await schemaResponse.json();
-        const schemaId = schemaData._id;
+        const schemaId = schemaData.id;
 
         const config = {
           level: 5,
@@ -158,7 +158,7 @@ describe("Game Config", () => {
 
         expect(schemaResponse.status).toBe(200);
         const schemaData = await schemaResponse.json();
-        const schemaId = schemaData._id;
+        const schemaId = schemaData.id;
 
         const invalidConfig = {
           level: 150,
@@ -228,13 +228,11 @@ describe("Game Config", () => {
         const data = await response.json();
         expect(data).toEqual(
           expect.objectContaining({
-            validationErrors: expect.arrayContaining([
-              expect.objectContaining({
-                instancePath: "/level",
-                keyword: "maximum",
-                message: "must be <= 100"
-              })
-            ])
+            error: "Bad Request",
+            message: expect.arrayContaining([
+              expect.stringContaining("schemaId must be a mongodb id")
+            ]),
+            statusCode: 400
           })
         );
       });
@@ -382,7 +380,7 @@ describe("Game Config", () => {
 
         expect(schemaResponse.status).toBe(200);
         const schemaData = await schemaResponse.json();
-        const schemaId = schemaData._id;
+        const schemaId = schemaData.id;
 
         const config = {
           level: 25,

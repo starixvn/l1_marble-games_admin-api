@@ -4,6 +4,7 @@ import { GameConfigSchemaService } from "./game-config-schema.service";
 import { GameConfigSchemaUpsertRequestDto } from "../game-config/dto/game-config-schema.dto";
 import { Roles } from "../common/decorators/role.decorator";
 import { Role } from "../common/enums/role.enum";
+import { GameConfigSchemaQueryDto } from "./dto/game-config-schema.dto";
 
 @ApiBearerAuth()
 @Roles(Role.DEVELOPER, Role.ADMIN)
@@ -14,15 +15,21 @@ export class GameConfigSchemaController {
     private readonly gameConfigSchemaService: GameConfigSchemaService
   ) {}
 
-  @Get('get')
-  @ApiQuery({ name: 'id', required: false, description: 'Game config schema ID' })
-  async getSchema(
-    @Query('id') id?: string,
-  ) {
-    if (id) {
-      return this.gameConfigSchemaService.getGameConfigSchema(id);
-    }
+  
+  @Get('list')
+  @ApiOperation({
+    summary: 'Get all game config schemas',
+    description: 'Get all game config schemas'
+  })
+  async listSchemas() {
     return this.gameConfigSchemaService.getAllGameConfigSchemas();
+  }
+
+  @Get('get')
+  async getSchema(
+    @Query() query: GameConfigSchemaQueryDto
+  ) {
+      return this.gameConfigSchemaService.getGameConfigSchema(query.id);
   }
 
   @Post('upsert')
@@ -44,12 +51,4 @@ export class GameConfigSchemaController {
     });
   }
 
-  @Get('list')
-  @ApiOperation({
-    summary: 'Get all game config schemas',
-    description: 'Get all game config schemas'
-  })
-  async listSchemas() {
-    return this.gameConfigSchemaService.getAllGameConfigSchemas();
-  }
 }
