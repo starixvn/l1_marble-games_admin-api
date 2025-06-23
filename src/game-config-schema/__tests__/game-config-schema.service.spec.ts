@@ -71,7 +71,7 @@ describe('GameConfigSchemaService', () => {
 
       // Assert
       expect(mockModel.findById).toHaveBeenCalledWith(mockId);
-      expect(mockReturnValue.select).toHaveBeenCalledWith('-__v');
+      expect(mockReturnValue.select).toHaveBeenCalledWith('-__v -_id');
       expect(result).toEqual(mockGameConfigSchema);
     });
 
@@ -104,8 +104,22 @@ describe('GameConfigSchemaService', () => {
     it('should return all game config schemas', async () => {
       // Arrange
       const mockSchemas = [
-        { _id: mockId, name: 'Schema 1' },
-        { _id: '507f1f77bcf86cd799439012', name: 'Schema 2' }
+        { 
+          _id: mockId, 
+          name: 'Schema 1',
+          toObject: jest.fn().mockImplementation(({ transform }) => {
+            const result = { _id: mockId, name: 'Schema 1' };
+            return transform(null, result);
+          })
+        },
+        { 
+          _id: '507f1f77bcf86cd799439012', 
+          name: 'Schema 2',
+          toObject: jest.fn().mockImplementation(({ transform }) => {
+            const result = { _id: '507f1f77bcf86cd799439012', name: 'Schema 2' };
+            return transform(null, result);
+          })
+        }
       ];
       const mockReturnValue = {
         select: jest.fn().mockResolvedValue(mockSchemas)
@@ -118,7 +132,10 @@ describe('GameConfigSchemaService', () => {
       // Assert
       expect(mockModel.find).toHaveBeenCalled();
       expect(mockReturnValue.select).toHaveBeenCalledWith('-__v -schema -uiSchema');
-      expect(result).toEqual(mockSchemas);
+      expect(result).toEqual([
+        { id: mockId, name: 'Schema 1' },
+        { id: '507f1f77bcf86cd799439012', name: 'Schema 2' }
+      ]);
     });
   });
 
@@ -130,12 +147,15 @@ describe('GameConfigSchemaService', () => {
         name: mockGameConfigSchema.name,
         uiSchema: mockGameConfigSchema.uiSchema
       };
+      
+      const { _id, ...expectedResultWithoutId } = mockGameConfigSchema;
+      const expectedResult = { ...expectedResultWithoutId, id: mockId };
 
       const mockSave = jest.fn().mockResolvedValue({
         toObject: jest.fn().mockImplementation((options) => {
           const result = { ...mockGameConfigSchema };
           if (options?.transform) {
-            options.transform(null, result);
+            return options.transform(null, result);
           }
           return result;
         })
@@ -167,7 +187,7 @@ describe('GameConfigSchemaService', () => {
         uiSchema: args.uiSchema
       });
       expect(mockSave).toHaveBeenCalled();
-      expect(result).toEqual(mockGameConfigSchema);
+      expect(result).toEqual(expectedResult);
     });
 
     it('should update existing game config schema when id is provided', async () => {
@@ -179,9 +199,19 @@ describe('GameConfigSchemaService', () => {
         uiSchema: mockGameConfigSchema.uiSchema
       };
       
-      const updatedSchema = { ...mockGameConfigSchema, name: args.name };
+      const { _id, ...expectedResultWithoutId } = { ...mockGameConfigSchema, name: args.name };
+      const expectedResult = { ...expectedResultWithoutId, id: mockId };
+      
+      const mockDocument = {
+        ...mockGameConfigSchema, 
+        name: args.name,
+        toObject: jest.fn().mockImplementation(({ transform }) => {
+          const result = { ...mockGameConfigSchema, name: args.name };
+          return transform(null, result);
+        })
+      };
       const mockReturnValue = {
-        select: jest.fn().mockResolvedValue(updatedSchema)
+        select: jest.fn().mockResolvedValue(mockDocument)
       };
       mockModel.findByIdAndUpdate.mockReturnValue(mockReturnValue);
 
@@ -199,7 +229,7 @@ describe('GameConfigSchemaService', () => {
         { new: true }
       );
       expect(mockReturnValue.select).toHaveBeenCalledWith('-__v');
-      expect(result).toEqual(updatedSchema);
+      expect(result).toEqual(expectedResult);
     });
 
     it('should throw BadRequestException when invalid ObjectId is provided for update', async () => {

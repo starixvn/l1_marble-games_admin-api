@@ -14,6 +14,8 @@ export class UpdateNameDto implements UpdateNameArgs {
   operatorId: string = '';
   
   @ApiProperty({ description: 'New name for the operator' })
+  @IsString()
+  @IsNotEmpty({ message: 'Name cannot be empty' })
   name: string = '';
 }
 
