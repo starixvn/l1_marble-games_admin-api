@@ -42,7 +42,7 @@ export class GameConfigSchemaService {
       throw new BadRequestException(`Invalid ObjectId format: ${id}`);
     }
     
-    const schema = await this.gameConfigJsonSchemaModel.findById(id).select('-__v');
+    const schema = await this.gameConfigJsonSchemaModel.findById(id).select('-__v -_id');
     if (!schema) {
       throw new NotFoundException(`Game config schema not found for id: ${id}`);
     }
@@ -50,7 +50,13 @@ export class GameConfigSchemaService {
   }
 
   async getAllGameConfigSchemas() {
-    return this.gameConfigJsonSchemaModel.find().select('-__v -schema -uiSchema');
+    const schemas = await this.gameConfigJsonSchemaModel.find().select('-__v -schema -uiSchema');
+    return schemas.map(schema => schema.toObject({ transform: (_, ret) => { 
+      ret.id = ret._id; 
+      delete ret._id; 
+      delete ret.__v; 
+      return ret; 
+    } }));
   }
 
   async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
@@ -61,9 +67,20 @@ export class GameConfigSchemaService {
         throw new BadRequestException(`Invalid ObjectId format: ${id}`);
       }
       
-      return this.gameConfigJsonSchemaModel.findByIdAndUpdate(
+      const updatedSchema = await this.gameConfigJsonSchemaModel.findByIdAndUpdate(
         id, { schema, name, uiSchema }, { new: true }
       ).select('-__v');
+      
+      if (!updatedSchema) {
+        throw new NotFoundException(`Game config schema not found for id: ${id}`);
+      }
+      
+      return updatedSchema.toObject({ transform: (_, ret) => { 
+        ret.id = ret._id; 
+        delete ret._id; 
+        delete ret.__v; 
+        return ret; 
+      } });
     }
     
     const newSchema = new this.gameConfigJsonSchemaModel({
@@ -72,7 +89,12 @@ export class GameConfigSchemaService {
       uiSchema
     });
     const saved = await newSchema.save();
-    return saved.toObject({ transform: (_, ret) => { delete ret.__v; return ret; } });
+    return saved.toObject({ transform: (_, ret) => { 
+      ret.id = ret._id; 
+      delete ret._id; 
+      delete ret.__v; 
+      return ret; 
+    } });
   }
 
   async validateGameConfigSchema(args: ValidateGameConfigSchemaArgs) {
