@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsMongoId, IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class GameConfigUpdateRequestDto {
   [key: string]: any;
 }
 
 export class GameConfigUpsertQueryDto {
-  @IsNumber()
+  @IsNumberString()
   @ApiProperty({
     description: "The id of the game to update the config for",
     required: true
@@ -24,7 +24,7 @@ export class GameConfigUpsertQueryDto {
 }
 
 export class GameConfigGetQueryDto {
-  @IsNumber()
+  @IsNumberString()
   @ApiProperty({
     description: "The id of the game to get the config for",
     required: true
