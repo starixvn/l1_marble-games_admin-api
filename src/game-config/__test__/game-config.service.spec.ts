@@ -73,7 +73,7 @@ describe('GameConfigService', () => {
         { 
           $set: { 
             config: args.config,
-            gameConfigSchema: new Types.ObjectId(mockSchemaId)
+            gameConfigSchema: mockSchemaId
           } 
         },
         { upsert: true, new: true }
@@ -106,7 +106,7 @@ describe('GameConfigService', () => {
         { 
           $set: { 
             config: args.config,
-            gameConfigSchema: new Types.ObjectId(mockSchemaId)
+            gameConfigSchema: mockSchemaId
           } 
         },
         { upsert: true, new: true }
@@ -149,7 +149,7 @@ describe('GameConfigService', () => {
         { 
           $set: { 
             config: args.config,
-            gameConfigSchema: new Types.ObjectId(mockSchemaId)
+            gameConfigSchema: mockSchemaId
           } 
         },
         { upsert: true, new: true }
@@ -182,7 +182,7 @@ describe('GameConfigService', () => {
         { 
           $set: { 
             config: args.config,
-            gameConfigSchema: new Types.ObjectId(mockSchemaId)
+            gameConfigSchema: mockSchemaId
           } 
         },
         { upsert: true, new: true }

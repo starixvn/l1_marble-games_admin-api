@@ -47,7 +47,7 @@ export class GameConfigService {
     }, {
       $set: {
         config,
-        gameConfigSchema: new Types.ObjectId(schemaId)
+        gameConfigSchema: schemaId
       }
     }, {
       upsert: true,
