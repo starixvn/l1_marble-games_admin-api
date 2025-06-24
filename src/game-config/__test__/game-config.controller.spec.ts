@@ -117,7 +117,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.getGameConfigByGameId.mockResolvedValue(mockResult as any);
 
-      const result = await controller.getGameConfig(gameId);
+      const result = await controller.getGameConfig({ gameId });
 
       expect(mockGameConfigService.getGameConfigByGameId).toHaveBeenCalledWith(Number(gameId));
       expect(mockGameConfigService.getGameConfigByGameId).toHaveBeenCalledTimes(1);
@@ -130,7 +130,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.getGameConfigByGameId.mockResolvedValue(mockResult as any);
 
-      const result = await controller.getGameConfig(gameId);
+      const result = await controller.getGameConfig({ gameId });
 
       expect(mockGameConfigService.getGameConfigByGameId).toHaveBeenCalledWith(Number(gameId));
       expect(result).toEqual(mockResult);
@@ -142,7 +142,7 @@ describe('GameConfigController', () => {
 
       mockGameConfigService.getGameConfigByGameId.mockRejectedValue(error);
 
-      await expect(controller.getGameConfig(gameId)).rejects.toThrow('Game config not found');
+      await expect(controller.getGameConfig({ gameId })).rejects.toThrow('Game config not found');
       expect(mockGameConfigService.getGameConfigByGameId).toHaveBeenCalledWith(Number(gameId));
     });
   });
