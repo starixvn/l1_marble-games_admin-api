@@ -4,26 +4,25 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { networkInterfaces } from 'os';
+import * as morgan from 'morgan';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.use(morgan('dev'));
 
-  app.setGlobalPrefix('api', {
-    exclude: [
-      { path: '/scalar', method: RequestMethod.GET},
-      { path: '', method: RequestMethod.GET}
-    ]
-  });
+  if (process.env.NODE_ENV === 'development') {
+    app.enableCors();
+  }
+
+  app.useGlobalPipes(new ValidationPipe());
 
   let config = new DocumentBuilder()
   .setTitle('Marble Odds Feed API')
   .setDescription('The API documentation for Marble Odds Feed')
   .setVersion('0.0')
   .addBearerAuth()
-  .addServer(process.env.PROXY_PATH ?? '', 'Proxy Server')
   .build();
   
 
