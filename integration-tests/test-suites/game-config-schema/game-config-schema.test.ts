@@ -19,7 +19,7 @@ describe("Game Config Schema", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ describe("Game Config Schema", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -98,7 +98,7 @@ describe("Game Config Schema", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -135,7 +135,7 @@ describe("Game Config Schema", () => {
         uiSchema: {}
       };
 
-      const createResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+      const createResponse = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -166,7 +166,7 @@ describe("Game Config Schema", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/upsert?id=${schemaId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/upsert?id=${schemaId}`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -205,7 +205,7 @@ describe("Game Config Schema", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/upsert?id=${invalidId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/upsert?id=${invalidId}`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -238,7 +238,7 @@ describe("Game Config Schema", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/upsert?id=${validObjectId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/upsert?id=${validObjectId}`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -266,7 +266,7 @@ describe("Game Config Schema", () => {
       const schemaId = '507f1f77bcf86cd799439012';
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/get?id=${schemaId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/get?id=${schemaId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -282,7 +282,7 @@ describe("Game Config Schema", () => {
       const invalidId = 'invalid-id';
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/get?id=${invalidId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/get?id=${invalidId}`, {
         method: 'GET',
         headers: addAdminAuth(),
       });
@@ -306,7 +306,7 @@ describe("Game Config Schema", () => {
       const nonExistentId = '507f1f77bcf86cd799439013';
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/get?id=${nonExistentId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/get?id=${nonExistentId}`, {
         method: 'GET',
         headers: addAdminAuth(),
       });
@@ -340,7 +340,7 @@ describe("Game Config Schema", () => {
         }
       };
 
-      const createResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+      const createResponse = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
         method: 'POST',
         headers: {
           ...addAdminAuth(),
@@ -354,7 +354,7 @@ describe("Game Config Schema", () => {
       const schemaId = createdData.id;
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/get?id=${schemaId}`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/get?id=${schemaId}`, {
         method: 'GET',
         headers: addAdminAuth(),
       });
@@ -375,7 +375,7 @@ describe("Game Config Schema", () => {
 
     it("should throw 400 if no id provided", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/get`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/get`, {
         method: 'GET',
         headers: addAdminAuth(),
       });
@@ -389,7 +389,7 @@ describe("Game Config Schema", () => {
   describe("list", () => {
     it("should return 401 if not authenticated", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/list`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/list`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -402,7 +402,7 @@ describe("Game Config Schema", () => {
 
     it("should return all schemas", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfigSchema/list`, {
+      const response = await fetch(`${baseUrl}/gameConfigSchema/list`, {
         method: 'GET',
         headers: addAdminAuth(),
       });

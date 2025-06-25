@@ -7,7 +7,7 @@ describe("Auth", () => {
   describe("OneTimeRegister", () => {
     it("should return 400 when admin account already exists", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/oneTimeRegister`, {
+      const response = await fetch(`${baseUrl}/auth/oneTimeRegister`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ describe("Auth", () => {
       }
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
+      const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ describe("Auth", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
+      const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ describe("Auth", () => {
 
     it("should return 401 on login with correct username but wrong password", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
+      const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ describe("Auth", () => {
       }
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/changePassword`, {
+      const response = await fetch(`${baseUrl}/auth/changePassword`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ describe("Auth", () => {
 
     it("should return 401 when no authorization token provided", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/changePassword`, {
+      const response = await fetch(`${baseUrl}/auth/changePassword`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ describe("Auth", () => {
 
     it("should return 401 when invalid authorization token provided", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/changePassword`, {
+      const response = await fetch(`${baseUrl}/auth/changePassword`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ describe("Auth", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/createAccount`, {
+      const response = await fetch(`${baseUrl}/auth/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -223,7 +223,7 @@ describe("Auth", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/createAccount`, {
+      const response = await fetch(`${baseUrl}/auth/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -258,7 +258,7 @@ describe("Auth", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/createAccount`, {
+      const response = await fetch(`${baseUrl}/auth/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ describe("Auth", () => {
         role: Role.DEVELOPER
       };
 
-      const createResponse = await fetch(`${baseUrl}/api/auth/createAccount`, {
+      const createResponse = await fetch(`${baseUrl}/auth/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -296,7 +296,7 @@ describe("Auth", () => {
       });
       const devAccount = await createResponse.json();
 
-      const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
+      const loginResponse = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -309,7 +309,7 @@ describe("Auth", () => {
       const loginData = await loginResponse.json();
 
       // Act
-      const response = await fetch(`${baseUrl}/api/auth/createAccount`, {
+      const response = await fetch(`${baseUrl}/auth/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

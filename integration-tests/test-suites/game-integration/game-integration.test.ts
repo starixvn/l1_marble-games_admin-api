@@ -14,7 +14,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: {
          'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?name=${nonExistentName}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?name=${nonExistentName}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -54,7 +54,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -70,7 +70,7 @@ describe("Game Integration", () => {
       const testName = `test-operator-name`;
       const gameId = 2001;
       
-      await fetch(`${baseUrl}/api/operator/updateName`, {
+      await fetch(`${baseUrl}/operator/updateName`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify({
@@ -85,7 +85,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -120,7 +120,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -154,7 +154,7 @@ describe("Game Integration", () => {
         mergeEvent: { eventType: "initial", priority: 1 }
       };
 
-      const createResponse = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const createResponse = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(initialRequest),
@@ -174,7 +174,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -219,7 +219,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -274,7 +274,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -300,7 +300,7 @@ describe("Game Integration", () => {
         const gameId = 3001;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameIntegration/get?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/gameIntegration/get?gameId=${gameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -317,7 +317,7 @@ describe("Game Integration", () => {
         const gameId = 3002;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameIntegration/get?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/gameIntegration/get?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -334,7 +334,7 @@ describe("Game Integration", () => {
         const nonExistentGameId = 99999;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${nonExistentGameId}`, {
+        const response = await fetch(`${baseUrl}/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${nonExistentGameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -616,7 +616,7 @@ describe("Game Integration", () => {
         ...upsertRequest
       };
 
-      const upsertResponse = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const upsertResponse = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(upsertRequest),
@@ -625,7 +625,7 @@ describe("Game Integration", () => {
       await upsertResponse.json();
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'GET',
         headers: addAdminAuth(),
       });

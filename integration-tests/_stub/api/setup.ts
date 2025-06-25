@@ -130,8 +130,8 @@ export class ApiService {
           return resolve();
         }
         
-        console.log(`Trying to connect to ${this.baseUrl}/api/healthcheck...`);
-        const healthResponse = await fetch(`${this.baseUrl}/api/healthcheck`).catch(() => null);
+        console.log(`Trying to connect to ${this.baseUrl}/healthcheck...`);
+        const healthResponse = await fetch(`${this.baseUrl}/healthcheck`).catch(() => null);
         
         if (healthResponse?.ok) {
           console.log('API service is ready at health endpoint!');

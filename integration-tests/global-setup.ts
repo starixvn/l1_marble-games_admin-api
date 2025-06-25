@@ -30,49 +30,56 @@ async function setupAdminAuth(): Promise<void> {
   const baseUrl = apiService.getBaseUrl();
   
   try {
-    console.log('🔐 Setting up admin authentication...');
-    const registerResponse = await fetch(`${baseUrl}/api/auth/oneTimeRegister`, {
+    console.log('Initializing admin credentials...');
+    
+    const registerResponse = await fetch(`${baseUrl}/auth/oneTimeRegister`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    if (registerResponse.status !== 200) {
+    if (registerResponse.status === 200) {
+      const adminAccount = await registerResponse.json();
+      console.log('Admin account created with one-time register');
+      
+      // Need to login to get access token
+      const loginResponse = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: adminAccount.username,
+          password: adminAccount.password
+        }),
+      });
+
+      if (loginResponse.status === 200) {
+        const loginData = await loginResponse.json();
+        const credentials = {
+          username: adminAccount.username,
+          password: adminAccount.password,
+          access_token: loginData.access_token
+        };
+        globalThis.__ADMIN_CREDENTIALS__ = credentials;
+        setAdminCredentials(credentials);
+        console.log('Admin credentials set successfully');
+      } else {
+        throw new Error('Failed to login with newly created admin account');
+      }
+    } else if (registerResponse.status === 400) {
+      // Admin already exists, try to generate new password via changePassword endpoint
+      console.log('Admin account already exists, attempting to generate new password...');
+      
+      // First try to login with 'admin' username and get a new password
+      // This is a workaround since we know the admin exists but don't know the password
+      throw new Error('Admin account already exists. Please clear the database and restart tests.');
+    } else {
       throw new Error(`Failed to register admin account: ${registerResponse.status}`);
     }
-
-    const adminAccount = await registerResponse.json();
-    console.log(`✅ Admin account registered with username: ${adminAccount.username}`);
-
-    const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: adminAccount.username,
-        password: adminAccount.password
-      }),
-    });
-
-    if (loginResponse.status !== 200) {
-      throw new Error(`Failed to login: ${loginResponse.status}`);
-    }
-
-    const loginData = await loginResponse.json();
-    console.log('✅ Admin login successful, access token obtained');
-
-    setAdminCredentials({
-      username: adminAccount.username,
-      password: adminAccount.password,
-      access_token: loginData.access_token
-    });
-
-    console.log('✅ Admin credentials set globally');
-    
   } catch (error) {
-    console.error('❌ Failed to setup admin authentication:', error);
+    console.error('Failed to initialize admin credentials:', error);
     throw error;
   }
 } 
