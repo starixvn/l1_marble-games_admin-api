@@ -61,6 +61,15 @@ export class GameIntegrationService {
     return this.getGameIntegration(query);
   }
 
+  async listGameIntegrations() {
+    return this.gameIntegrationModel.find().select('-_id -__v -markets -mergeEvent -mergeEventDetails -patches').lean();
+  }
+
+  async deleteGameIntegration(query: GameIntegrationQueryDto) {
+    const operatorId = await this.getOperator(query);
+    await this.gameIntegrationModel.deleteOne({ operatorId, gameId: query.gameId });
+  }
+
   async getGameIntegration(query: GameIntegrationQueryDto) {
     const operatorId = await this.getOperator(query);
 

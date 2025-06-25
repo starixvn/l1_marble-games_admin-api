@@ -65,4 +65,14 @@ export class GameIntegrationController {
   ) {
     return this.gameIntegrationService.getGameIntegration(query);
   }
+
+  @Get('list')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List game integrations',
+    description: 'Retrieves all game integrations'
+  })
+  async listGameIntegrations() {
+    return this.gameIntegrationService.listGameIntegrations();
+  }
 }

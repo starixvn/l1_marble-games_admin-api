@@ -19,8 +19,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   let config = new DocumentBuilder()
-  .setTitle('Marble Odds Feed API')
-  .setDescription('The API documentation for Marble Odds Feed')
+  .setTitle('Marble Odd Feed Admin API')
+  .setDescription('The Admin API documentation for Marble Odds Feed')
   .setVersion('0.0')
   .addBearerAuth()
   .addServer(process.env.PROXY_PATH ?? '', 'Proxy Server')
