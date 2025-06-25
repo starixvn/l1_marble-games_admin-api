@@ -23,6 +23,7 @@ async function bootstrap() {
   .setDescription('The API documentation for Marble Odds Feed')
   .setVersion('0.0')
   .addBearerAuth()
+  .addServer(process.env.PROXY_PATH ?? '', 'Proxy Server')
   .build();
   
 
