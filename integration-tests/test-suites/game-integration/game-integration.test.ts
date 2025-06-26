@@ -647,4 +647,142 @@ describe("Game Integration", () => {
     });
     
   });
+
+  describe("List", () => {
+    it("should return 401 if not authenticated", async () => {
+      // Arrange
+      const response = await fetch(`${baseUrl}/gameIntegration/list`, {
+        method: 'GET',
+      });
+      expect(response.status).toBe(401);
+    });
+
+    it("should return all game integrations", async () => {
+      // Arrange
+      const response = await fetch(`${baseUrl}/gameIntegration/list`, {
+        method: 'GET',
+        headers: addAdminAuth(),
+      });
+      const data = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(data).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          operatorId: expect.any(String),
+          gameId: expect.any(Number)
+        })
+      ]));
+    });
+  });
+
+  describe("Delete", () => {
+    it("should return 401 if not authenticated", async () => {
+      // Arrange
+      const response = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=67d291d943a96fad7f14ddae&gameId=2001`, {
+        method: 'DELETE',
+      });
+      expect(response.status).toBe(401);
+    });
+
+    it("should throw 404 if operator not found", async () => {
+      // Arrange
+      const nonExistentOperatorId = "000000000000000000000000";
+      const gameId = 2001;
+
+      // Act
+      const response = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(response.status).toBe(404);
+    });
+
+    it("should delete game integration", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const gameId = 4001;
+      const createRequest = {
+        mergeEvent: { eventType: "match", priority: 1 },
+        patches: [{ op: "replace", path: "/status", value: "active" }]
+      };
+
+      const createResponse = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+        method: 'POST',
+        headers: addAdminAuth(),
+        body: JSON.stringify(createRequest),
+      });
+
+      expect(createResponse.status).toBe(200);
+
+      // Act
+      const deleteResponse = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(deleteResponse.status).toBe(200);
+      
+      const deleteData = await deleteResponse.json();
+      expect(deleteData).toEqual({ message: 'Game integration deleted successfully' });
+    });
+
+    it("should throw 404 if game integration not found", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const nonExistentGameId = 99999;
+
+      // Act
+      const response = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=${existingOperatorId}&gameId=${nonExistentGameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(response.status).toBe(404);
+    });
+
+    it("should delete game integration using operator name", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const testName = "test-delete-operator";
+      const gameId = 4002;
+      
+      await fetch(`${baseUrl}/operator/updateName`, {
+        method: 'POST',
+        headers: addAdminAuth(),
+        body: JSON.stringify({
+          operatorId: existingOperatorId,
+          name: testName,
+        }),
+      });
+
+      const createRequest = {
+        mergeEvent: { eventType: "match", priority: 1 }
+      };
+
+      const createResponse = await fetch(`${baseUrl}/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
+        method: 'POST',
+        headers: addAdminAuth(),
+        body: JSON.stringify(createRequest),
+      });
+
+      expect(createResponse.status).toBe(200);
+
+      // Act
+      const deleteResponse = await fetch(`${baseUrl}/gameIntegration/delete?name=${testName}&gameId=${gameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(deleteResponse.status).toBe(200);
+      
+      const deleteData = await deleteResponse.json();
+      expect(deleteData).toEqual({ message: 'Game integration deleted successfully' });
+    });
+  });
 })

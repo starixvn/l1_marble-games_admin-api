@@ -26,6 +26,7 @@ describe('GameIntegrationService', () => {
     const mockGameIntegrationModelFactory = {
       findOneAndUpdate: jest.fn(),
       findOne: jest.fn(),
+      deleteOne: jest.fn(),
     };
 
     const mockMarketIntegrationModelFactory = {
@@ -788,6 +789,223 @@ describe('GameIntegrationService', () => {
           name: 'Test Market',
           selections: ['Selection 1'],
         });
+      });
+    });
+  });
+
+  describe('deleteGameIntegration', () => {
+    describe('when operatorId is provided', () => {
+      it('should delete game integration successfully', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        setupOperatorMock(mockOperator);
+        mockGameIntegrationModel.deleteOne.mockResolvedValue({
+          deletedCount: 1,
+        });
+
+        // Act
+        const result = await service.deleteGameIntegration(query);
+
+        // Assert
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+          _id: mockOperatorId.toString(),
+        });
+        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        });
+        expect(result).toBe(true);
+      });
+
+      it('should return false when game integration does not exist', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        setupOperatorMock(mockOperator);
+        mockGameIntegrationModel.deleteOne.mockResolvedValue({
+          deletedCount: 0,
+        });
+
+        // Act
+        const result = await service.deleteGameIntegration(query);
+
+        // Assert
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+          _id: mockOperatorId.toString(),
+        });
+        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        });
+        expect(result).toBe(false);
+      });
+
+      it('should throw NotFoundException when operator does not exist', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+
+        setupOperatorMock(null);
+
+        // Act & Assert
+        await expect(service.deleteGameIntegration(query)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+          _id: mockOperatorId.toString(),
+        });
+        expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when name is provided', () => {
+      it('should delete game integration successfully', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          name: 'test-operator',
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        setupOperatorMock(mockOperator);
+        mockGameIntegrationModel.deleteOne.mockResolvedValue({
+          deletedCount: 1,
+        });
+
+        // Act
+        const result = await service.deleteGameIntegration(query);
+
+        // Assert
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+          name: 'test-operator',
+        });
+        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        });
+        expect(result).toBe(true);
+      });
+
+      it('should return false when game integration does not exist', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          name: 'test-operator',
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        setupOperatorMock(mockOperator);
+        mockGameIntegrationModel.deleteOne.mockResolvedValue({
+          deletedCount: 0,
+        });
+
+        // Act
+        const result = await service.deleteGameIntegration(query);
+
+        // Assert
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+          name: 'test-operator',
+        });
+        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        });
+        expect(result).toBe(false);
+      });
+
+      it('should throw NotFoundException when operator does not exist', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          name: 'non-existent-operator',
+          gameId: 1001,
+        };
+
+        setupOperatorMock(null);
+
+        // Act & Assert
+        await expect(service.deleteGameIntegration(query)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+          name: 'non-existent-operator',
+        });
+        expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when neither operatorId nor name is provided', () => {
+      it('should throw NotFoundException', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          gameId: 1001,
+        };
+
+        // Act & Assert
+        await expect(service.deleteGameIntegration(query)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle deletion when multiple documents could match but only one exists', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        setupOperatorMock(mockOperator);
+        mockGameIntegrationModel.deleteOne.mockResolvedValue({
+          deletedCount: 1,
+        });
+
+        // Act
+        const result = await service.deleteGameIntegration(query);
+
+        // Assert
+        expect(result).toBe(true);
+        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return correct boolean value based on deletedCount', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const mockOperator = { _id: mockOperatorId };
+
+        setupOperatorMock(mockOperator);
+
+        // Test deletedCount = 0
+        mockGameIntegrationModel.deleteOne.mockResolvedValueOnce({
+          deletedCount: 0,
+        });
+
+        let result = await service.deleteGameIntegration(query);
+        expect(result).toBe(false);
+
+        // Test deletedCount = 1
+        mockGameIntegrationModel.deleteOne.mockResolvedValueOnce({
+          deletedCount: 1,
+        });
+
+        result = await service.deleteGameIntegration(query);
+        expect(result).toBe(true);
       });
     });
   });

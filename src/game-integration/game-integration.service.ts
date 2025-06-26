@@ -67,7 +67,7 @@ export class GameIntegrationService {
 
   async deleteGameIntegration(query: GameIntegrationQueryDto) {
     const operatorId = await this.getOperator(query);
-    await this.gameIntegrationModel.deleteOne({ operatorId, gameId: query.gameId });
+    return (await this.gameIntegrationModel.deleteOne({ operatorId, gameId: query.gameId })).deletedCount > 0;
   }
 
   async getGameIntegration(query: GameIntegrationQueryDto) {

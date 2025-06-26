@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Post, Query } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { GameIntegrationService } from "./game-integration.service";
 import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
@@ -74,5 +74,25 @@ export class GameIntegrationController {
   })
   async listGameIntegrations() {
     return this.gameIntegrationService.listGameIntegrations();
+  }
+
+  @Delete('delete')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete game integration',
+    description: 'Deletes a game integration based on operatorId/alias and gameId'
+  })
+  async deleteGameIntegration(
+    @Query()
+    query: GameIntegrationQueryDto
+  ) {
+    const result= await this.gameIntegrationService.deleteGameIntegration(query);
+    if (result) {
+      return {
+        message: 'Game integration deleted successfully'
+      };
+    }
+
+    throw new NotFoundException('Game integration not found');
   }
 }
