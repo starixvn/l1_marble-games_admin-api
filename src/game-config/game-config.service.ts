@@ -1,6 +1,6 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { GameConfig, GameConfigDocument } from "./schema/game-config.schema";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { GameConfigSchemaService } from "../game-config-schema/game-config-schema.service";
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
 
