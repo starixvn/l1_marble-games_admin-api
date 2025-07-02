@@ -11,12 +11,13 @@ import { RolesGuard } from './common/guards/role.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
+import { ApiLogModule } from './api-log/api-log.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration]
+      load: [configuration],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -25,9 +26,9 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
         const dbConfig = configService.get('database');
 
         return {
-          ...dbConfig
+          ...dbConfig,
         };
-      }
+      },
     }),
     HealthcheckModule,
     AuthModule,
@@ -35,6 +36,7 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
     GameIntegrationModule,
     GameConfigModule,
     GameConfigSchemaModule,
+    ApiLogModule,
   ],
   providers: [
     {
