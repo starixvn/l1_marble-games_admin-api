@@ -34,8 +34,8 @@ describe('ApiLogController', () => {
     it('should call service with correct parameters when all query params are provided', async () => {
       const queryLogsMock = service.queryLogs;
       const queryDto: ApiLogQueryDto = {
-        startDate: new Date('2025-01-01T00:00:00.000Z'),
-        endDate: new Date('2025-01-01T23:59:59.000Z'),
+        startDate: '2025-01-01T00:00:00.000Z',
+        endDate: '2025-01-01T23:59:59.000Z',
         operator: 'test-operator',
         endpoint: '/api/test',
         queryParams: 'param1=value1&param2=value2',
@@ -77,8 +77,8 @@ describe('ApiLogController', () => {
     it('should call service with only required parameters when optional params are not provided', async () => {
       const queryLogsMock = service.queryLogs;
       const queryDto: ApiLogQueryDto = {
-        startDate: new Date('2025-01-01T00:00:00.000Z'),
-        endDate: new Date('2025-01-01T23:59:59.000Z'),
+        startDate: '2025-01-01T00:00:00.000Z',
+        endDate: '2025-01-01T23:59:59.000Z',
       };
 
       const expectedServiceParams = {
@@ -115,8 +115,8 @@ describe('ApiLogController', () => {
     it('should call service with partial optional parameters', async () => {
       const queryLogsMock = service.queryLogs;
       const queryDto: ApiLogQueryDto = {
-        startDate: new Date('2025-01-01T00:00:00.000Z'),
-        endDate: new Date('2025-01-01T23:59:59.000Z'),
+        startDate: '2025-01-01T00:00:00.000Z',
+        endDate: '2025-01-01T23:59:59.000Z',
         operator: 'test-operator',
         gameId: 123,
       };
@@ -155,8 +155,8 @@ describe('ApiLogController', () => {
     it('should handle empty response from service', async () => {
       const queryLogsMock = service.queryLogs;
       const queryDto: ApiLogQueryDto = {
-        startDate: new Date('2025-01-01T00:00:00.000Z'),
-        endDate: new Date('2025-01-01T23:59:59.000Z'),
+        startDate: '2025-01-01T00:00:00.000Z',
+        endDate: '2025-01-01T23:59:59.000Z',
         operator: 'non-existent-operator',
       };
 
@@ -186,8 +186,8 @@ describe('ApiLogController', () => {
     it('should propagate service errors', async () => {
       const queryLogsMock = service.queryLogs;
       const queryDto: ApiLogQueryDto = {
-        startDate: new Date('2025-01-01T00:00:00.000Z'),
-        endDate: new Date('2025-01-01T23:59:59.000Z'),
+        startDate: '2025-01-01T00:00:00.000Z',
+        endDate: '2025-01-01T23:59:59.000Z',
       };
 
       const expectedServiceParams = {

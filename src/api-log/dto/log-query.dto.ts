@@ -1,32 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import {
-  IsDate,
   IsOptional,
   IsNumberString,
   ValidateIf,
   IsNotEmpty,
+  IsDateString,
 } from 'class-validator';
 
 export class ApiLogQueryDto {
-  @IsDate()
+  @IsDateString()
   @ApiProperty({
     description: 'The start date of the log',
     example: '2025-07-02T00:00:00.000',
     required: true,
   })
-  @Transform(({ value }: { value: string }) => new Date(value))
-  startDate: Date;
+  startDate: string;
 
-  @IsDate()
-  @Transform(({ value }: { value: string }) => new Date(value))
+  @IsDateString()
   @ApiProperty({
     description: 'The end date of the log',
     example: '2025-07-02T00:12:00.000',
     required: true,
   })
-  @Transform(({ value }: { value: string }) => new Date(value))
-  endDate: Date;
+  endDate: string;
 
   @IsOptional()
   @ApiProperty({
@@ -70,13 +66,16 @@ export class ApiLogQueryDto {
   })
   eventId?: number;
 
-  @ValidateIf((o: ApiLogQueryDto) => o.startDate >= o.endDate)
+  @ValidateIf(
+    (o: ApiLogQueryDto) => new Date(o.startDate) >= new Date(o.endDate),
+  )
   @IsNotEmpty({ message: 'Start date must be before end date' })
   _dateValid?: never;
 
   @ValidateIf(
     (o: ApiLogQueryDto) =>
-      o.endDate.getTime() - o.startDate.getTime() > 24 * 60 * 60 * 1000,
+      new Date(o.endDate).getTime() - new Date(o.startDate).getTime() >
+      24 * 60 * 60 * 1000,
   )
   @IsNotEmpty({ message: 'Only query logs within 24 hours are allowed' })
   _dateRangeValid?: never;
