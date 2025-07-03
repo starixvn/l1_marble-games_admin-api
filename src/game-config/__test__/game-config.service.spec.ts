@@ -1,34 +1,44 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { GameConfigService } from '../game-config.service';
-import { GameConfig } from '../schema/game-config.schema';
+import { GameConfig, GameConfigDocument } from '../schema/game-config.schema';
 import { GameConfigSchemaService } from '../../game-config-schema/game-config-schema.service';
-import { Types } from 'mongoose';
+import { AdminLogService } from '../../admin-log/admin-log.service';
+import { Model } from 'mongoose';
 
 describe('GameConfigService', () => {
   let service: GameConfigService;
-  let mockGameConfigModel: any;
-  let mockGameConfigSchemaService: any;
+  let mockGameConfigModel: Partial<Model<GameConfigDocument>>;
+  let mockGameConfigSchemaService: Partial<GameConfigSchemaService>;
+  let mockAdminLogService: Partial<AdminLogService>;
 
   const mockSchemaId = '507f1f77bcf86cd799439011';
 
   beforeEach(async () => {
     // Arrange
     const mockSelect = jest.fn();
+    const mockFindOneAndUpdate = jest.fn().mockReturnValue({
+      select: mockSelect,
+    });
+    const mockFindOne = jest.fn().mockReturnValue({
+      select: jest.fn(),
+    });
+    const mockFind = jest.fn().mockReturnValue({
+      select: jest.fn(),
+    });
+
     mockGameConfigModel = {
-      findOneAndUpdate: jest.fn().mockReturnValue({
-        select: mockSelect
-      }),
-      findOne: jest.fn().mockReturnValue({
-        select: jest.fn()
-      }),
-      find: jest.fn().mockReturnValue({
-        select: jest.fn()
-      })
+      findOneAndUpdate: mockFindOneAndUpdate,
+      findOne: mockFindOne,
+      find: mockFind,
     };
 
     mockGameConfigSchemaService = {
-      validateGameConfigSchema: jest.fn().mockResolvedValue(undefined)
+      validateGameConfigSchema: jest.fn().mockResolvedValue(undefined),
+    };
+
+    mockAdminLogService = {
+      createLog: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -36,12 +46,16 @@ describe('GameConfigService', () => {
         GameConfigService,
         {
           provide: getModelToken(GameConfig.name),
-          useValue: mockGameConfigModel
+          useValue: mockGameConfigModel,
         },
         {
           provide: GameConfigSchemaService,
-          useValue: mockGameConfigSchemaService
-        }
+          useValue: mockGameConfigSchemaService,
+        },
+        {
+          provide: AdminLogService,
+          useValue: mockAdminLogService,
+        },
       ],
     }).compile();
 
@@ -54,31 +68,35 @@ describe('GameConfigService', () => {
       const args = {
         schemaId: mockSchemaId,
         gameId: 123,
-        config: { enabled: true, settings: { maxPlayers: 4 } }
+        config: { enabled: true, settings: { maxPlayers: 4 } },
       };
       const mockResult = { gameId: 123, config: args.config };
-      
-      mockGameConfigModel.findOneAndUpdate().select.mockResolvedValue(mockResult);
+
+      const mockFindOneAndUpdateFn =
+        mockGameConfigModel.findOneAndUpdate as jest.Mock;
+      mockFindOneAndUpdateFn().select.mockResolvedValue(mockResult);
 
       // Act
       const result = await service.upsertGameConfig(args);
 
       // Assert
-      expect(mockGameConfigSchemaService.validateGameConfigSchema).toHaveBeenCalledWith({ 
-        id: mockSchemaId, 
-        config: args.config 
+      expect(
+        mockGameConfigSchemaService.validateGameConfigSchema,
+      ).toHaveBeenCalledWith({
+        id: mockSchemaId,
+        config: args.config,
       });
       expect(mockGameConfigModel.findOneAndUpdate).toHaveBeenCalledWith(
         { gameId: Number(args.gameId) },
-        { 
-          $set: { 
+        {
+          $set: {
             config: args.config,
-            gameConfigSchema: mockSchemaId
-          } 
+            gameConfigSchema: mockSchemaId,
+          },
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
-      expect(mockGameConfigModel.findOneAndUpdate().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindOneAndUpdateFn().select).toHaveBeenCalledWith('-_id -__v');
       expect(result).toEqual(mockResult);
     });
 
@@ -87,29 +105,33 @@ describe('GameConfigService', () => {
       const args = {
         schemaId: mockSchemaId,
         gameId: 456,
-        config: { enabled: false }
+        config: { enabled: false },
       };
       const mockResult = { gameId: 456, config: args.config };
-      
-      mockGameConfigModel.findOneAndUpdate().select.mockResolvedValue(mockResult);
+
+      const mockFindOneAndUpdateFn =
+        mockGameConfigModel.findOneAndUpdate as jest.Mock;
+      mockFindOneAndUpdateFn().select.mockResolvedValue(mockResult);
 
       // Act
       const result = await service.upsertGameConfig(args);
 
       // Assert
-      expect(mockGameConfigSchemaService.validateGameConfigSchema).toHaveBeenCalledWith({ 
-        id: mockSchemaId, 
-        config: args.config 
+      expect(
+        mockGameConfigSchemaService.validateGameConfigSchema,
+      ).toHaveBeenCalledWith({
+        id: mockSchemaId,
+        config: args.config,
       });
       expect(mockGameConfigModel.findOneAndUpdate).toHaveBeenCalledWith(
         { gameId: Number(args.gameId) },
-        { 
-          $set: { 
+        {
+          $set: {
             config: args.config,
-            gameConfigSchema: mockSchemaId
-          } 
+            gameConfigSchema: mockSchemaId,
+          },
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
       expect(result).toEqual(mockResult);
     });
@@ -124,37 +146,41 @@ describe('GameConfigService', () => {
           settings: {
             maxPlayers: 8,
             timeLimit: 300,
-            difficulty: 'hard'
+            difficulty: 'hard',
           },
           metadata: {
             version: '1.2.0',
-            lastUpdated: new Date()
-          }
-        }
+            lastUpdated: new Date(),
+          },
+        },
       };
       const mockResult = { gameId: args.gameId, config: args.config };
-      
-      mockGameConfigModel.findOneAndUpdate().select.mockResolvedValue(mockResult);
+
+      const mockFindOneAndUpdateFn =
+        mockGameConfigModel.findOneAndUpdate as jest.Mock;
+      mockFindOneAndUpdateFn().select.mockResolvedValue(mockResult);
 
       // Act
       const result = await service.upsertGameConfig(args);
 
       // Assert
-      expect(mockGameConfigSchemaService.validateGameConfigSchema).toHaveBeenCalledWith({ 
-        id: mockSchemaId, 
-        config: args.config 
+      expect(
+        mockGameConfigSchemaService.validateGameConfigSchema,
+      ).toHaveBeenCalledWith({
+        id: mockSchemaId,
+        config: args.config,
       });
       expect(mockGameConfigModel.findOneAndUpdate).toHaveBeenCalledWith(
         { gameId: Number(args.gameId) },
-        { 
-          $set: { 
+        {
+          $set: {
             config: args.config,
-            gameConfigSchema: mockSchemaId
-          } 
+            gameConfigSchema: mockSchemaId,
+          },
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
-      expect(mockGameConfigModel.findOneAndUpdate().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindOneAndUpdateFn().select).toHaveBeenCalledWith('-_id -__v');
       expect(result).toEqual(mockResult);
     });
 
@@ -163,29 +189,33 @@ describe('GameConfigService', () => {
       const args = {
         schemaId: mockSchemaId,
         gameId: 999,
-        config: {}
+        config: {},
       };
       const mockResult = { gameId: args.gameId, config: args.config };
-      
-      mockGameConfigModel.findOneAndUpdate().select.mockResolvedValue(mockResult);
+
+      const mockFindOneAndUpdateFn =
+        mockGameConfigModel.findOneAndUpdate as jest.Mock;
+      mockFindOneAndUpdateFn().select.mockResolvedValue(mockResult);
 
       // Act
       const result = await service.upsertGameConfig(args);
 
       // Assert
-      expect(mockGameConfigSchemaService.validateGameConfigSchema).toHaveBeenCalledWith({ 
-        id: mockSchemaId, 
-        config: args.config 
+      expect(
+        mockGameConfigSchemaService.validateGameConfigSchema,
+      ).toHaveBeenCalledWith({
+        id: mockSchemaId,
+        config: args.config,
       });
       expect(mockGameConfigModel.findOneAndUpdate).toHaveBeenCalledWith(
         { gameId: Number(args.gameId) },
-        { 
-          $set: { 
+        {
+          $set: {
             config: args.config,
-            gameConfigSchema: mockSchemaId
-          } 
+            gameConfigSchema: mockSchemaId,
+          },
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
       expect(result).toEqual(mockResult);
     });
@@ -195,19 +225,89 @@ describe('GameConfigService', () => {
       const args = {
         schemaId: mockSchemaId,
         gameId: 123,
-        config: { invalid: 'config' }
+        config: { invalid: 'config' },
       };
       const validationError = new Error('Schema validation failed');
-      
-      mockGameConfigSchemaService.validateGameConfigSchema.mockRejectedValue(validationError);
+
+      const mockValidateFn =
+        mockGameConfigSchemaService.validateGameConfigSchema as jest.Mock;
+      mockValidateFn.mockRejectedValue(validationError);
 
       // Act & Assert
-      await expect(service.upsertGameConfig(args)).rejects.toThrow('Schema validation failed');
-      expect(mockGameConfigSchemaService.validateGameConfigSchema).toHaveBeenCalledWith({ 
-        id: mockSchemaId, 
-        config: args.config 
+      await expect(service.upsertGameConfig(args)).rejects.toThrow(
+        'Schema validation failed',
+      );
+      expect(
+        mockGameConfigSchemaService.validateGameConfigSchema,
+      ).toHaveBeenCalledWith({
+        id: mockSchemaId,
+        config: args.config,
       });
       expect(mockGameConfigModel.findOneAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should create admin log when upserting game config', async () => {
+      // Arrange
+      const args = {
+        schemaId: mockSchemaId,
+        gameId: 123,
+        config: { enabled: true },
+      };
+      const mockResult = { gameId: 123, config: args.config };
+
+      const mockFindOneAndUpdateFn =
+        mockGameConfigModel.findOneAndUpdate as jest.Mock;
+      mockFindOneAndUpdateFn().select.mockResolvedValue(mockResult);
+
+      // Act
+      await service.upsertGameConfig(args);
+
+      // Assert
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'game-config',
+        action: 'insert',
+        diff: {
+          old: undefined,
+          new: mockResult,
+        },
+      });
+    });
+
+    it('should create admin log with update action when existing config is found', async () => {
+      // Arrange
+      const args = {
+        schemaId: mockSchemaId,
+        gameId: 123,
+        config: { enabled: true },
+      };
+      const oldConfig = {
+        gameId: 123,
+        config: { enabled: false },
+        toObject: () => ({ gameId: 123, config: { enabled: false } }),
+      };
+      const mockResult = { gameId: 123, config: args.config };
+
+      const mockFindOneFn = mockGameConfigModel.findOne as jest.Mock;
+      const mockFindOneAndUpdateFn =
+        mockGameConfigModel.findOneAndUpdate as jest.Mock;
+
+      mockFindOneFn().select.mockResolvedValue(oldConfig);
+      mockFindOneAndUpdateFn().select.mockResolvedValue(mockResult);
+
+      // Act
+      await service.upsertGameConfig(args);
+
+      // Assert
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'game-config',
+        action: 'update',
+        diff: {
+          old: { gameId: 123, config: { enabled: false } },
+          new: mockResult,
+        },
+      });
     });
   });
 
@@ -216,14 +316,17 @@ describe('GameConfigService', () => {
       // Arrange
       const gameId = 123;
       const mockResult = { gameId, config: { enabled: true } };
-      mockGameConfigModel.findOne().select.mockResolvedValue(mockResult);
+      const mockFindOneFn = mockGameConfigModel.findOne as jest.Mock;
+      mockFindOneFn().select.mockResolvedValue(mockResult);
 
       // Act
       const result = await service.getGameConfigByGameId(gameId);
 
       // Assert
-      expect(mockGameConfigModel.findOne).toHaveBeenCalledWith({ gameId: Number(gameId) });
-      expect(mockGameConfigModel.findOne().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockGameConfigModel.findOne).toHaveBeenCalledWith({
+        gameId: Number(gameId),
+      });
+      expect(mockFindOneFn().select).toHaveBeenCalledWith('-_id -__v');
       expect(result).toEqual(mockResult);
     });
   });
@@ -233,16 +336,17 @@ describe('GameConfigService', () => {
       // Arrange
       const mockResult = [
         { gameId: 123, config: { enabled: true } },
-        { gameId: 456, config: { enabled: false } }
+        { gameId: 456, config: { enabled: false } },
       ];
-      mockGameConfigModel.find().select.mockResolvedValue(mockResult);
+      const mockFindFn = mockGameConfigModel.find as jest.Mock;
+      mockFindFn().select.mockResolvedValue(mockResult);
 
       // Act
       const result = await service.getAllGameConfigs();
 
       // Assert
       expect(mockGameConfigModel.find).toHaveBeenCalled();
-      expect(mockGameConfigModel.find().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindFn().select).toHaveBeenCalledWith('-_id -__v');
       expect(result).toEqual(mockResult);
     });
   });

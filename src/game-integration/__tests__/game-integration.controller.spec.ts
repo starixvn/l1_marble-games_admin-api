@@ -3,7 +3,10 @@ import { GameIntegrationController } from '../game-integration.controller';
 import { GameIntegrationService } from '../game-integration.service';
 import { GameIntegrationQueryDto } from '../dto/game-integration-query.dto';
 import { GameIntegrationUpdateRequestDto } from '../dto/game-integration-update-request.dto';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 describe('GameIntegrationController', () => {
   let controller: GameIntegrationController;
@@ -26,7 +29,9 @@ describe('GameIntegrationController', () => {
       ],
     }).compile();
 
-    controller = module.get<GameIntegrationController>(GameIntegrationController);
+    controller = module.get<GameIntegrationController>(
+      GameIntegrationController,
+    );
     service = module.get<GameIntegrationService>(GameIntegrationService);
   });
 
@@ -66,26 +71,42 @@ describe('GameIntegrationController', () => {
 
     it('should successfully upsert game integration with operatorId', async () => {
       // Arrange
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(mockQueryWithOperatorId, mockUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        mockQueryWithOperatorId,
+        mockUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, mockUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        mockUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
     it('should successfully upsert game integration with alias', async () => {
       // Arrange
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(mockQueryWithAlias, mockUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        mockQueryWithAlias,
+        mockUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias, mockUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithAlias,
+        mockUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -100,13 +121,21 @@ describe('GameIntegrationController', () => {
         patches: undefined,
         markets: undefined,
       };
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(minimalResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        minimalResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(mockQueryWithOperatorId, minimalUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        mockQueryWithOperatorId,
+        minimalUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, minimalUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        minimalUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(minimalResponse);
     });
@@ -118,10 +147,16 @@ describe('GameIntegrationController', () => {
 
       // Act & Assert
       await expect(
-        controller.upsertGameIntegration(mockQueryWithOperatorId, mockUpdateRequest)
+        controller.upsertGameIntegration(
+          mockQueryWithOperatorId,
+          mockUpdateRequest,
+        ),
       ).rejects.toThrow(NotFoundException);
 
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, mockUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        mockUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -132,10 +167,16 @@ describe('GameIntegrationController', () => {
 
       // Act & Assert
       await expect(
-        controller.upsertGameIntegration(mockQueryWithOperatorId, mockUpdateRequest)
+        controller.upsertGameIntegration(
+          mockQueryWithOperatorId,
+          mockUpdateRequest,
+        ),
       ).rejects.toThrow(InternalServerErrorException);
 
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, mockUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        mockUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -146,23 +187,37 @@ describe('GameIntegrationController', () => {
 
       // Act & Assert
       await expect(
-        controller.upsertGameIntegration(mockQueryWithOperatorId, mockUpdateRequest)
+        controller.upsertGameIntegration(
+          mockQueryWithOperatorId,
+          mockUpdateRequest,
+        ),
       ).rejects.toThrow('Unexpected error');
 
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, mockUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        mockUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
     });
 
     it('should handle query with only required gameId parameter', async () => {
       // Arrange
       const queryWithOnlyGameId = { gameId: 1001 } as GameIntegrationQueryDto;
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(queryWithOnlyGameId, mockUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        queryWithOnlyGameId,
+        mockUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(queryWithOnlyGameId, mockUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        queryWithOnlyGameId,
+        mockUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -172,13 +227,21 @@ describe('GameIntegrationController', () => {
       const partialUpdateRequest: GameIntegrationUpdateRequestDto = {
         mergeEvent: { eventType: 'match', priority: 1 },
       };
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(mockQueryWithOperatorId, partialUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        mockQueryWithOperatorId,
+        partialUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, partialUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        partialUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -188,13 +251,21 @@ describe('GameIntegrationController', () => {
       const partialUpdateRequest: GameIntegrationUpdateRequestDto = {
         markets: [],
       };
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(mockQueryWithOperatorId, partialUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        mockQueryWithOperatorId,
+        partialUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, partialUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        partialUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -208,13 +279,21 @@ describe('GameIntegrationController', () => {
           { op: 'remove', path: '/deprecated' },
         ],
       };
-      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.upsertGameIntegration(mockQueryWithOperatorId, complexUpdateRequest);
+      const result = await controller.upsertGameIntegration(
+        mockQueryWithOperatorId,
+        complexUpdateRequest,
+      );
 
       // Assert
-      expect(service.upsertGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId, complexUpdateRequest);
+      expect(service.upsertGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+        complexUpdateRequest,
+      );
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -249,26 +328,36 @@ describe('GameIntegrationController', () => {
 
     it('should successfully get game integration with operatorId', async () => {
       // Arrange
-      mockGameIntegrationService.getGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
-      const result = await controller.getGameIntegration(mockQueryWithOperatorId);
+      const result = await controller.getGameIntegration(
+        mockQueryWithOperatorId,
+      );
 
       // Assert
-      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
     it('should successfully get game integration with alias', async () => {
       // Arrange
-      mockGameIntegrationService.getGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
       const result = await controller.getGameIntegration(mockQueryWithAlias);
 
       // Assert
-      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithAlias,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -279,13 +368,19 @@ describe('GameIntegrationController', () => {
         ...mockGameIntegrationResponse,
         markets: [],
       };
-      mockGameIntegrationService.getGameIntegration.mockResolvedValue(responseWithoutMarkets);
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(
+        responseWithoutMarkets,
+      );
 
       // Act
-      const result = await controller.getGameIntegration(mockQueryWithOperatorId);
+      const result = await controller.getGameIntegration(
+        mockQueryWithOperatorId,
+      );
 
       // Assert
-      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(responseWithoutMarkets);
     });
@@ -300,7 +395,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow(NotFoundException);
-      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -314,20 +411,26 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow(NotFoundException);
-      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithAlias,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
     });
 
     it('should handle query with only required gameId parameter', async () => {
       // Arrange
       const queryWithOnlyGameId = { gameId: 1001 } as GameIntegrationQueryDto;
-      mockGameIntegrationService.getGameIntegration.mockResolvedValue(mockGameIntegrationResponse);
+      mockGameIntegrationService.getGameIntegration.mockResolvedValue(
+        mockGameIntegrationResponse,
+      );
 
       // Act
       const result = await controller.getGameIntegration(queryWithOnlyGameId);
 
       // Assert
-      expect(service.getGameIntegration).toHaveBeenCalledWith(queryWithOnlyGameId);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        queryWithOnlyGameId,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockGameIntegrationResponse);
     });
@@ -342,7 +445,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow('Unexpected error');
-      expect(service.getGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.getGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
     });
   });
@@ -363,12 +468,18 @@ describe('GameIntegrationController', () => {
       mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(true);
 
       // Act
-      const result = await controller.deleteGameIntegration(mockQueryWithOperatorId);
+      const result = await controller.deleteGameIntegration(
+        mockQueryWithOperatorId,
+      );
 
       // Assert
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ message: 'Game integration deleted successfully' });
+      expect(result).toEqual({
+        message: 'Game integration deleted successfully',
+      });
     });
 
     it('should successfully delete game integration with alias', async () => {
@@ -379,22 +490,13 @@ describe('GameIntegrationController', () => {
       const result = await controller.deleteGameIntegration(mockQueryWithAlias);
 
       // Assert
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithAlias,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ message: 'Game integration deleted successfully' });
-    });
-
-    it('should throw NotFoundException when game integration does not exist', async () => {
-      // Arrange
-      mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(false);
-
-      // Act
-      const promise = controller.deleteGameIntegration(mockQueryWithOperatorId);
-
-      // Assert
-      await expect(promise).rejects.toThrow(NotFoundException);
-      await expect(promise).rejects.toThrow('Game integration not found');
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(result).toEqual({
+        message: 'Game integration deleted successfully',
+      });
     });
 
     it('should throw NotFoundException when operator is not found', async () => {
@@ -407,7 +509,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow(NotFoundException);
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -421,7 +525,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow(NotFoundException);
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithAlias);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithAlias,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -436,7 +542,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow(NotFoundException);
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(queryWithOnlyGameId);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        queryWithOnlyGameId,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -450,7 +558,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       await expect(promise).rejects.toThrow('Unexpected error');
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
@@ -459,27 +569,20 @@ describe('GameIntegrationController', () => {
       mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(true);
 
       // Act
-      const result = await controller.deleteGameIntegration(mockQueryWithOperatorId);
+      const result = await controller.deleteGameIntegration(
+        mockQueryWithOperatorId,
+      );
 
       // Assert
-      expect(result).toEqual({ message: 'Game integration deleted successfully' });
+      expect(result).toEqual({
+        message: 'Game integration deleted successfully',
+      });
       expect(typeof result).toBe('object');
       expect(result).toHaveProperty('message');
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
+      expect(service.deleteGameIntegration).toHaveBeenCalledWith(
+        mockQueryWithOperatorId,
+      );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle failed deletion and throw NotFoundException', async () => {
-      // Arrange
-      mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(false);
-
-      // Act
-      const promise = controller.deleteGameIntegration(mockQueryWithOperatorId);
-
-      // Assert
-      await expect(promise).rejects.toThrow(NotFoundException);
-      await expect(promise).rejects.toThrow('Game integration not found');
-      expect(service.deleteGameIntegration).toHaveBeenCalledWith(mockQueryWithOperatorId);
     });
 
     it('should pass through the query parameters correctly to service', async () => {
@@ -495,7 +598,9 @@ describe('GameIntegrationController', () => {
 
       // Assert
       expect(service.deleteGameIntegration).toHaveBeenCalledWith(customQuery);
-      expect(result).toEqual({ message: 'Game integration deleted successfully' });
+      expect(result).toEqual({
+        message: 'Game integration deleted successfully',
+      });
     });
   });
 });

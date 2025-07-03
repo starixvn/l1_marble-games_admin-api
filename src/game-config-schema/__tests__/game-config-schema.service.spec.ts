@@ -3,10 +3,13 @@ import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { GameConfigSchemaService } from '../game-config-schema.service';
 import { GameConfigJsonSchema } from '../schema/game-config-schema.schema';
+import { AdminLogService } from '../../admin-log/admin-log.service';
+import { AdminLogActions } from '../../admin-log/constants';
 
 describe('GameConfigSchemaService', () => {
   let service: GameConfigSchemaService;
   let mockModel: any;
+  let mockAdminLogService: any;
 
   const mockId = '507f1f77bcf86cd799439011';
   const mockGameConfigSchema = {
@@ -20,12 +23,12 @@ describe('GameConfigSchemaService', () => {
           type: 'object',
           properties: {
             sound: { type: 'boolean' },
-            music: { type: 'boolean' }
+            music: { type: 'boolean' },
           },
-          required: ['sound', 'music']
-        }
+          required: ['sound', 'music'],
+        },
       },
-      required: ['level', 'difficulty', 'settings']
+      required: ['level', 'difficulty', 'settings'],
     },
     name: 'Test Game Configuration',
     uiSchema: {
@@ -33,9 +36,9 @@ describe('GameConfigSchemaService', () => {
       difficulty: { 'ui:widget': 'select' },
       settings: {
         sound: { 'ui:widget': 'checkbox' },
-        music: { 'ui:widget': 'checkbox' }
-      }
-    }
+        music: { 'ui:widget': 'checkbox' },
+      },
+    },
   };
 
   beforeEach(async () => {
@@ -45,12 +48,20 @@ describe('GameConfigSchemaService', () => {
       find: jest.fn(),
     };
 
+    mockAdminLogService = {
+      createLog: jest.fn().mockResolvedValue({}),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GameConfigSchemaService,
         {
           provide: getModelToken(GameConfigJsonSchema.name),
           useValue: mockModel,
+        },
+        {
+          provide: AdminLogService,
+          useValue: mockAdminLogService,
         },
       ],
     }).compile();
@@ -62,7 +73,7 @@ describe('GameConfigSchemaService', () => {
     it('should return game config schema when valid id is provided', async () => {
       // Arrange
       const mockReturnValue = {
-        select: jest.fn().mockResolvedValue(mockGameConfigSchema)
+        select: jest.fn().mockResolvedValue(mockGameConfigSchema),
       };
       mockModel.findById.mockReturnValue(mockReturnValue);
 
@@ -81,7 +92,7 @@ describe('GameConfigSchemaService', () => {
 
       // Act & Assert
       await expect(service.getGameConfigSchema(invalidId)).rejects.toThrow(
-        new BadRequestException(`Invalid ObjectId format: ${invalidId}`)
+        new BadRequestException(`Invalid ObjectId format: ${invalidId}`),
       );
     });
 
@@ -89,13 +100,15 @@ describe('GameConfigSchemaService', () => {
       // Arrange
       const nonExistentId = '507f1f77bcf86cd799439012';
       const mockReturnValue = {
-        select: jest.fn().mockResolvedValue(null)
+        select: jest.fn().mockResolvedValue(null),
       };
       mockModel.findById.mockReturnValue(mockReturnValue);
 
       // Act & Assert
       await expect(service.getGameConfigSchema(nonExistentId)).rejects.toThrow(
-        new NotFoundException(`Game config schema not found for id: ${nonExistentId}`)
+        new NotFoundException(
+          `Game config schema not found for id: ${nonExistentId}`,
+        ),
       );
     });
   });
@@ -104,25 +117,28 @@ describe('GameConfigSchemaService', () => {
     it('should return all game config schemas', async () => {
       // Arrange
       const mockSchemas = [
-        { 
-          _id: mockId, 
+        {
+          _id: mockId,
           name: 'Schema 1',
           toObject: jest.fn().mockImplementation(({ transform }) => {
             const result = { _id: mockId, name: 'Schema 1' };
             return transform(null, result);
-          })
+          }),
         },
-        { 
-          _id: '507f1f77bcf86cd799439012', 
+        {
+          _id: '507f1f77bcf86cd799439012',
           name: 'Schema 2',
           toObject: jest.fn().mockImplementation(({ transform }) => {
-            const result = { _id: '507f1f77bcf86cd799439012', name: 'Schema 2' };
+            const result = {
+              _id: '507f1f77bcf86cd799439012',
+              name: 'Schema 2',
+            };
             return transform(null, result);
-          })
-        }
+          }),
+        },
       ];
       const mockReturnValue = {
-        select: jest.fn().mockResolvedValue(mockSchemas)
+        select: jest.fn().mockResolvedValue(mockSchemas),
       };
       mockModel.find.mockReturnValue(mockReturnValue);
 
@@ -131,10 +147,12 @@ describe('GameConfigSchemaService', () => {
 
       // Assert
       expect(mockModel.find).toHaveBeenCalled();
-      expect(mockReturnValue.select).toHaveBeenCalledWith('-__v -schema -uiSchema');
+      expect(mockReturnValue.select).toHaveBeenCalledWith(
+        '-__v -schema -uiSchema',
+      );
       expect(result).toEqual([
         { id: mockId, name: 'Schema 1' },
-        { id: '507f1f77bcf86cd799439012', name: 'Schema 2' }
+        { id: '507f1f77bcf86cd799439012', name: 'Schema 2' },
       ]);
     });
   });
@@ -145,11 +163,14 @@ describe('GameConfigSchemaService', () => {
       const args = {
         schema: mockGameConfigSchema.schema,
         name: mockGameConfigSchema.name,
-        uiSchema: mockGameConfigSchema.uiSchema
+        uiSchema: mockGameConfigSchema.uiSchema,
       };
-      
-      const { _id, ...expectedResultWithoutId } = mockGameConfigSchema;
-      const expectedResult = { ...expectedResultWithoutId, id: mockId };
+
+      const expectedResult = {
+        ...mockGameConfigSchema,
+        id: mockId,
+      };
+      delete (expectedResult as any)._id;
 
       const mockSave = jest.fn().mockResolvedValue({
         toObject: jest.fn().mockImplementation((options) => {
@@ -158,7 +179,7 @@ describe('GameConfigSchemaService', () => {
             return options.transform(null, result);
           }
           return result;
-        })
+        }),
       });
       const mockToObject = jest.fn().mockImplementation((options) => {
         const result = { ...mockGameConfigSchema };
@@ -171,7 +192,7 @@ describe('GameConfigSchemaService', () => {
       // Mock the model constructor
       const mockConstructor = jest.fn().mockImplementation(() => ({
         save: mockSave,
-        toObject: mockToObject
+        toObject: mockToObject,
       }));
 
       // Replace the model in the service with our mock
@@ -184,9 +205,17 @@ describe('GameConfigSchemaService', () => {
       expect(mockConstructor).toHaveBeenCalledWith({
         schema: args.schema,
         name: args.name,
-        uiSchema: args.uiSchema
+        uiSchema: args.uiSchema,
       });
       expect(mockSave).toHaveBeenCalled();
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'game-config-schema',
+        action: AdminLogActions.INSERT,
+        diff: {
+          new: expectedResult,
+        },
+      });
       expect(result).toEqual(expectedResult);
     });
 
@@ -196,24 +225,44 @@ describe('GameConfigSchemaService', () => {
         id: mockId,
         schema: mockGameConfigSchema.schema,
         name: 'Updated Display Name',
-        uiSchema: mockGameConfigSchema.uiSchema
+        uiSchema: mockGameConfigSchema.uiSchema,
       };
-      
-      const { _id, ...expectedResultWithoutId } = { ...mockGameConfigSchema, name: args.name };
-      const expectedResult = { ...expectedResultWithoutId, id: mockId };
-      
+
+      const expectedOld = {
+        ...mockGameConfigSchema,
+        id: mockId,
+      };
+      delete (expectedOld as any)._id;
+      const expectedNew = {
+        ...mockGameConfigSchema,
+        name: args.name,
+        id: mockId,
+      };
+      delete (expectedNew as any)._id;
+
+      const oldSchema = {
+        ...mockGameConfigSchema,
+        toObject: jest.fn().mockImplementation(({ transform }) => {
+          const result = { ...mockGameConfigSchema };
+          return transform(null, result);
+        }),
+      };
+
       const mockDocument = {
-        ...mockGameConfigSchema, 
+        ...mockGameConfigSchema,
         name: args.name,
         toObject: jest.fn().mockImplementation(({ transform }) => {
           const result = { ...mockGameConfigSchema, name: args.name };
           return transform(null, result);
-        })
+        }),
       };
       const mockReturnValue = {
-        select: jest.fn().mockResolvedValue(mockDocument)
+        select: jest.fn().mockResolvedValue(mockDocument),
       };
       mockModel.findByIdAndUpdate.mockReturnValue(mockReturnValue);
+      mockModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(oldSchema),
+      });
 
       // Act
       const result = await service.upsertGameConfigSchema(args);
@@ -224,12 +273,21 @@ describe('GameConfigSchemaService', () => {
         {
           schema: args.schema,
           name: args.name,
-          uiSchema: args.uiSchema
+          uiSchema: args.uiSchema,
         },
-        { new: true }
+        { new: true },
       );
       expect(mockReturnValue.select).toHaveBeenCalledWith('-__v');
-      expect(result).toEqual(expectedResult);
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'game-config-schema',
+        action: AdminLogActions.UPDATE,
+        diff: {
+          old: expectedOld,
+          new: expectedNew,
+        },
+      });
+      expect(result).toEqual(expectedNew);
     });
 
     it('should throw BadRequestException when invalid ObjectId is provided for update', async () => {
@@ -238,12 +296,12 @@ describe('GameConfigSchemaService', () => {
         id: 'invalid-id',
         schema: mockGameConfigSchema.schema,
         name: mockGameConfigSchema.name,
-        uiSchema: mockGameConfigSchema.uiSchema
+        uiSchema: mockGameConfigSchema.uiSchema,
       };
 
       // Act & Assert
       await expect(service.upsertGameConfigSchema(args)).rejects.toThrow(
-        new BadRequestException(`Invalid ObjectId format: ${args.id}`)
+        new BadRequestException(`Invalid ObjectId format: ${args.id}`),
       );
     });
   });
@@ -257,12 +315,12 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'medium',
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: mockId,
-          config: validConfig
+          config: validConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -281,12 +339,12 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'hard',
           settings: {
             sound: false,
-            music: true
-          }
+            music: true,
+          },
         };
         const args = {
           id: mockId,
-          config: validConfig
+          config: validConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -306,12 +364,12 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'medium',
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: mockId,
-          config: invalidConfig
+          config: invalidConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -329,12 +387,12 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'extreme',
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: mockId,
-          config: invalidConfig
+          config: invalidConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -351,12 +409,12 @@ describe('GameConfigSchemaService', () => {
           level: 5,
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: mockId,
-          config: invalidConfig
+          config: invalidConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -373,12 +431,12 @@ describe('GameConfigSchemaService', () => {
           level: 5,
           difficulty: 'easy',
           settings: {
-            sound: true
-          }
+            sound: true,
+          },
         };
         const args = {
           id: mockId,
-          config: invalidConfig
+          config: invalidConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -396,12 +454,12 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'medium',
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: mockId,
-          config: invalidConfig
+          config: invalidConfig,
         };
         mockModel.findById.mockResolvedValue(mockGameConfigSchema);
 
@@ -422,30 +480,30 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'medium',
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: invalidId,
-          config
+          config,
         };
 
         // Act & Assert
         await expect(service.validateGameConfigSchema(args)).rejects.toThrow(
-          new BadRequestException(`Invalid ObjectId format: ${invalidId}`)
+          new BadRequestException(`Invalid ObjectId format: ${invalidId}`),
         );
       });
     });
 
-    describe("no schema id provided", () => {
-      it("should validate with default schema and throw BadRequestException when config is invalid", async () => {
+    describe('no schema id provided', () => {
+      it('should validate with default schema and throw BadRequestException when config is invalid', async () => {
         // Arrange
         const invalidConfig = {
           level: 5,
-          difficulty: 'medium'
+          difficulty: 'medium',
         };
         const args = {
-          config: invalidConfig
+          config: invalidConfig,
         };
 
         // Act
@@ -455,13 +513,13 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it("should validate with default schema for valid game config", async () => {
+      it('should validate with default schema for valid game config', async () => {
         // Arrange
         const validConfig = {
-          enabled: true
+          enabled: true,
         };
         const args = {
-          config: validConfig
+          config: validConfig,
         };
 
         // Act
@@ -471,14 +529,14 @@ describe('GameConfigSchemaService', () => {
         await expect(act).resolves.not.toThrow();
       });
 
-      it("should validate with default schema when id is empty string", async () => {
+      it('should validate with default schema when id is empty string', async () => {
         // Arrange
         const validConfig = {
-          enabled: false
+          enabled: false,
         };
         const args = {
           id: '',
-          config: validConfig
+          config: validConfig,
         };
 
         // Act
@@ -488,13 +546,13 @@ describe('GameConfigSchemaService', () => {
         await expect(act).resolves.not.toThrow();
       });
 
-      it("should throw BadRequestException with default schema when required field is missing", async () => {
+      it('should throw BadRequestException with default schema when required field is missing', async () => {
         // Arrange
         const invalidConfig = {
-          someOtherField: 'value'
+          someOtherField: 'value',
         };
         const args = {
-          config: invalidConfig
+          config: invalidConfig,
         };
 
         // Act
@@ -504,13 +562,13 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it("should throw BadRequestException with default schema when enabled field has wrong type", async () => {
+      it('should throw BadRequestException with default schema when enabled field has wrong type', async () => {
         // Arrange
         const invalidConfig = {
-          enabled: 'true'
+          enabled: 'true',
         };
         const args = {
-          config: invalidConfig
+          config: invalidConfig,
         };
 
         // Act
@@ -530,12 +588,12 @@ describe('GameConfigSchemaService', () => {
           difficulty: 'medium',
           settings: {
             sound: true,
-            music: false
-          }
+            music: false,
+          },
         };
         const args = {
           id: nonExistentId,
-          config
+          config,
         };
         mockModel.findById.mockResolvedValue(null);
 
@@ -544,7 +602,9 @@ describe('GameConfigSchemaService', () => {
 
         // Assert
         await expect(act).rejects.toThrow(
-          new NotFoundException(`Game config schema not found for id: ${nonExistentId}`)
+          new NotFoundException(
+            `Game config schema not found for id: ${nonExistentId}`,
+          ),
         );
         expect(mockModel.findById).toHaveBeenCalledWith(nonExistentId);
       });

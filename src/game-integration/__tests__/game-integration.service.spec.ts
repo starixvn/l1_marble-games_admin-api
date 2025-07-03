@@ -11,12 +11,15 @@ import { MarketIntegration } from '../schema/market-integration.schema';
 import { OperatorCredential } from '../../operator/schema/operator-credential.schema';
 import { GameIntegrationQueryDto } from '../dto/game-integration-query.dto';
 import { GameIntegrationUpdateRequestDto } from '../dto/game-integration-update-request.dto';
+import { AdminLogService } from '../../admin-log/admin-log.service';
+import { AdminLogActions } from '../../admin-log/constants';
 
 describe('GameIntegrationService', () => {
   let service: GameIntegrationService;
   let mockGameIntegrationModel: any;
   let mockMarketIntegrationModel: any;
   let mockOperatorModel: any;
+  let mockAdminLogService: any;
 
   const mockOperatorId = new Types.ObjectId();
   const mockGameIntegrationId = new Types.ObjectId();
@@ -38,6 +41,10 @@ describe('GameIntegrationService', () => {
       findOne: jest.fn(),
     };
 
+    const mockAdminLogServiceFactory = {
+      createLog: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GameIntegrationService,
@@ -53,6 +60,10 @@ describe('GameIntegrationService', () => {
           provide: getModelToken(OperatorCredential.name),
           useValue: mockOperatorModelFactory,
         },
+        {
+          provide: AdminLogService,
+          useValue: mockAdminLogServiceFactory,
+        },
       ],
     }).compile();
 
@@ -62,6 +73,7 @@ describe('GameIntegrationService', () => {
       getModelToken(MarketIntegration.name),
     );
     mockOperatorModel = module.get(getModelToken(OperatorCredential.name));
+    mockAdminLogService = module.get(AdminLogService);
   });
 
   afterEach(() => {
@@ -83,6 +95,24 @@ describe('GameIntegrationService', () => {
           lean: jest.fn().mockResolvedValue(gameIntegration),
         }),
       }),
+    });
+  };
+
+  const setupGameIntegrationFindOneMockMultipleCalls = (calls: any[]) => {
+    const mockLean = jest.fn();
+    const mockPopulate = jest.fn().mockReturnValue({
+      lean: mockLean,
+    });
+    const mockSelect = jest.fn().mockReturnValue({
+      populate: mockPopulate,
+    });
+
+    calls.forEach((call) => {
+      mockLean.mockResolvedValueOnce(call);
+    });
+
+    mockGameIntegrationModel.findOne.mockReturnValue({
+      select: mockSelect,
     });
   };
 
@@ -114,7 +144,10 @@ describe('GameIntegrationService', () => {
 
         setupOperatorMock(mockOperator);
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
-        setupGameIntegrationFindOneMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
 
         // Act
         const result = await service.upsertGameIntegration(
@@ -138,6 +171,15 @@ describe('GameIntegrationService', () => {
           },
           { upsert: true, new: true },
         );
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.INSERT,
+          diff: {
+            old: undefined,
+            new: mockUpsertedIntegration,
+          },
+        });
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
@@ -177,7 +219,10 @@ describe('GameIntegrationService', () => {
           mockCreatedMarketIntegration,
         );
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
-        setupGameIntegrationFindOneMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
 
         // Act
         const result = await service.upsertGameIntegration(
@@ -186,9 +231,11 @@ describe('GameIntegrationService', () => {
         );
 
         // Assert
-        expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+        expect(
+          mockMarketIntegrationModel.findOneAndUpdate,
+        ).toHaveBeenCalledWith(
           { name: 'Test Market' },
-          { 
+          {
             $set: {
               merge: { key: 'value' },
               selections: ['Selection 1', 'Selection 2'],
@@ -208,6 +255,15 @@ describe('GameIntegrationService', () => {
           },
           { upsert: true, new: true },
         );
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.INSERT,
+          diff: {
+            old: undefined,
+            new: mockUpsertedIntegration,
+          },
+        });
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
@@ -247,7 +303,10 @@ describe('GameIntegrationService', () => {
           mockUpdatedMarketIntegration,
         );
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
-        setupGameIntegrationFindOneMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
 
         // Act
         const result = await service.upsertGameIntegration(
@@ -260,7 +319,7 @@ describe('GameIntegrationService', () => {
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
           { name: 'Updated Market' },
-          { 
+          {
             $set: {
               merge: { updated: true },
               selections: ['Updated Selection'],
@@ -280,6 +339,66 @@ describe('GameIntegrationService', () => {
           },
           { upsert: true, new: true },
         );
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.INSERT,
+          diff: {
+            old: undefined,
+            new: mockUpsertedIntegration,
+          },
+        });
+        expect(result).toEqual(mockUpsertedIntegration);
+      });
+
+      it('should update existing game integration and log as UPDATE', async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: 'match' },
+          markets: [],
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockOldIntegration = {
+          _id: mockGameIntegrationId,
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: 'old' },
+          markets: [],
+        };
+        const mockUpsertedIntegration = {
+          _id: mockGameIntegrationId,
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          ...updateRequest,
+        };
+
+        setupOperatorMock(mockOperator);
+        setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          mockOldIntegration,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
+
+        // Act
+        const result = await service.upsertGameIntegration(
+          query,
+          updateRequest,
+        );
+
+        // Assert
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.UPDATE,
+          diff: {
+            old: mockOldIntegration,
+            new: mockUpsertedIntegration,
+          },
+        });
         expect(result).toEqual(mockUpsertedIntegration);
       });
     });
@@ -305,7 +424,10 @@ describe('GameIntegrationService', () => {
 
         setupOperatorMock(mockOperator);
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
-        setupGameIntegrationFindOneMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
 
         // Act
         const result = await service.upsertGameIntegration(
@@ -329,6 +451,15 @@ describe('GameIntegrationService', () => {
           },
           { upsert: true, new: true },
         );
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.INSERT,
+          diff: {
+            old: undefined,
+            new: mockUpsertedIntegration,
+          },
+        });
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
@@ -422,9 +553,11 @@ describe('GameIntegrationService', () => {
         await expect(
           service.upsertGameIntegration(query, updateRequest),
         ).rejects.toThrow(InternalServerErrorException);
-        expect(mockMarketIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+        expect(
+          mockMarketIntegrationModel.findOneAndUpdate,
+        ).toHaveBeenCalledWith(
           { name: 'Test Market' },
-          { 
+          {
             $set: {
               merge: { key: 'value' },
               selections: ['Selection 1'],
@@ -465,7 +598,7 @@ describe('GameIntegrationService', () => {
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
           { name: 'Updated Market' },
-          { 
+          {
             $set: {
               merge: { updated: true },
               selections: ['Updated Selection'],
@@ -499,7 +632,10 @@ describe('GameIntegrationService', () => {
 
         setupOperatorMock(mockOperator);
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
-        setupGameIntegrationFindOneMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
 
         // Act
         const result = await service.upsertGameIntegration(
@@ -520,6 +656,15 @@ describe('GameIntegrationService', () => {
           },
           { upsert: true, new: true },
         );
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.INSERT,
+          diff: {
+            old: undefined,
+            new: mockUpsertedIntegration,
+          },
+        });
         expect(result).toEqual(mockUpsertedIntegration);
       });
     });
@@ -542,7 +687,10 @@ describe('GameIntegrationService', () => {
 
         setupOperatorMock(mockOperator);
         setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
-        setupGameIntegrationFindOneMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
 
         // Act
         const result = await service.upsertGameIntegration(
@@ -556,6 +704,15 @@ describe('GameIntegrationService', () => {
           { $set: { operatorId: mockOperatorId, gameId: 1001, markets: [] } },
           { upsert: true, new: true },
         );
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.INSERT,
+          diff: {
+            old: undefined,
+            new: mockUpsertedIntegration,
+          },
+        });
         expect(result).toEqual(mockUpsertedIntegration);
       });
     });
@@ -802,8 +959,15 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: 'match' },
+          markets: [],
+        };
 
         setupOperatorMock(mockOperator);
+        setupGameIntegrationFindOneMock(mockGameIntegration);
         mockGameIntegrationModel.deleteOne.mockResolvedValue({
           deletedCount: 1,
         });
@@ -815,9 +979,21 @@ describe('GameIntegrationService', () => {
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
           _id: mockOperatorId.toString(),
         });
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        });
         expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
           gameId: 1001,
+        });
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.DELETE,
+          diff: {
+            old: mockGameIntegration,
+          },
         });
         expect(result).toBe(true);
       });
@@ -831,22 +1007,21 @@ describe('GameIntegrationService', () => {
         const mockOperator = { _id: mockOperatorId };
 
         setupOperatorMock(mockOperator);
-        mockGameIntegrationModel.deleteOne.mockResolvedValue({
-          deletedCount: 0,
-        });
+        setupGameIntegrationFindOneMock(null);
 
-        // Act
-        const result = await service.deleteGameIntegration(query);
-
-        // Assert
+        // Act & Assert
+        await expect(service.deleteGameIntegration(query)).rejects.toThrow(
+          NotFoundException,
+        );
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
           _id: mockOperatorId.toString(),
         });
-        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
           gameId: 1001,
         });
-        expect(result).toBe(false);
+        expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+        expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
 
       it('should throw NotFoundException when operator does not exist', async () => {
@@ -866,6 +1041,7 @@ describe('GameIntegrationService', () => {
           _id: mockOperatorId.toString(),
         });
         expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+        expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
     });
 
@@ -877,8 +1053,15 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: 'match' },
+          markets: [],
+        };
 
         setupOperatorMock(mockOperator);
+        setupGameIntegrationFindOneMock(mockGameIntegration);
         mockGameIntegrationModel.deleteOne.mockResolvedValue({
           deletedCount: 1,
         });
@@ -890,9 +1073,21 @@ describe('GameIntegrationService', () => {
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
           name: 'test-operator',
         });
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
+          operatorId: mockOperatorId,
+          gameId: 1001,
+        });
         expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
           gameId: 1001,
+        });
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.DELETE,
+          diff: {
+            old: mockGameIntegration,
+          },
         });
         expect(result).toBe(true);
       });
@@ -906,22 +1101,21 @@ describe('GameIntegrationService', () => {
         const mockOperator = { _id: mockOperatorId };
 
         setupOperatorMock(mockOperator);
-        mockGameIntegrationModel.deleteOne.mockResolvedValue({
-          deletedCount: 0,
-        });
+        setupGameIntegrationFindOneMock(null);
 
-        // Act
-        const result = await service.deleteGameIntegration(query);
-
-        // Assert
+        // Act & Assert
+        await expect(service.deleteGameIntegration(query)).rejects.toThrow(
+          NotFoundException,
+        );
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
           name: 'test-operator',
         });
-        expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledWith({
+        expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
           gameId: 1001,
         });
-        expect(result).toBe(false);
+        expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+        expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
 
       it('should throw NotFoundException when operator does not exist', async () => {
@@ -941,6 +1135,7 @@ describe('GameIntegrationService', () => {
           name: 'non-existent-operator',
         });
         expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+        expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
     });
 
@@ -956,6 +1151,7 @@ describe('GameIntegrationService', () => {
           NotFoundException,
         );
         expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
+        expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
     });
 
@@ -967,8 +1163,14 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          markets: [],
+        };
 
         setupOperatorMock(mockOperator);
+        setupGameIntegrationFindOneMock(mockGameIntegration);
         mockGameIntegrationModel.deleteOne.mockResolvedValue({
           deletedCount: 1,
         });
@@ -979,6 +1181,14 @@ describe('GameIntegrationService', () => {
         // Assert
         expect(result).toBe(true);
         expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledTimes(1);
+        expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+          author: 'admin',
+          resource: 'game-integration',
+          action: AdminLogActions.DELETE,
+          diff: {
+            old: mockGameIntegration,
+          },
+        });
       });
 
       it('should return correct boolean value based on deletedCount', async () => {
@@ -988,8 +1198,14 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
+        const mockGameIntegration = {
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          markets: [],
+        };
 
         setupOperatorMock(mockOperator);
+        setupGameIntegrationFindOneMock(mockGameIntegration);
 
         // Test deletedCount = 0
         mockGameIntegrationModel.deleteOne.mockResolvedValueOnce({

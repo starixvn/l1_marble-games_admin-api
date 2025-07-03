@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  Inject,
 } from '@nestjs/common';
 import {
   GameIntegration,
@@ -22,6 +23,8 @@ import {
   MarketIntegration,
   MarketIntegrationDocument,
 } from './schema/market-integration.schema';
+import { AdminLogService } from '../admin-log/admin-log.service';
+import { AdminLogActions } from '../admin-log/constants';
 
 @Injectable()
 export class GameIntegrationService {
@@ -32,6 +35,8 @@ export class GameIntegrationService {
     private readonly marketIntegrationModel: Model<MarketIntegrationDocument>,
     @InjectModel(OperatorCredential.name)
     private readonly operatorModel: Model<OperatorDocument>,
+    @Inject(AdminLogService)
+    private readonly adminLogService: AdminLogService,
   ) {}
 
   async upsertGameIntegration(
@@ -46,6 +51,8 @@ export class GameIntegrationService {
       marketIntegrationToProcess,
     );
 
+    const oldGameIntegration = await this.getNullableGameIntegration(query);
+
     const processedUpdateRequest = {
       ...updateRequest,
       operatorId,
@@ -58,16 +65,54 @@ export class GameIntegrationService {
       query.gameId,
       processedUpdateRequest,
     );
-    return this.getGameIntegration(query);
+    const newGameIntegration = await this.getGameIntegration(query);
+
+    const action = oldGameIntegration
+      ? AdminLogActions.UPDATE
+      : AdminLogActions.INSERT;
+
+    void this.adminLogService.createLog({
+      author: 'admin',
+      resource: 'game-integration',
+      action,
+      diff: {
+        old: oldGameIntegration ?? undefined,
+        new: newGameIntegration,
+      },
+    });
+
+    return newGameIntegration;
   }
 
   async listGameIntegrations() {
-    return this.gameIntegrationModel.find().select('-_id -__v -markets -mergeEvent -mergeEventDetails -patches').lean();
+    return this.gameIntegrationModel
+      .find()
+      .select('-_id -__v -markets -mergeEvent -mergeEventDetails -patches')
+      .lean();
   }
 
   async deleteGameIntegration(query: GameIntegrationQueryDto) {
     const operatorId = await this.getOperator(query);
-    return (await this.gameIntegrationModel.deleteOne({ operatorId, gameId: query.gameId })).deletedCount > 0;
+    const oldGameIntegration = await this.getGameIntegration(query);
+
+    const result =
+      (
+        await this.gameIntegrationModel.deleteOne({
+          operatorId,
+          gameId: query.gameId,
+        })
+      ).deletedCount > 0;
+
+    void this.adminLogService.createLog({
+      author: 'admin',
+      resource: 'game-integration',
+      action: AdminLogActions.DELETE,
+      diff: {
+        old: oldGameIntegration,
+      },
+    });
+
+    return result;
   }
 
   async getGameIntegration(query: GameIntegrationQueryDto) {
@@ -90,6 +135,21 @@ export class GameIntegrationService {
     }
 
     return gameIntegration;
+  }
+
+  private async getNullableGameIntegration(query: GameIntegrationQueryDto) {
+    const operatorId = await this.getOperator(query);
+    return this.gameIntegrationModel
+      .findOne({ operatorId, gameId: query.gameId })
+      .select('-_id -__v -gameId -operatorId')
+      .populate({
+        path: 'markets',
+        select: '-_id -__v',
+        transform: (doc) => {
+          return doc;
+        },
+      })
+      .lean();
   }
 
   private async updateOrCreateGameIntegration(
@@ -155,21 +215,22 @@ export class GameIntegrationService {
     const merge = marketIntegration.merge ?? {};
     const selections = marketIntegration.selections ?? [];
 
-    const existingMarketIntegration = 
-      await this.marketIntegrationModel
-        .findOneAndUpdate(
-          { name: marketIntegration.name },
-          { 
-            $set: {
-              merge,
-              selections,
-            },
+    const existingMarketIntegration =
+      await this.marketIntegrationModel.findOneAndUpdate(
+        { name: marketIntegration.name },
+        {
+          $set: {
+            merge,
+            selections,
           },
-          { new: true, upsert: true },
-        );
+        },
+        { new: true, upsert: true },
+      );
 
     if (!existingMarketIntegration) {
-      throw new InternalServerErrorException('Failed to create or update market integration');
+      throw new InternalServerErrorException(
+        'Failed to create or update market integration',
+      );
     }
 
     return existingMarketIntegration._id;

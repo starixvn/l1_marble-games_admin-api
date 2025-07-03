@@ -1,48 +1,60 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
-import { GameConfigJsonSchema, GameConfigJsonSchemaDocument } from "./schema/game-config-schema.schema";
-import Ajv from "ajv";
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import {
+  GameConfigJsonSchema,
+  GameConfigJsonSchemaDocument,
+} from './schema/game-config-schema.schema';
+import Ajv from 'ajv';
+import { AdminLogService } from '../admin-log/admin-log.service';
+import { AdminLogActions } from '../admin-log/constants';
 
 export type UpsertGameConfigSchemaArgs = {
   id?: string;
   schema: object;
   name: string;
   uiSchema?: object;
-}
+};
 
 export type ValidateGameConfigSchemaArgs = {
   id?: string;
   config: object;
-}
+};
 
 export const DEFAULT_GAME_CONFIG_SCHEMA = {
-  "type": "object",
-  "properties": {
-    "enabled": {
-      "type": "boolean"
-    }
+  type: 'object',
+  properties: {
+    enabled: {
+      type: 'boolean',
+    },
   },
-  "required": [
-    "enabled"
-  ]
-}
+  required: ['enabled'],
+};
 
 @Injectable()
 export class GameConfigSchemaService {
-  private readonly ajv = new Ajv({ $data: true , $comment: true });
+  private readonly ajv = new Ajv({ $data: true, $comment: true });
 
   constructor(
     @InjectModel(GameConfigJsonSchema.name)
-    private readonly gameConfigJsonSchemaModel: Model<GameConfigJsonSchemaDocument>
+    private readonly gameConfigJsonSchemaModel: Model<GameConfigJsonSchemaDocument>,
+    @Inject(AdminLogService)
+    private readonly adminLogService: AdminLogService,
   ) {}
 
   async getGameConfigSchema(id: string) {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException(`Invalid ObjectId format: ${id}`);
     }
-    
-    const schema = await this.gameConfigJsonSchemaModel.findById(id).select('-__v -_id');
+
+    const schema = await this.gameConfigJsonSchemaModel
+      .findById(id)
+      .select('-__v -_id');
     if (!schema) {
       throw new NotFoundException(`Game config schema not found for id: ${id}`);
     }
@@ -50,13 +62,19 @@ export class GameConfigSchemaService {
   }
 
   async getAllGameConfigSchemas() {
-    const schemas = await this.gameConfigJsonSchemaModel.find().select('-__v -schema -uiSchema');
-    return schemas.map(schema => schema.toObject({ transform: (_, ret) => { 
-      ret.id = ret._id; 
-      delete ret._id; 
-      delete ret.__v; 
-      return ret; 
-    } }));
+    const schemas = await this.gameConfigJsonSchemaModel
+      .find()
+      .select('-__v -schema -uiSchema');
+    return schemas.map((schema) =>
+      schema.toObject({
+        transform: (_, ret) => {
+          ret.id = ret._id;
+          delete ret._id;
+          delete ret.__v;
+          return ret;
+        },
+      }),
+    );
   }
 
   async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
@@ -68,35 +86,84 @@ export class GameConfigSchemaService {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException(`Invalid ObjectId format: ${id}`);
       }
-      
-      const updatedSchema = await this.gameConfigJsonSchemaModel.findByIdAndUpdate(
-        id, { schema, name, uiSchema }, { new: true }
-      ).select('-__v');
-      
+
+      const oldSchema = await this.gameConfigJsonSchemaModel
+        .findById(id)
+        .select('-__v');
+
+      const updatedSchema = await this.gameConfigJsonSchemaModel
+        .findByIdAndUpdate(id, { schema, name, uiSchema }, { new: true })
+        .select('-__v');
+
       if (!updatedSchema) {
-        throw new NotFoundException(`Game config schema not found for id: ${id}`);
+        throw new NotFoundException(
+          `Game config schema not found for id: ${id}`,
+        );
       }
-      
-      return updatedSchema.toObject({ transform: (_, ret) => { 
-        ret.id = ret._id; 
-        delete ret._id; 
-        delete ret.__v; 
-        return ret; 
-      } });
+
+      const oldSchemaObject = oldSchema?.toObject({
+        transform: (_, ret) => {
+          ret.id = ret._id;
+          delete ret._id;
+          delete ret.__v;
+          return ret;
+        },
+      });
+
+      const updatedSchemaObject = updatedSchema.toObject({
+        transform: (_, ret) => {
+          ret.id = ret._id;
+          delete ret._id;
+          delete ret.__v;
+          return ret;
+        },
+      });
+
+      void this.adminLogService.createLog({
+        author: 'admin',
+        resource: 'game-config-schema',
+        action: AdminLogActions.UPDATE,
+        diff: {
+          old: oldSchemaObject,
+          new: updatedSchemaObject,
+        },
+      });
+
+      return updatedSchema.toObject({
+        transform: (_, ret) => {
+          ret.id = ret._id;
+          delete ret._id;
+          delete ret.__v;
+          return ret;
+        },
+      });
     }
-    
+
     const newSchema = new this.gameConfigJsonSchemaModel({
       schema,
       name,
-      uiSchema
+      uiSchema,
     });
     const saved = await newSchema.save();
-    return saved.toObject({ transform: (_, ret) => { 
-      ret.id = ret._id; 
-      delete ret._id; 
-      delete ret.__v; 
-      return ret; 
-    } });
+    const newSchemaObject = saved.toObject({
+      transform: (_, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    });
+
+    void this.adminLogService.createLog({
+      author: 'admin',
+      resource: 'game-config-schema',
+      action: AdminLogActions.INSERT,
+      diff: {
+        new: newSchemaObject,
+      },
+    });
+
+    return newSchemaObject;
   }
 
   async validateGameConfigSchema(args: ValidateGameConfigSchemaArgs) {
@@ -119,7 +186,7 @@ export class GameConfigSchemaService {
     return this.valideteConfig(config, gameConfigSchema.schema);
   }
 
-  private async valideteConfig(config: object, schema: object) {
+  private valideteConfig(config: object, schema: object) {
     const validate = this.ajv.compile(schema);
 
     const isValid = validate(config);
@@ -128,7 +195,7 @@ export class GameConfigSchemaService {
       throw new BadRequestException({
         validationErrors: validate.errors,
         config,
-        schema
+        schema,
       });
     }
   }
@@ -140,7 +207,7 @@ export class GameConfigSchemaService {
       throw new BadRequestException({
         message: 'Invalid JSON Schema',
         error: error instanceof Error ? error.message : String(error),
-        schema
+        schema,
       });
     }
   }

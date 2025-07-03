@@ -12,6 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
 import { ApiLogModule } from './api-log/api-log.module';
+import { AdminLogModule } from './admin-log/admin-log.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { ApiLogModule } from './api-log/api-log.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const dbConfig = configService.get('database');
 
         return {
@@ -37,6 +39,7 @@ import { ApiLogModule } from './api-log/api-log.module';
     GameConfigModule,
     GameConfigSchemaModule,
     ApiLogModule,
+    AdminLogModule,
   ],
   providers: [
     {

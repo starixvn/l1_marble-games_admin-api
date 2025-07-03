@@ -4,17 +4,31 @@ import { getModelToken } from '@nestjs/mongoose';
 import { OperatorCredential } from '../schema/operator-credential.schema';
 import * as bcrypt from 'bcryptjs';
 import * as randomUtils from '../../utils/random';
-import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
+import { AdminLogService } from '../../admin-log/admin-log.service';
 
 describe('OperatorService', () => {
   let service: OperatorService;
   let mockOperatorModel: any;
+  let mockAdminLogService: Partial<AdminLogService>;
   let bcryptHashSpy: jest.SpyInstance;
   let generateRandomPasswordSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    bcryptHashSpy = jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password' as never);
-    generateRandomPasswordSpy = jest.spyOn(randomUtils, 'generateRandomPassword').mockReturnValue('random-password');
+    bcryptHashSpy = jest
+      .spyOn(bcrypt, 'hash')
+      .mockResolvedValue('hashed-password' as never);
+    generateRandomPasswordSpy = jest
+      .spyOn(randomUtils, 'generateRandomPassword')
+      .mockReturnValue('random-password');
+
+    mockAdminLogService = {
+      createLog: jest.fn().mockResolvedValue(undefined),
+    } as Partial<AdminLogService>;
 
     class MockOperatorModel {
       password: string;
@@ -30,7 +44,7 @@ describe('OperatorService', () => {
       static readonly findById = jest.fn().mockImplementation(() => ({
         select: jest.fn().mockImplementation(() => Promise.resolve(null)),
       }));
-      
+
       static readonly findOne = jest.fn().mockImplementation(() => ({
         select: jest.fn().mockImplementation(() => Promise.resolve(null)),
       }));
@@ -42,6 +56,10 @@ describe('OperatorService', () => {
         {
           provide: getModelToken(OperatorCredential.name),
           useValue: MockOperatorModel,
+        },
+        {
+          provide: AdminLogService,
+          useValue: mockAdminLogService,
         },
       ],
     }).compile();
@@ -61,13 +79,13 @@ describe('OperatorService', () => {
         _id: 'test-id',
         toString: () => 'test-id',
       };
-      
+
       // Use a class-based approach without `this` typing issues
       mockOperatorModel.prototype.save = jest.fn().mockImplementation(() => {
         return Promise.resolve({
           _id: mockSavedOperator,
           password: 'hashed-password',
-          name: 'new-operator'
+          name: 'new-operator',
         });
       });
 
@@ -82,6 +100,18 @@ describe('OperatorService', () => {
         password: 'random-password',
         name: 'new-operator',
       });
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'operator',
+        action: 'insert',
+        diff: {
+          new: {
+            id: 'test-id',
+            password: 'NEW_PASSWORD',
+            name: 'new-operator',
+          },
+        },
+      });
     });
 
     it('should throw ConflictException when creating operator with existing name', async () => {
@@ -90,7 +120,7 @@ describe('OperatorService', () => {
         _id: 'existing-id',
         name: 'existing-operator',
       };
-      
+
       mockOperatorModel.findOne.mockImplementation(() => ({
         select: jest.fn().mockResolvedValue(existingOperator),
       }));
@@ -98,11 +128,15 @@ describe('OperatorService', () => {
       mockOperatorModel.prototype.save = jest.fn();
 
       // Act
-      const createOperatorPromise = service.createOperator({ name: 'existing-operator' });
+      const createOperatorPromise = service.createOperator({
+        name: 'existing-operator',
+      });
 
       // Assert
       await expect(createOperatorPromise).rejects.toThrow(ConflictException);
-      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'existing-operator' });
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+        name: 'existing-operator',
+      });
       expect(mockOperatorModel.prototype.save).not.toHaveBeenCalled();
     });
 
@@ -112,7 +146,7 @@ describe('OperatorService', () => {
         _id: 'test-id',
         toString: () => 'test-id',
       };
-      
+
       mockOperatorModel.findOne.mockImplementation(() => ({
         select: jest.fn().mockResolvedValue(null),
       }));
@@ -121,7 +155,7 @@ describe('OperatorService', () => {
         return Promise.resolve({
           _id: mockSavedOperator,
           password: 'hashed-password',
-          name: undefined
+          name: undefined,
         });
       });
 
@@ -154,12 +188,34 @@ describe('OperatorService', () => {
       }));
 
       // Act
-      await service.updateName({ operatorId: 'operator-id-123', name: 'new-name' });
+      await service.updateName({
+        operatorId: 'operator-id-123',
+        name: 'new-name',
+      });
 
       // Assert
-      expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith(
+        'operator-id-123',
+      );
       expect(foundOperator.save).toHaveBeenCalled();
       expect(foundOperator.name).toBe('new-name');
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'operator',
+        action: 'update',
+        diff: {
+          old: {
+            id: 'operator-id-123',
+            name: 'old-name',
+            password: 'UNCHANGED',
+          },
+          new: {
+            id: 'operator-id-123',
+            name: 'new-name',
+            password: 'UNCHANGED',
+          },
+        },
+      });
     });
 
     it('should throw NotFoundException if operator not found', async () => {
@@ -171,7 +227,7 @@ describe('OperatorService', () => {
 
       // Act & Assert
       await expect(
-        service.updateName({ operatorId: 'non-existent-id', name: 'new-name' })
+        service.updateName({ operatorId: 'non-existent-id', name: 'new-name' }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -187,14 +243,17 @@ describe('OperatorService', () => {
         name: 'old-name',
         save: jest.fn().mockResolvedValue(true),
       };
-      
+
       mockOperatorModel.findById.mockReturnValue(operatorToUpdate);
       mockOperatorModel.findOne.mockImplementation(() => ({
         select: jest.fn().mockResolvedValue(existingOperator),
       }));
 
       // Act
-      const promise = service.updateName({ operatorId: 'operator-id-123', name: 'duplicate-name' });
+      const promise = service.updateName({
+        operatorId: 'operator-id-123',
+        name: 'duplicate-name',
+      });
 
       // Assert
       await expect(promise).rejects.toThrow(ConflictException);
@@ -207,7 +266,7 @@ describe('OperatorService', () => {
       // Arrange
       const foundOperator = {
         _id: {
-          toString: () => 'operator-id-123'
+          toString: () => 'operator-id-123',
         },
         password: 'old-hashed-password',
         name: 'test-operator',
@@ -217,10 +276,14 @@ describe('OperatorService', () => {
       mockOperatorModel.findOne.mockReturnValue(null);
 
       // Act
-      const result = await service.generatePassword({ operatorId: 'operator-id-123' });
+      const result = await service.generatePassword({
+        operatorId: 'operator-id-123',
+      });
 
       // Assert
-      expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith(
+        'operator-id-123',
+      );
       expect(generateRandomPasswordSpy).toHaveBeenCalled();
       expect(bcryptHashSpy).toHaveBeenCalledWith('random-password', 10);
       expect(foundOperator.save).toHaveBeenCalled();
@@ -228,13 +291,30 @@ describe('OperatorService', () => {
         operatorId: 'operator-id-123',
         password: 'random-password',
       });
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'operator',
+        action: 'update',
+        diff: {
+          old: {
+            id: 'operator-id-123',
+            name: 'test-operator',
+            password: 'OLD_PASSWORD',
+          },
+          new: {
+            id: 'operator-id-123',
+            name: 'test-operator',
+            password: 'NEW_PASSWORD',
+          },
+        },
+      });
     });
 
     it('should change password when name is provided', async () => {
       // Arrange
       const foundOperator = {
         _id: {
-          toString: () => 'operator-id-123'
+          toString: () => 'operator-id-123',
         },
         password: 'old-hashed-password',
         name: 'test-operator',
@@ -247,7 +327,9 @@ describe('OperatorService', () => {
       const result = await service.generatePassword({ name: 'test-operator' });
 
       // Assert
-      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator' });
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+        name: 'test-operator',
+      });
       expect(generateRandomPasswordSpy).toHaveBeenCalled();
       expect(bcryptHashSpy).toHaveBeenCalledWith('random-password', 10);
       expect(foundOperator.save).toHaveBeenCalled();
@@ -255,11 +337,30 @@ describe('OperatorService', () => {
         operatorId: 'operator-id-123',
         password: 'random-password',
       });
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        author: 'admin',
+        resource: 'operator',
+        action: 'update',
+        diff: {
+          old: {
+            id: 'operator-id-123',
+            name: 'test-operator',
+            password: 'OLD_PASSWORD',
+          },
+          new: {
+            id: 'operator-id-123',
+            name: 'test-operator',
+            password: 'NEW_PASSWORD',
+          },
+        },
+      });
     });
 
     it('should throw BadRequestException if neither operatorId nor name provided', async () => {
       // Arrange & Act & Assert
-      await expect(service.generatePassword({})).rejects.toThrow(BadRequestException);
+      await expect(service.generatePassword({})).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw NotFoundException if operator not found', async () => {
@@ -269,7 +370,7 @@ describe('OperatorService', () => {
 
       // Act & Assert
       await expect(
-        service.generatePassword({ operatorId: 'non-existent-id' })
+        service.generatePassword({ operatorId: 'non-existent-id' }),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -282,8 +383,10 @@ describe('OperatorService', () => {
         { id: 'operator-2', name: 'operator-two' },
         { id: 'operator-3', name: null },
       ];
-      
-      mockOperatorModel.aggregate = jest.fn().mockResolvedValue(mockAggregateResult);
+
+      mockOperatorModel.aggregate = jest
+        .fn()
+        .mockResolvedValue(mockAggregateResult);
 
       // Act
       const result = await service.getAllOperators();
@@ -292,11 +395,11 @@ describe('OperatorService', () => {
       expect(mockOperatorModel.aggregate).toHaveBeenCalledWith([
         {
           $project: {
-            "id": "$_id",
-            "_id": 0,
-            "name": 1,
-          }
-        }
+            id: '$_id',
+            _id: 0,
+            name: 1,
+          },
+        },
       ]);
       expect(result).toEqual(mockAggregateResult);
     });
@@ -333,10 +436,14 @@ describe('OperatorService', () => {
       mockOperatorModel.findById.mockReturnValue(mockQuery);
 
       // Act
-      const result = await service.getOperator({ operatorId: 'operator-id-123' });
+      const result = await service.getOperator({
+        operatorId: 'operator-id-123',
+      });
 
       // Assert
-      expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith(
+        'operator-id-123',
+      );
       expect(mockQuery.select).toHaveBeenCalledWith('-password -__v');
       expect(result).toEqual({
         id: 'operator-id-123',
@@ -375,7 +482,9 @@ describe('OperatorService', () => {
       const result = await service.getOperator({ name: 'test-operator-name' });
 
       // Assert
-      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'test-operator-name' });
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+        name: 'test-operator-name',
+      });
       expect(mockQuery.select).toHaveBeenCalledWith('-password -__v');
       expect(result).toEqual({
         id: 'operator-id-456',
@@ -393,9 +502,11 @@ describe('OperatorService', () => {
 
       // Act & Assert
       await expect(
-        service.getOperator({ operatorId: 'non-existent-id' })
+        service.getOperator({ operatorId: 'non-existent-id' }),
       ).rejects.toThrow(NotFoundException);
-      expect(mockOperatorModel.findById).toHaveBeenCalledWith('non-existent-id');
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith(
+        'non-existent-id',
+      );
     });
 
     it('should throw NotFoundException when operator not found by name', async () => {
@@ -412,15 +523,17 @@ describe('OperatorService', () => {
 
       // Act & Assert
       await expect(
-        service.getOperator({ name: 'non-existent-name' })
+        service.getOperator({ name: 'non-existent-name' }),
       ).rejects.toThrow(NotFoundException);
-      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({ name: 'non-existent-name' });
+      expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
+        name: 'non-existent-name',
+      });
     });
 
     it('should throw Error when neither operatorId nor name is provided', async () => {
       // Act & Assert
       await expect(service.getOperator({})).rejects.toThrow(
-        'Either operatorId or name must be provided'
+        'Either operatorId or name must be provided',
       );
     });
 
@@ -454,7 +567,9 @@ describe('OperatorService', () => {
       });
 
       // Assert
-      expect(mockOperatorModel.findById).toHaveBeenCalledWith('operator-id-123');
+      expect(mockOperatorModel.findById).toHaveBeenCalledWith(
+        'operator-id-123',
+      );
       expect(mockOperatorModel.findOne).not.toHaveBeenCalled();
       expect(result).toEqual({
         id: 'operator-id-123',
@@ -480,7 +595,9 @@ describe('OperatorService', () => {
       mockOperatorModel.findById.mockReturnValue(mockQuery);
 
       // Act
-      const result = await service.getOperator({ operatorId: 'operator-id-789' });
+      const result = await service.getOperator({
+        operatorId: 'operator-id-789',
+      });
 
       // Assert
       expect(result).toEqual(mockOperator);
