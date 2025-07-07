@@ -3,28 +3,28 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Inject,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   GameIntegration,
   GameIntegrationDocument,
-} from './schema/game-integration.schema';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+} from "./schema/game-integration.schema";
+import { Model } from "mongoose";
+import { InjectModel } from "@nestjs/mongoose";
 import {
   GameIntegrationUpdateRequestDto,
   MarketIntegrationUpdateRequestDto,
-} from './dto/game-integration-update-request.dto';
-import { GameIntegrationQueryDto } from './dto/game-integration-query.dto';
+} from "./dto/game-integration-update-request.dto";
+import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
 import {
   OperatorCredential,
   OperatorDocument,
-} from '../operator/schema/operator-credential.schema';
+} from "../operator/schema/operator-credential.schema";
 import {
   MarketIntegration,
   MarketIntegrationDocument,
-} from './schema/market-integration.schema';
-import { AdminLogService } from '../admin-log/admin-log.service';
-import { AdminLogActions } from '../admin-log/constants';
+} from "./schema/market-integration.schema";
+import { AdminLogService } from "../admin-log/admin-log.service";
+import { AdminLogActions } from "../admin-log/constants";
 
 @Injectable()
 export class GameIntegrationService {
@@ -72,8 +72,8 @@ export class GameIntegrationService {
       : AdminLogActions.INSERT;
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'game-integration',
+      author: "admin",
+      resource: "game-integration",
       action,
       diff: {
         old: oldGameIntegration ?? undefined,
@@ -87,7 +87,7 @@ export class GameIntegrationService {
   async listGameIntegrations() {
     return this.gameIntegrationModel
       .find()
-      .select('-_id -__v -markets -mergeEvent -mergeEventDetails -patches')
+      .select("-_id -__v -markets -mergeEvent -mergeEventDetails -patches")
       .lean();
   }
 
@@ -104,8 +104,8 @@ export class GameIntegrationService {
       ).deletedCount > 0;
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'game-integration',
+      author: "admin",
+      resource: "game-integration",
       action: AdminLogActions.DELETE,
       diff: {
         old: oldGameIntegration,
@@ -120,10 +120,10 @@ export class GameIntegrationService {
 
     const gameIntegration = await this.gameIntegrationModel
       .findOne({ operatorId, gameId: query.gameId })
-      .select('-_id -__v -gameId -operatorId')
+      .select("-_id -__v -gameId -operatorId")
       .populate({
-        path: 'markets',
-        select: '-_id -__v',
+        path: "markets",
+        select: "-_id -__v",
         transform: (doc) => {
           return doc;
         },
@@ -131,7 +131,7 @@ export class GameIntegrationService {
       .lean();
 
     if (!gameIntegration) {
-      throw new NotFoundException('Game integration not found');
+      throw new NotFoundException("Game integration not found");
     }
 
     return gameIntegration;
@@ -141,10 +141,10 @@ export class GameIntegrationService {
     const operatorId = await this.getOperator(query);
     return this.gameIntegrationModel
       .findOne({ operatorId, gameId: query.gameId })
-      .select('-_id -__v -gameId -operatorId')
+      .select("-_id -__v -gameId -operatorId")
       .populate({
-        path: 'markets',
-        select: '-_id -__v',
+        path: "markets",
+        select: "-_id -__v",
         transform: (doc) => {
           return doc;
         },
@@ -163,7 +163,7 @@ export class GameIntegrationService {
         { $set: updateRequest },
         { upsert: true, new: true },
       )
-      .select('-_id -__v');
+      .select("-_id -__v");
   }
 
   private async getOperator(query: GameIntegrationQueryDto) {
@@ -176,16 +176,16 @@ export class GameIntegrationService {
     }
 
     if (!operatorQuery) {
-      throw new NotFoundException('Operator not found');
+      throw new NotFoundException("Operator not found");
     }
 
     const operator = await this.operatorModel
       .findOne(operatorQuery)
-      .select('_id')
+      .select("_id")
       .lean();
 
     if (!operator) {
-      throw new NotFoundException('Operator not found');
+      throw new NotFoundException("Operator not found");
     }
 
     return operator._id;
@@ -229,7 +229,7 @@ export class GameIntegrationService {
 
     if (!existingMarketIntegration) {
       throw new InternalServerErrorException(
-        'Failed to create or update market integration',
+        "Failed to create or update market integration",
       );
     }
 

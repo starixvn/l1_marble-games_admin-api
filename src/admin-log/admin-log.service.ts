@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
 import {
   AdminLogRecord,
   AdminLogRecordDocument,
   Diff,
-} from './schema/admin-log-record.schema';
-import { Model, RootFilterQuery } from 'mongoose';
+} from "./schema/admin-log-record.schema";
+import { Model, RootFilterQuery } from "mongoose";
 
 export type AdminQueryLogParams = {
   dateRange: {
@@ -69,7 +69,7 @@ export class AdminLogService {
     return this.adminLogModel
       .find(query)
       .sort({ timestamp: -1 })
-      .select('-__v')
+      .select("-__v")
       .lean()
       .then((logs) =>
         logs.map((log) => {

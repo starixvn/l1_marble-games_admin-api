@@ -1,49 +1,49 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 import {
   IsOptional,
   IsNumberString,
   ValidateIf,
   IsNotEmpty,
   IsDateString,
-} from 'class-validator';
+} from "class-validator";
 
 export class ApiLogQueryDto {
   @IsDateString()
   @ApiProperty({
-    description: 'The start date of the log',
-    example: '2025-07-02T00:00:00.000',
+    description: "The start date of the log",
+    example: "2025-07-02T00:00:00.000",
     required: true,
   })
   startDate: string;
 
   @IsDateString()
   @ApiProperty({
-    description: 'The end date of the log',
-    example: '2025-07-02T00:12:00.000',
+    description: "The end date of the log",
+    example: "2025-07-02T00:12:00.000",
     required: true,
   })
   endDate: string;
 
   @IsOptional()
   @ApiProperty({
-    description: 'The operator of the log',
-    example: '1234567890',
+    description: "The operator of the log",
+    example: "1234567890",
     required: false,
   })
   operator?: string;
 
   @IsOptional()
   @ApiProperty({
-    description: 'The endpoint of the log',
-    example: 'api/v1/logs',
+    description: "The endpoint of the log",
+    example: "api/v1/logs",
     required: false,
   })
   endpoint?: string;
 
   @IsOptional()
   @ApiProperty({
-    description: 'The query params of the log',
-    example: '?page=1&limit=10',
+    description: "The query params of the log",
+    example: "?page=1&limit=10",
     required: false,
   })
   queryParams?: string;
@@ -51,7 +51,7 @@ export class ApiLogQueryDto {
   @IsOptional()
   @IsNumberString()
   @ApiProperty({
-    description: 'The game id of the log',
+    description: "The game id of the log",
     example: 1,
     required: false,
   })
@@ -60,7 +60,7 @@ export class ApiLogQueryDto {
   @IsOptional()
   @IsNumberString()
   @ApiProperty({
-    description: 'The event id of the log',
+    description: "The event id of the log",
     example: 1,
     required: false,
   })
@@ -69,7 +69,7 @@ export class ApiLogQueryDto {
   @ValidateIf(
     (o: ApiLogQueryDto) => new Date(o.startDate) >= new Date(o.endDate),
   )
-  @IsNotEmpty({ message: 'Start date must be before end date' })
+  @IsNotEmpty({ message: "Start date must be before end date" })
   _dateValid?: never;
 
   @ValidateIf(
@@ -77,6 +77,6 @@ export class ApiLogQueryDto {
       new Date(o.endDate).getTime() - new Date(o.startDate).getTime() >
       24 * 60 * 60 * 1000,
   )
-  @IsNotEmpty({ message: 'Only query logs within 24 hours are allowed' })
+  @IsNotEmpty({ message: "Only query logs within 24 hours are allowed" })
   _dateRangeValid?: never;
 }
