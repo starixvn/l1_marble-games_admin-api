@@ -6,31 +6,44 @@ import {
   HttpStatus,
   Post,
   Request,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { AuthDto, AuthResponseDto, AccountResponseDto, CreateAccountDto } from './dto/auth.dto';
-import { Public } from '../common/decorators/public.decorator';
-import { Role } from '../common/enums/role.enum';
-import { Roles } from '../common/decorators/role.decorator';
+  Get,
+} from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from "@nestjs/swagger";
+import { AuthService } from "./auth.service";
+import {
+  AuthDto,
+  AuthResponseDto,
+  AccountResponseDto,
+  CreateAccountDto,
+  AccountDto,
+  ProfileDto,
+} from "./dto/auth.dto";
+import { Public } from "../common/decorators/public.decorator";
+import { Role } from "../common/enums/role.enum";
+import { Roles } from "../common/decorators/role.decorator";
 
-@ApiTags('Auth')
-@Controller('auth')
+@ApiTags("Auth")
+@Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiOperation({ summary: 'Login with username and password' })
+  @ApiOperation({ summary: "Login with username and password" })
   @ApiResponse({
     status: 200,
-    description: 'Login successful',
+    description: "Login successful",
     type: AuthResponseDto,
   })
   @ApiResponse({
     status: 401,
-    description: 'Unauthorized: Invalid credentials',
+    description: "Unauthorized: Invalid credentials",
   })
   @Public()
-  @Post('login')
+  @Post("login")
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: AuthDto): Promise<AuthResponseDto> {
     const account = await this.authService.validateAccount({
@@ -39,7 +52,7 @@ export class AuthController {
     });
 
     if (!account) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const token = await this.authService.generateJwt({
@@ -52,7 +65,7 @@ export class AuthController {
     };
   }
 
-  @Post('oneTimeRegister')
+  @Post("oneTimeRegister")
   @HttpCode(HttpStatus.OK)
   @Public()
   async oneTimeRegister(): Promise<AccountResponseDto> {
@@ -60,18 +73,39 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @Post('changePassword')
+  @Post("changePassword")
   @HttpCode(HttpStatus.OK)
-  async changePassword(@Request() req: any): Promise<AccountResponseDto> {
+  async changePassword(
+    @Request() req: { user: { id: string } },
+  ): Promise<AccountResponseDto> {
     const userId = req.user.id;
     return this.authService.changePassword(userId);
   }
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @Post('createAccount')
+  @Post("createAccount")
   @HttpCode(HttpStatus.OK)
-  async createAccount(@Body() createAccountDto: CreateAccountDto): Promise<AccountResponseDto> {
+  async createAccount(
+    @Body() createAccountDto: CreateAccountDto,
+  ): Promise<AccountResponseDto> {
     return this.authService.createAccount(createAccountDto);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get("getAllAccounts")
+  @HttpCode(HttpStatus.OK)
+  async getAllAccounts(): Promise<AccountDto[]> {
+    return this.authService.getAllAccounts();
+  }
+
+  @ApiBearerAuth()
+  @Get("profile")
+  @HttpCode(HttpStatus.OK)
+  async getProfile(
+    @Request() req: { user: { id: string } },
+  ): Promise<ProfileDto> {
+    return this.authService.getProfile(req.user.id);
   }
 }
