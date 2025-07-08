@@ -19,6 +19,7 @@ describe("AuthController", () => {
     oneTimeRegister: jest.fn(),
     changePassword: jest.fn(),
     createAccount: jest.fn(),
+    getProfile: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -129,6 +130,28 @@ describe("AuthController", () => {
       expect(result).toEqual(expected);
       expect(mockAuthService.createAccount).toHaveBeenCalledWith(
         createAccountDto,
+      );
+    });
+  });
+
+  describe("getProfile", () => {
+    it("should return profile response", async () => {
+      // arrange
+      const mockRequest = { user: { id: "1" } };
+      const expected = {
+        id: "1",
+        username: "test",
+        role: Role.ADMIN,
+      };
+      mockAuthService.getProfile.mockResolvedValue(expected);
+
+      // act
+      const result = await controller.getProfile(mockRequest);
+
+      // assert
+      expect(result).toEqual(expected);
+      expect(mockAuthService.getProfile).toHaveBeenCalledWith(
+        mockRequest.user.id,
       );
     });
   });
