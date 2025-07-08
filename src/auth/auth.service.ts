@@ -240,7 +240,13 @@ export class AuthService {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const fullPath = this.buildFullPath(controllerPath, methodPath);
 
-        if (isPublic || methodRoles.includes(role)) {
+        if (
+          isPublic ||
+          !role ||
+          methodRoles.length === 0 ||
+          methodRoles.includes(role)
+        ) {
+          // role undefined is admin, because the admin account had been there before the role feature was implemented
           endpoints.push(fullPath);
         }
       });

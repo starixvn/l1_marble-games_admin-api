@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "../auth.service";
 import { JwtService } from "@nestjs/jwt";
@@ -50,6 +51,9 @@ describe("AuthService", () => {
   (mockAccountModel as any).find = jest.fn().mockResolvedValue([]);
 
   beforeEach(async () => {
+    // Reset all mocks
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -323,7 +327,7 @@ describe("AuthService", () => {
       expect(result).toEqual({
         username: "admin",
         role: Role.ADMIN,
-        allowedEndpoints: [],
+        allowedEndpoints: ["/test/endpoint"],
       });
       expect(mockAccountModel.findById).toHaveBeenCalledWith("123");
 
