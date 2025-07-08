@@ -1,10 +1,10 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { GameConfig, GameConfigDocument } from './schema/game-config.schema';
-import { Model } from 'mongoose';
-import { GameConfigSchemaService } from '../game-config-schema/game-config-schema.service';
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { AdminLogService } from '../admin-log/admin-log.service';
-import { AdminLogActions } from '../admin-log/constants';
+import { InjectModel } from "@nestjs/mongoose";
+import { GameConfig, GameConfigDocument } from "./schema/game-config.schema";
+import { Model } from "mongoose";
+import { GameConfigSchemaService } from "../game-config-schema/game-config-schema.service";
+import { Injectable, Inject, NotFoundException } from "@nestjs/common";
+import { AdminLogService } from "../admin-log/admin-log.service";
+import { AdminLogActions } from "../admin-log/constants";
 
 export type UpsertGameConfigArgs = {
   schemaId?: string;
@@ -38,11 +38,11 @@ export class GameConfigService {
   async getNullableGameConfigByGameId(gameId: number) {
     return this.gameConfigModel
       .findOne({ gameId: Number(gameId) })
-      .select('-_id -__v');
+      .select("-_id -__v");
   }
 
   async getAllGameConfigs() {
-    return this.gameConfigModel.find().select('-_id -__v');
+    return this.gameConfigModel.find().select("-_id -__v");
   }
 
   async upsertGameConfig(args: UpsertGameConfigArgs) {
@@ -73,15 +73,15 @@ export class GameConfigService {
           new: true,
         },
       )
-      .select('-_id -__v');
+      .select("-_id -__v");
 
     const action = oldGameConfig
       ? AdminLogActions.UPDATE
       : AdminLogActions.INSERT;
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'game-config',
+      author: "admin",
+      resource: "game-config",
       action,
       diff: {
         old: oldGameConfig,

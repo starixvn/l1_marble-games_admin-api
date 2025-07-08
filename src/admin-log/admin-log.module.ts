@@ -1,11 +1,11 @@
-import { Global, Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { Global, Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
 import {
   AdminLogRecord,
   AdminLogRecordSchema,
-} from './schema/admin-log-record.schema';
-import { AdminLogService } from './admin-log.service';
-import { AdminLogController } from './admin-log.controller';
+} from "./schema/admin-log-record.schema";
+import { AdminLogService } from "./admin-log.service";
+import { AdminLogController } from "./admin-log.controller";
 
 @Global()
 @Module({
@@ -14,7 +14,7 @@ import { AdminLogController } from './admin-log.controller';
       {
         name: AdminLogRecord.name,
         schema: AdminLogRecordSchema,
-        collection: 'admin_log_records',
+        collection: "admin_log_records",
       },
     ]),
   ],

@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { GameIntegrationController } from '../game-integration.controller';
-import { GameIntegrationService } from '../game-integration.service';
-import { GameIntegrationQueryDto } from '../dto/game-integration-query.dto';
-import { GameIntegrationUpdateRequestDto } from '../dto/game-integration-update-request.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { GameIntegrationController } from "../game-integration.controller";
+import { GameIntegrationService } from "../game-integration.service";
+import { GameIntegrationQueryDto } from "../dto/game-integration-query.dto";
+import { GameIntegrationUpdateRequestDto } from "../dto/game-integration-update-request.dto";
 import {
   NotFoundException,
   InternalServerErrorException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
-describe('GameIntegrationController', () => {
+describe("GameIntegrationController", () => {
   let controller: GameIntegrationController;
   let service: GameIntegrationService;
 
@@ -39,37 +39,37 @@ describe('GameIntegrationController', () => {
     jest.clearAllMocks();
   });
 
-  describe('upsertGameIntegration', () => {
+  describe("upsertGameIntegration", () => {
     const mockQueryWithOperatorId: GameIntegrationQueryDto = {
-      operatorId: '507f1f77bcf86cd799439011',
+      operatorId: "507f1f77bcf86cd799439011",
       gameId: 1001,
     };
 
     const mockQueryWithAlias: GameIntegrationQueryDto = {
-      name: 'main-operator',
+      name: "main-operator",
       gameId: 1001,
     };
 
     const mockUpdateRequest: GameIntegrationUpdateRequestDto = {
-      mergeEvent: { eventType: 'match', priority: 1 },
-      mergeEventDetails: [{ detail: 'live', value: true }],
-      patches: [{ op: 'replace', path: '/status', value: 'active' }],
+      mergeEvent: { eventType: "match", priority: 1 },
+      mergeEventDetails: [{ detail: "live", value: true }],
+      patches: [{ op: "replace", path: "/status", value: "active" }],
       markets: [],
     };
 
     const mockGameIntegrationResponse = {
-      _id: '507f1f77bcf86cd799439012',
-      operatorId: '507f1f77bcf86cd799439011',
+      _id: "507f1f77bcf86cd799439012",
+      operatorId: "507f1f77bcf86cd799439011",
       gameId: 1001,
-      mergeEvent: { eventType: 'match', priority: 1 },
-      mergeEventDetails: [{ detail: 'live', value: true }],
-      patches: [{ op: 'replace', path: '/status', value: 'active' }],
+      mergeEvent: { eventType: "match", priority: 1 },
+      mergeEventDetails: [{ detail: "live", value: true }],
+      patches: [{ op: "replace", path: "/status", value: "active" }],
       markets: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    it('should successfully upsert game integration with operatorId', async () => {
+    it("should successfully upsert game integration with operatorId", async () => {
       // Arrange
       mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
         mockGameIntegrationResponse,
@@ -90,7 +90,7 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should successfully upsert game integration with alias', async () => {
+    it("should successfully upsert game integration with alias", async () => {
       // Arrange
       mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
         mockGameIntegrationResponse,
@@ -111,7 +111,7 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should successfully upsert game integration with minimal update request', async () => {
+    it("should successfully upsert game integration with minimal update request", async () => {
       // Arrange
       const minimalUpdateRequest: GameIntegrationUpdateRequestDto = {};
       const minimalResponse = {
@@ -140,9 +140,9 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(minimalResponse);
     });
 
-    it('should throw NotFoundException when operator is not found', async () => {
+    it("should throw NotFoundException when operator is not found", async () => {
       // Arrange
-      const error = new NotFoundException('Operator not found');
+      const error = new NotFoundException("Operator not found");
       mockGameIntegrationService.upsertGameIntegration.mockRejectedValue(error);
 
       // Act & Assert
@@ -160,9 +160,9 @@ describe('GameIntegrationController', () => {
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw InternalServerErrorException when update operation fails', async () => {
+    it("should throw InternalServerErrorException when update operation fails", async () => {
       // Arrange
-      const error = new InternalServerErrorException('Update failed');
+      const error = new InternalServerErrorException("Update failed");
       mockGameIntegrationService.upsertGameIntegration.mockRejectedValue(error);
 
       // Act & Assert
@@ -180,9 +180,9 @@ describe('GameIntegrationController', () => {
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should propagate any unexpected error from service', async () => {
+    it("should propagate any unexpected error from service", async () => {
       // Arrange
-      const error = new Error('Unexpected error');
+      const error = new Error("Unexpected error");
       mockGameIntegrationService.upsertGameIntegration.mockRejectedValue(error);
 
       // Act & Assert
@@ -191,7 +191,7 @@ describe('GameIntegrationController', () => {
           mockQueryWithOperatorId,
           mockUpdateRequest,
         ),
-      ).rejects.toThrow('Unexpected error');
+      ).rejects.toThrow("Unexpected error");
 
       expect(service.upsertGameIntegration).toHaveBeenCalledWith(
         mockQueryWithOperatorId,
@@ -200,7 +200,7 @@ describe('GameIntegrationController', () => {
       expect(service.upsertGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle query with only required gameId parameter', async () => {
+    it("should handle query with only required gameId parameter", async () => {
       // Arrange
       const queryWithOnlyGameId = { gameId: 1001 } as GameIntegrationQueryDto;
       mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
@@ -222,10 +222,10 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should handle updateRequest with only mergeEvent', async () => {
+    it("should handle updateRequest with only mergeEvent", async () => {
       // Arrange
       const partialUpdateRequest: GameIntegrationUpdateRequestDto = {
-        mergeEvent: { eventType: 'match', priority: 1 },
+        mergeEvent: { eventType: "match", priority: 1 },
       };
       mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
         mockGameIntegrationResponse,
@@ -246,7 +246,7 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should handle updateRequest with only markets', async () => {
+    it("should handle updateRequest with only markets", async () => {
       // Arrange
       const partialUpdateRequest: GameIntegrationUpdateRequestDto = {
         markets: [],
@@ -270,13 +270,13 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should handle updateRequest with complex patch operations', async () => {
+    it("should handle updateRequest with complex patch operations", async () => {
       // Arrange
       const complexUpdateRequest: GameIntegrationUpdateRequestDto = {
         patches: [
-          { op: 'replace', path: '/status', value: 'active' },
-          { op: 'add', path: '/config/timeout', value: 5000 },
-          { op: 'remove', path: '/deprecated' },
+          { op: "replace", path: "/status", value: "active" },
+          { op: "add", path: "/config/timeout", value: 5000 },
+          { op: "remove", path: "/deprecated" },
         ],
       };
       mockGameIntegrationService.upsertGameIntegration.mockResolvedValue(
@@ -299,34 +299,34 @@ describe('GameIntegrationController', () => {
     });
   });
 
-  describe('getGameIntegration', () => {
+  describe("getGameIntegration", () => {
     const mockQueryWithOperatorId: GameIntegrationQueryDto = {
-      operatorId: '507f1f77bcf86cd799439011',
+      operatorId: "507f1f77bcf86cd799439011",
       gameId: 1001,
     };
 
     const mockQueryWithAlias: GameIntegrationQueryDto = {
-      name: 'main-operator',
+      name: "main-operator",
       gameId: 1001,
     };
 
     const mockGameIntegrationResponse = {
-      operatorId: '507f1f77bcf86cd799439011',
+      operatorId: "507f1f77bcf86cd799439011",
       gameId: 1001,
-      mergeEvent: { eventType: 'match', priority: 1 },
-      mergeEventDetails: [{ detail: 'live', value: true }],
-      patches: [{ op: 'replace', path: '/status', value: 'active' }],
+      mergeEvent: { eventType: "match", priority: 1 },
+      mergeEventDetails: [{ detail: "live", value: true }],
+      patches: [{ op: "replace", path: "/status", value: "active" }],
       markets: [
         {
-          id: '507f1f77bcf86cd799439013',
-          name: 'Test Market',
-          selections: ['Selection 1', 'Selection 2'],
-          merge: { key: 'value' },
+          id: "507f1f77bcf86cd799439013",
+          name: "Test Market",
+          selections: ["Selection 1", "Selection 2"],
+          merge: { key: "value" },
         },
       ],
     };
 
-    it('should successfully get game integration with operatorId', async () => {
+    it("should successfully get game integration with operatorId", async () => {
       // Arrange
       mockGameIntegrationService.getGameIntegration.mockResolvedValue(
         mockGameIntegrationResponse,
@@ -345,7 +345,7 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should successfully get game integration with alias', async () => {
+    it("should successfully get game integration with alias", async () => {
       // Arrange
       mockGameIntegrationService.getGameIntegration.mockResolvedValue(
         mockGameIntegrationResponse,
@@ -362,7 +362,7 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should successfully get game integration with empty markets', async () => {
+    it("should successfully get game integration with empty markets", async () => {
       // Arrange
       const responseWithoutMarkets = {
         ...mockGameIntegrationResponse,
@@ -385,9 +385,9 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(responseWithoutMarkets);
     });
 
-    it('should throw NotFoundException when operator is not found', async () => {
+    it("should throw NotFoundException when operator is not found", async () => {
       // Arrange
-      const error = new NotFoundException('Operator not found');
+      const error = new NotFoundException("Operator not found");
       mockGameIntegrationService.getGameIntegration.mockRejectedValue(error);
 
       // Act
@@ -401,9 +401,9 @@ describe('GameIntegrationController', () => {
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw NotFoundException when game integration is not found', async () => {
+    it("should throw NotFoundException when game integration is not found", async () => {
       // Arrange
-      const error = new NotFoundException('Game integration not found');
+      const error = new NotFoundException("Game integration not found");
       mockGameIntegrationService.getGameIntegration.mockRejectedValue(error);
 
       // Act
@@ -417,7 +417,7 @@ describe('GameIntegrationController', () => {
       expect(service.getGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle query with only required gameId parameter', async () => {
+    it("should handle query with only required gameId parameter", async () => {
       // Arrange
       const queryWithOnlyGameId = { gameId: 1001 } as GameIntegrationQueryDto;
       mockGameIntegrationService.getGameIntegration.mockResolvedValue(
@@ -435,16 +435,16 @@ describe('GameIntegrationController', () => {
       expect(result).toEqual(mockGameIntegrationResponse);
     });
 
-    it('should propagate any unexpected error from service', async () => {
+    it("should propagate any unexpected error from service", async () => {
       // Arrange
-      const error = new Error('Unexpected error');
+      const error = new Error("Unexpected error");
       mockGameIntegrationService.getGameIntegration.mockRejectedValue(error);
 
       // Act
       const promise = controller.getGameIntegration(mockQueryWithOperatorId);
 
       // Assert
-      await expect(promise).rejects.toThrow('Unexpected error');
+      await expect(promise).rejects.toThrow("Unexpected error");
       expect(service.getGameIntegration).toHaveBeenCalledWith(
         mockQueryWithOperatorId,
       );
@@ -452,18 +452,18 @@ describe('GameIntegrationController', () => {
     });
   });
 
-  describe('deleteGameIntegration', () => {
+  describe("deleteGameIntegration", () => {
     const mockQueryWithOperatorId: GameIntegrationQueryDto = {
-      operatorId: '507f1f77bcf86cd799439011',
+      operatorId: "507f1f77bcf86cd799439011",
       gameId: 1001,
     };
 
     const mockQueryWithAlias: GameIntegrationQueryDto = {
-      name: 'main-operator',
+      name: "main-operator",
       gameId: 1001,
     };
 
-    it('should successfully delete game integration with operatorId', async () => {
+    it("should successfully delete game integration with operatorId", async () => {
       // Arrange
       mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(true);
 
@@ -478,11 +478,11 @@ describe('GameIntegrationController', () => {
       );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        message: 'Game integration deleted successfully',
+        message: "Game integration deleted successfully",
       });
     });
 
-    it('should successfully delete game integration with alias', async () => {
+    it("should successfully delete game integration with alias", async () => {
       // Arrange
       mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(true);
 
@@ -495,13 +495,13 @@ describe('GameIntegrationController', () => {
       );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        message: 'Game integration deleted successfully',
+        message: "Game integration deleted successfully",
       });
     });
 
-    it('should throw NotFoundException when operator is not found', async () => {
+    it("should throw NotFoundException when operator is not found", async () => {
       // Arrange
-      const error = new NotFoundException('Operator not found');
+      const error = new NotFoundException("Operator not found");
       mockGameIntegrationService.deleteGameIntegration.mockRejectedValue(error);
 
       // Act
@@ -515,9 +515,9 @@ describe('GameIntegrationController', () => {
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw NotFoundException when operator alias is not found', async () => {
+    it("should throw NotFoundException when operator alias is not found", async () => {
       // Arrange
-      const error = new NotFoundException('Operator not found');
+      const error = new NotFoundException("Operator not found");
       mockGameIntegrationService.deleteGameIntegration.mockRejectedValue(error);
 
       // Act
@@ -531,10 +531,10 @@ describe('GameIntegrationController', () => {
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle query with only required gameId parameter', async () => {
+    it("should handle query with only required gameId parameter", async () => {
       // Arrange
       const queryWithOnlyGameId = { gameId: 1001 } as GameIntegrationQueryDto;
-      const error = new NotFoundException('Operator not found');
+      const error = new NotFoundException("Operator not found");
       mockGameIntegrationService.deleteGameIntegration.mockRejectedValue(error);
 
       // Act
@@ -548,23 +548,23 @@ describe('GameIntegrationController', () => {
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should propagate any unexpected error from service', async () => {
+    it("should propagate any unexpected error from service", async () => {
       // Arrange
-      const error = new Error('Unexpected error');
+      const error = new Error("Unexpected error");
       mockGameIntegrationService.deleteGameIntegration.mockRejectedValue(error);
 
       // Act
       const promise = controller.deleteGameIntegration(mockQueryWithOperatorId);
 
       // Assert
-      await expect(promise).rejects.toThrow('Unexpected error');
+      await expect(promise).rejects.toThrow("Unexpected error");
       expect(service.deleteGameIntegration).toHaveBeenCalledWith(
         mockQueryWithOperatorId,
       );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle successful deletion and return message response', async () => {
+    it("should handle successful deletion and return message response", async () => {
       // Arrange
       mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(true);
 
@@ -575,20 +575,20 @@ describe('GameIntegrationController', () => {
 
       // Assert
       expect(result).toEqual({
-        message: 'Game integration deleted successfully',
+        message: "Game integration deleted successfully",
       });
-      expect(typeof result).toBe('object');
-      expect(result).toHaveProperty('message');
+      expect(typeof result).toBe("object");
+      expect(result).toHaveProperty("message");
       expect(service.deleteGameIntegration).toHaveBeenCalledWith(
         mockQueryWithOperatorId,
       );
       expect(service.deleteGameIntegration).toHaveBeenCalledTimes(1);
     });
 
-    it('should pass through the query parameters correctly to service', async () => {
+    it("should pass through the query parameters correctly to service", async () => {
       // Arrange
       const customQuery: GameIntegrationQueryDto = {
-        operatorId: '507f1f77bcf86cd799439099',
+        operatorId: "507f1f77bcf86cd799439099",
         gameId: 5555,
       };
       mockGameIntegrationService.deleteGameIntegration.mockResolvedValue(true);
@@ -599,7 +599,7 @@ describe('GameIntegrationController', () => {
       // Assert
       expect(service.deleteGameIntegration).toHaveBeenCalledWith(customQuery);
       expect(result).toEqual({
-        message: 'Game integration deleted successfully',
+        message: "Game integration deleted successfully",
       });
     });
   });

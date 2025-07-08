@@ -1,4 +1,4 @@
 export enum ConfigKeys {
-  Database = 'database',
-  Jwt = 'jwt',
+  Database = "database",
+  Jwt = "jwt",
 }

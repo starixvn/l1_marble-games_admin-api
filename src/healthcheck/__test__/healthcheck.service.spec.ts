@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HealthcheckService } from '../healthcheck.service';
-import { ServiceUnavailableException } from '@nestjs/common';
-import { getConnectionToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from "@nestjs/testing";
+import { HealthcheckService } from "../healthcheck.service";
+import { ServiceUnavailableException } from "@nestjs/common";
+import { getConnectionToken } from "@nestjs/mongoose";
 
-describe('HealthcheckService', () => {
+describe("HealthcheckService", () => {
   let service: HealthcheckService;
   let mongoConnection: {
     readyState: number;
@@ -26,16 +26,16 @@ describe('HealthcheckService', () => {
     mongoConnection = module.get(getConnectionToken());
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('healthCheck', () => {
-    it('should return health status only when database is fully connected', async () => {
+  describe("healthCheck", () => {
+    it("should return health status only when database is fully connected", async () => {
       // arrange
-      process.env.ENVIRONMENT = 'test';
+      process.env.ENVIRONMENT = "test";
       const expectedResponse = {
-        messge: 'API is running in test environment',
+        messge: "API is running in test environment",
         timestamp: expect.any(String),
       };
 
@@ -46,16 +46,16 @@ describe('HealthcheckService', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw ServiceUnavailableException when database is disconnected', async () => {
+    it("should throw ServiceUnavailableException when database is disconnected", async () => {
       // arrange
-      process.env.ENVIRONMENT = 'test';
+      process.env.ENVIRONMENT = "test";
       mongoConnection.readyState = 0;
       const expectedError = {
-        message: 'API is running but database is unavailable, test environment',
+        message: "API is running but database is unavailable, test environment",
         timestamp: expect.any(String),
         database: {
-          error: 'DB not ready',
-          state: 'disconnected',
+          error: "DB not ready",
+          state: "disconnected",
         },
       };
 
@@ -65,20 +65,20 @@ describe('HealthcheckService', () => {
       // assert
       await expect(result).rejects.toThrow(ServiceUnavailableException);
       await expect(result).rejects.toMatchObject({
-        response: expectedError
+        response: expectedError,
       });
     });
 
-    it('should throw ServiceUnavailableException when database is connecting', async () => {
+    it("should throw ServiceUnavailableException when database is connecting", async () => {
       // arrange
-      process.env.ENVIRONMENT = 'test';
+      process.env.ENVIRONMENT = "test";
       mongoConnection.readyState = 2;
       const expectedError = {
-        message: 'API is running but database is unavailable, test environment',
+        message: "API is running but database is unavailable, test environment",
         timestamp: expect.any(String),
         database: {
-          error: 'DB not ready',
-          state: 'connecting',
+          error: "DB not ready",
+          state: "connecting",
         },
       };
 
@@ -88,20 +88,20 @@ describe('HealthcheckService', () => {
       // assert
       await expect(result).rejects.toThrow(ServiceUnavailableException);
       await expect(result).rejects.toMatchObject({
-        response: expectedError
+        response: expectedError,
       });
     });
 
-    it('should throw ServiceUnavailableException when database is disconnecting', async () => {
+    it("should throw ServiceUnavailableException when database is disconnecting", async () => {
       // arrange
-      process.env.ENVIRONMENT = 'test';
+      process.env.ENVIRONMENT = "test";
       mongoConnection.readyState = 3;
       const expectedError = {
-        message: 'API is running but database is unavailable, test environment',
+        message: "API is running but database is unavailable, test environment",
         timestamp: expect.any(String),
         database: {
-          error: 'DB not ready',
-          state: 'disconnecting',
+          error: "DB not ready",
+          state: "disconnecting",
         },
       };
 
@@ -111,7 +111,7 @@ describe('HealthcheckService', () => {
       // assert
       await expect(result).rejects.toThrow(ServiceUnavailableException);
       await expect(result).rejects.toMatchObject({
-        response: expectedError
+        response: expectedError,
       });
     });
   });

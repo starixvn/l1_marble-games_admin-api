@@ -4,17 +4,17 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
 import {
   OperatorCredential,
   OperatorDocument,
-} from './schema/operator-credential.schema';
-import { Model } from 'mongoose';
-import { hash } from 'bcryptjs';
-import { generateRandomPassword } from '../utils/random';
-import { AdminLogService } from '../admin-log/admin-log.service';
-import { AdminLogActions } from '../admin-log/constants';
+} from "./schema/operator-credential.schema";
+import { Model } from "mongoose";
+import { hash } from "bcryptjs";
+import { generateRandomPassword } from "../utils/random";
+import { AdminLogService } from "../admin-log/admin-log.service";
+import { AdminLogActions } from "../admin-log/constants";
 
 const SALT_ROUND = 10;
 
@@ -58,9 +58,9 @@ export class OperatorService {
     if (options?.name) {
       const existingOperator = await this.operatorModel
         .findOne({ name: options.name })
-        .select('-password -__v');
+        .select("-password -__v");
       if (existingOperator) {
-        throw new ConflictException('Operator with this name already exists');
+        throw new ConflictException("Operator with this name already exists");
       }
     }
 
@@ -75,13 +75,13 @@ export class OperatorService {
     await newOperator.save();
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'operator',
+      author: "admin",
+      resource: "operator",
       action: AdminLogActions.INSERT,
       diff: {
         new: {
           id: newOperator._id,
-          password: 'NEW_PASSWORD',
+          password: "NEW_PASSWORD",
           name: options?.name,
         },
       },
@@ -99,37 +99,37 @@ export class OperatorService {
 
     const existingOperator = await this.operatorModel
       .findOne({ name })
-      .select('-password -__v');
+      .select("-password -__v");
 
     if (existingOperator) {
-      throw new ConflictException('Operator with this name already exists');
+      throw new ConflictException("Operator with this name already exists");
     }
 
     const operator = await this.operatorModel.findById(operatorId);
 
     if (!operator) {
-      throw new NotFoundException('Operator not found');
+      throw new NotFoundException("Operator not found");
     }
 
-    const oldName = operator.name ?? '';
+    const oldName = operator.name ?? "";
     operator.name = name;
 
     await operator.save();
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'operator',
+      author: "admin",
+      resource: "operator",
       action: AdminLogActions.UPDATE,
       diff: {
         old: {
           id: operatorId,
           name: oldName,
-          password: 'UNCHANGED',
+          password: "UNCHANGED",
         },
         new: {
           id: operatorId,
           name: name,
-          password: 'UNCHANGED',
+          password: "UNCHANGED",
         },
       },
     });
@@ -140,7 +140,7 @@ export class OperatorService {
 
     if (!operatorId && !name) {
       throw new BadRequestException(
-        'Either operatorId or name must be provided',
+        "Either operatorId or name must be provided",
       );
     }
 
@@ -149,7 +149,7 @@ export class OperatorService {
       (name && (await this.operatorModel.findOne({ name })));
 
     if (!operator) {
-      throw new NotFoundException('Operator not found');
+      throw new NotFoundException("Operator not found");
     }
 
     const password = generateRandomPassword();
@@ -160,19 +160,19 @@ export class OperatorService {
     await operator.save();
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'operator',
+      author: "admin",
+      resource: "operator",
       action: AdminLogActions.UPDATE,
       diff: {
         old: {
           id: (operator._id as unknown as string).toString(),
           name: operator.name,
-          password: 'OLD_PASSWORD',
+          password: "OLD_PASSWORD",
         },
         new: {
           id: (operator._id as unknown as string).toString(),
           name: operator.name,
-          password: 'NEW_PASSWORD',
+          password: "NEW_PASSWORD",
         },
       },
     });
@@ -189,7 +189,7 @@ export class OperatorService {
     if (operatorId) {
       const operator = await this.getOperatorById(operatorId);
       if (!operator) {
-        throw new NotFoundException('Operator not found');
+        throw new NotFoundException("Operator not found");
       }
       return operator;
     }
@@ -197,19 +197,19 @@ export class OperatorService {
     if (name) {
       const operator = await this.getOperatorByName(name);
       if (!operator) {
-        throw new NotFoundException('Operator not found');
+        throw new NotFoundException("Operator not found");
       }
       return operator;
     }
 
-    throw new Error('Either operatorId or name must be provided'); // this is developer fault to not provide either operatorId or name
+    throw new Error("Either operatorId or name must be provided"); // this is developer fault to not provide either operatorId or name
   }
 
   async getAllOperators() {
     return this.operatorModel.aggregate([
       {
         $project: {
-          id: '$_id',
+          id: "$_id",
           _id: 0,
           name: 1,
         },
@@ -227,8 +227,8 @@ export class OperatorService {
   private filterOperatorFields(
     query: ReturnType<typeof this.operatorModel.findOne>,
   ) {
-    return query.select('-password -__v').transform((doc) => {
-      if (doc && typeof (doc as any).toObject === 'function') {
+    return query.select("-password -__v").transform((doc) => {
+      if (doc && typeof (doc as any).toObject === "function") {
         const obj = (doc as OperatorDocument).toObject();
         const { _id, ...rest } = obj;
         return { id: _id.toString(), ...rest };

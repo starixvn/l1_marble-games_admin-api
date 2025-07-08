@@ -1,4 +1,4 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, SchemaFactory } from "@nestjs/mongoose";
 
 export class MergeSelection {
   @Prop({ type: Number })

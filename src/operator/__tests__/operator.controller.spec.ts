@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OperatorController } from '../operator.controller';
-import { OperatorService, OperatorCreateResponse } from '../operator.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { OperatorController } from "../operator.controller";
+import { OperatorService, OperatorCreateResponse } from "../operator.service";
 
-describe('OperatorController', () => {
+describe("OperatorController", () => {
   let controller: OperatorController;
   let service: OperatorService;
 
@@ -25,14 +25,14 @@ describe('OperatorController', () => {
     service = module.get<OperatorService>(OperatorService);
   });
 
-  describe('createOperator', () => {
-    it('should call createOperator method from service', async () => {
+  describe("createOperator", () => {
+    it("should call createOperator method from service", async () => {
       // Arrange
-      const result: OperatorCreateResponse = { 
-        operatorId: 'op-123', 
-        password: 'secret-123' 
+      const result: OperatorCreateResponse = {
+        operatorId: "op-123",
+        password: "secret-123",
       };
-      jest.spyOn(service, 'createOperator').mockResolvedValue(result);
+      jest.spyOn(service, "createOperator").mockResolvedValue(result);
 
       // Act
       const response = await controller.createOperator();
@@ -42,16 +42,16 @@ describe('OperatorController', () => {
       expect(response).toEqual(result);
     });
 
-    it('should call createOperator method from service with name parameter', async () => {
+    it("should call createOperator method from service with name parameter", async () => {
       // Arrange
       const createOperatorDto = {
-        name: 'test-operator'
+        name: "test-operator",
       };
-      const result: OperatorCreateResponse = { 
-        operatorId: 'op-123', 
-        password: 'secret-123' 
+      const result: OperatorCreateResponse = {
+        operatorId: "op-123",
+        password: "secret-123",
       };
-      jest.spyOn(service, 'createOperator').mockResolvedValue(result);
+      jest.spyOn(service, "createOperator").mockResolvedValue(result);
 
       // Act
       const response = await controller.createOperator(createOperatorDto);
@@ -62,14 +62,14 @@ describe('OperatorController', () => {
     });
   });
 
-  describe('updateName', () => {
-    it('should call updateName method from service with correct parameters', async () => {
+  describe("updateName", () => {
+    it("should call updateName method from service with correct parameters", async () => {
       // Arrange
       const updateNameArgs = {
-        operatorId: 'op-123',
-        name: 'new-name',
+        operatorId: "op-123",
+        name: "new-name",
       };
-      jest.spyOn(service, 'updateName').mockResolvedValue(undefined);
+      jest.spyOn(service, "updateName").mockResolvedValue(undefined);
 
       // Act
       const response = await controller.updateName(updateNameArgs);
@@ -80,17 +80,17 @@ describe('OperatorController', () => {
     });
   });
 
-  describe('changePassword', () => {
-    it('should call changePassword method from service with operatorId', async () => {
+  describe("changePassword", () => {
+    it("should call changePassword method from service with operatorId", async () => {
       // Arrange
       const changePasswordArgs = {
-        operatorId: 'op-123',
+        operatorId: "op-123",
       };
-      const result = { 
-        operatorId: 'op-123', 
-        password: 'new-password' 
+      const result = {
+        operatorId: "op-123",
+        password: "new-password",
       };
-      jest.spyOn(service, 'generatePassword').mockResolvedValue(result);
+      jest.spyOn(service, "generatePassword").mockResolvedValue(result);
 
       // Act
       const response = await controller.generatePassword(changePasswordArgs);
@@ -100,16 +100,16 @@ describe('OperatorController', () => {
       expect(response).toEqual(result);
     });
 
-    it('should call changePassword method from service with name', async () => {
+    it("should call changePassword method from service with name", async () => {
       // Arrange
       const changePasswordArgs = {
-        name: 'operator1',
+        name: "operator1",
       };
-      const result = { 
-        operatorId: 'op-123', 
-        password: 'new-password' 
+      const result = {
+        operatorId: "op-123",
+        password: "new-password",
       };
-      jest.spyOn(service, 'generatePassword').mockResolvedValue(result);
+      jest.spyOn(service, "generatePassword").mockResolvedValue(result);
 
       // Act
       const response = await controller.generatePassword(changePasswordArgs);

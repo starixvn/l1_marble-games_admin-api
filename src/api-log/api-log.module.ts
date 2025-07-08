@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ApiLogController } from './api-log.controller';
-import { ApiLogQueryService } from './api-log.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { LogRecord, LogRecordSchema } from './schema/log-record.schema';
+import { Module } from "@nestjs/common";
+import { ApiLogController } from "./api-log.controller";
+import { ApiLogQueryService } from "./api-log.service";
+import { MongooseModule } from "@nestjs/mongoose";
+import { LogRecord, LogRecordSchema } from "./schema/log-record.schema";
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { LogRecord, LogRecordSchema } from './schema/log-record.schema';
       {
         name: LogRecord.name,
         schema: LogRecordSchema,
-        collection: 'log_records',
+        collection: "log_records",
       },
     ]),
   ],

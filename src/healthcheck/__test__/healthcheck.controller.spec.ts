@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HealthcheckController } from '../healthcheck.controller';
-import { HealthcheckService } from '../healthcheck.service';
-import { ServiceUnavailableException } from '@nestjs/common';
+import { Test, TestingModule } from "@nestjs/testing";
+import { HealthcheckController } from "../healthcheck.controller";
+import { HealthcheckService } from "../healthcheck.service";
+import { ServiceUnavailableException } from "@nestjs/common";
 
-describe('HealthcheckController', () => {
+describe("HealthcheckController", () => {
   let controller: HealthcheckController;
   let service: HealthcheckService;
 
@@ -24,18 +24,18 @@ describe('HealthcheckController', () => {
     service = module.get<HealthcheckService>(HealthcheckService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 
-  describe('healthCheck', () => {
-    it('should return health check response when service is healthy', async () => {
+  describe("healthCheck", () => {
+    it("should return health check response when service is healthy", async () => {
       // arrange
       const expectedResponse = {
-        messge: 'API is running in test environment',
-        timestamp: '2024-03-20T00:00:00.000Z',
+        messge: "API is running in test environment",
+        timestamp: "2024-03-20T00:00:00.000Z",
       };
-      jest.spyOn(service, 'healthCheck').mockResolvedValue(expectedResponse);
+      jest.spyOn(service, "healthCheck").mockResolvedValue(expectedResponse);
 
       // act
       const result = await controller.healthCheck();
@@ -45,17 +45,17 @@ describe('HealthcheckController', () => {
       expect(service.healthCheck).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw ServiceUnavailableException when database is down', async () => {
+    it("should throw ServiceUnavailableException when database is down", async () => {
       // arrange
       const expectedError = new ServiceUnavailableException({
-        message: 'API is running but database is unavailable, test environment',
-        timestamp: '2024-03-20T00:00:00.000Z',
+        message: "API is running but database is unavailable, test environment",
+        timestamp: "2024-03-20T00:00:00.000Z",
         database: {
-          error: 'DB down',
-          state: 'disconnected',
+          error: "DB down",
+          state: "disconnected",
         },
       });
-      jest.spyOn(service, 'healthCheck').mockRejectedValue(expectedError);
+      jest.spyOn(service, "healthCheck").mockRejectedValue(expectedError);
 
       // act
       const result = controller.healthCheck();

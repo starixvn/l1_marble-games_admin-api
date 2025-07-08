@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, ObjectId } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose, { Document, ObjectId } from "mongoose";
 
 @Schema({ _id: false })
 export class Diff {

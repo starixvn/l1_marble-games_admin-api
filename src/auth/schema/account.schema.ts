@@ -8,15 +8,14 @@ export type AccountDocument = Account & Document<ObjectId>;
 
 @Schema()
 export class Account {
+  @Prop({ type: String, required: false })
+  username: string;
 
-    @Prop({ type: String, required: false })
-    username: string;
+  @Prop({ type: String })
+  password: string;
 
-    @Prop({ type: String })
-    password: string;
-
-    @Prop({ type: String, enum: roleValues, required: true })
-    role: Role;
+  @Prop({ type: String, enum: roleValues, required: true })
+  role: Role;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

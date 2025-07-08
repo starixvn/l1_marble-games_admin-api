@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { LogRecord, LogRecordDocument } from './schema/log-record.schema';
-import { Model, RootFilterQuery } from 'mongoose';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { LogRecord, LogRecordDocument } from "./schema/log-record.schema";
+import { Model, RootFilterQuery } from "mongoose";
 
 export type QueryLogsParams = {
   operator?: string;
@@ -34,25 +34,25 @@ export class ApiLogQueryService {
     };
 
     if (operator) {
-      query['user.userId'] = operator;
+      query["user.userId"] = operator;
     }
 
     if (endpoint) {
-      query['request.path'] = endpoint;
+      query["request.path"] = endpoint;
     }
 
     if (queryParams) {
-      query['request.query'] = Object.fromEntries(
+      query["request.query"] = Object.fromEntries(
         new URLSearchParams(queryParams),
       );
     }
 
     if (gameId) {
-      query['request.additionalInfo.gameId'] = gameId;
+      query["request.additionalInfo.gameId"] = gameId;
     }
 
     if (eventId) {
-      query['request.additionalInfo.eventId'] = eventId;
+      query["request.additionalInfo.eventId"] = eventId;
     }
 
     return this.logModel

@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { GameConfigService } from '../game-config.service';
-import { GameConfig, GameConfigDocument } from '../schema/game-config.schema';
-import { GameConfigSchemaService } from '../../game-config-schema/game-config-schema.service';
-import { AdminLogService } from '../../admin-log/admin-log.service';
-import { Model } from 'mongoose';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getModelToken } from "@nestjs/mongoose";
+import { GameConfigService } from "../game-config.service";
+import { GameConfig, GameConfigDocument } from "../schema/game-config.schema";
+import { GameConfigSchemaService } from "../../game-config-schema/game-config-schema.service";
+import { AdminLogService } from "../../admin-log/admin-log.service";
+import { Model } from "mongoose";
 
-describe('GameConfigService', () => {
+describe("GameConfigService", () => {
   let service: GameConfigService;
   let mockGameConfigModel: Partial<Model<GameConfigDocument>>;
   let mockGameConfigSchemaService: Partial<GameConfigSchemaService>;
   let mockAdminLogService: Partial<AdminLogService>;
 
-  const mockSchemaId = '507f1f77bcf86cd799439011';
+  const mockSchemaId = "507f1f77bcf86cd799439011";
 
   beforeEach(async () => {
     // Arrange
@@ -62,8 +62,8 @@ describe('GameConfigService', () => {
     service = module.get<GameConfigService>(GameConfigService);
   });
 
-  describe('upsertGameConfig', () => {
-    it('should call validateGameConfigSchema and findOneAndUpdate with correct parameters', async () => {
+  describe("upsertGameConfig", () => {
+    it("should call validateGameConfigSchema and findOneAndUpdate with correct parameters", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
@@ -96,11 +96,11 @@ describe('GameConfigService', () => {
         },
         { upsert: true, new: true },
       );
-      expect(mockFindOneAndUpdateFn().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindOneAndUpdateFn().select).toHaveBeenCalledWith("-_id -__v");
       expect(result).toEqual(mockResult);
     });
 
-    it('should handle different config values', async () => {
+    it("should handle different config values", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
@@ -136,7 +136,7 @@ describe('GameConfigService', () => {
       expect(result).toEqual(mockResult);
     });
 
-    it('should handle complex config objects', async () => {
+    it("should handle complex config objects", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
@@ -146,10 +146,10 @@ describe('GameConfigService', () => {
           settings: {
             maxPlayers: 8,
             timeLimit: 300,
-            difficulty: 'hard',
+            difficulty: "hard",
           },
           metadata: {
-            version: '1.2.0',
+            version: "1.2.0",
             lastUpdated: new Date(),
           },
         },
@@ -180,11 +180,11 @@ describe('GameConfigService', () => {
         },
         { upsert: true, new: true },
       );
-      expect(mockFindOneAndUpdateFn().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindOneAndUpdateFn().select).toHaveBeenCalledWith("-_id -__v");
       expect(result).toEqual(mockResult);
     });
 
-    it('should handle empty config object', async () => {
+    it("should handle empty config object", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
@@ -220,14 +220,14 @@ describe('GameConfigService', () => {
       expect(result).toEqual(mockResult);
     });
 
-    it('should throw error when schema validation fails', async () => {
+    it("should throw error when schema validation fails", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
         gameId: 123,
-        config: { invalid: 'config' },
+        config: { invalid: "config" },
       };
-      const validationError = new Error('Schema validation failed');
+      const validationError = new Error("Schema validation failed");
 
       const mockValidateFn =
         mockGameConfigSchemaService.validateGameConfigSchema as jest.Mock;
@@ -235,7 +235,7 @@ describe('GameConfigService', () => {
 
       // Act & Assert
       await expect(service.upsertGameConfig(args)).rejects.toThrow(
-        'Schema validation failed',
+        "Schema validation failed",
       );
       expect(
         mockGameConfigSchemaService.validateGameConfigSchema,
@@ -246,7 +246,7 @@ describe('GameConfigService', () => {
       expect(mockGameConfigModel.findOneAndUpdate).not.toHaveBeenCalled();
     });
 
-    it('should create admin log when upserting game config', async () => {
+    it("should create admin log when upserting game config", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
@@ -264,9 +264,9 @@ describe('GameConfigService', () => {
 
       // Assert
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: 'admin',
-        resource: 'game-config',
-        action: 'insert',
+        author: "admin",
+        resource: "game-config",
+        action: "insert",
         diff: {
           old: undefined,
           new: mockResult,
@@ -274,7 +274,7 @@ describe('GameConfigService', () => {
       });
     });
 
-    it('should create admin log with update action when existing config is found', async () => {
+    it("should create admin log with update action when existing config is found", async () => {
       // Arrange
       const args = {
         schemaId: mockSchemaId,
@@ -300,9 +300,9 @@ describe('GameConfigService', () => {
 
       // Assert
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: 'admin',
-        resource: 'game-config',
-        action: 'update',
+        author: "admin",
+        resource: "game-config",
+        action: "update",
         diff: {
           old: { gameId: 123, config: { enabled: false } },
           new: mockResult,
@@ -311,8 +311,8 @@ describe('GameConfigService', () => {
     });
   });
 
-  describe('getGameConfigByGameId', () => {
-    it('should return game config for given gameId', async () => {
+  describe("getGameConfigByGameId", () => {
+    it("should return game config for given gameId", async () => {
       // Arrange
       const gameId = 123;
       const mockResult = { gameId, config: { enabled: true } };
@@ -326,13 +326,13 @@ describe('GameConfigService', () => {
       expect(mockGameConfigModel.findOne).toHaveBeenCalledWith({
         gameId: Number(gameId),
       });
-      expect(mockFindOneFn().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindOneFn().select).toHaveBeenCalledWith("-_id -__v");
       expect(result).toEqual(mockResult);
     });
   });
 
-  describe('getAllGameConfigs', () => {
-    it('should return all game configs', async () => {
+  describe("getAllGameConfigs", () => {
+    it("should return all game configs", async () => {
       // Arrange
       const mockResult = [
         { gameId: 123, config: { enabled: true } },
@@ -346,7 +346,7 @@ describe('GameConfigService', () => {
 
       // Assert
       expect(mockGameConfigModel.find).toHaveBeenCalled();
-      expect(mockFindFn().select).toHaveBeenCalledWith('-_id -__v');
+      expect(mockFindFn().select).toHaveBeenCalledWith("-_id -__v");
       expect(result).toEqual(mockResult);
     });
   });

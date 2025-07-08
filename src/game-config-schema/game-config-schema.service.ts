@@ -3,16 +3,16 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model, Types } from "mongoose";
 import {
   GameConfigJsonSchema,
   GameConfigJsonSchemaDocument,
-} from './schema/game-config-schema.schema';
-import Ajv from 'ajv';
-import { AdminLogService } from '../admin-log/admin-log.service';
-import { AdminLogActions } from '../admin-log/constants';
+} from "./schema/game-config-schema.schema";
+import Ajv from "ajv";
+import { AdminLogService } from "../admin-log/admin-log.service";
+import { AdminLogActions } from "../admin-log/constants";
 
 export type UpsertGameConfigSchemaArgs = {
   id?: string;
@@ -27,13 +27,13 @@ export type ValidateGameConfigSchemaArgs = {
 };
 
 export const DEFAULT_GAME_CONFIG_SCHEMA = {
-  type: 'object',
+  type: "object",
   properties: {
     enabled: {
-      type: 'boolean',
+      type: "boolean",
     },
   },
-  required: ['enabled'],
+  required: ["enabled"],
 };
 
 @Injectable()
@@ -54,7 +54,7 @@ export class GameConfigSchemaService {
 
     const schema = await this.gameConfigJsonSchemaModel
       .findById(id)
-      .select('-__v -_id');
+      .select("-__v -_id");
     if (!schema) {
       throw new NotFoundException(`Game config schema not found for id: ${id}`);
     }
@@ -64,7 +64,7 @@ export class GameConfigSchemaService {
   async getAllGameConfigSchemas() {
     const schemas = await this.gameConfigJsonSchemaModel
       .find()
-      .select('-__v -schema -uiSchema');
+      .select("-__v -schema -uiSchema");
     return schemas.map((schema) =>
       schema.toObject({
         transform: (_, ret) => {
@@ -89,11 +89,11 @@ export class GameConfigSchemaService {
 
       const oldSchema = await this.gameConfigJsonSchemaModel
         .findById(id)
-        .select('-__v');
+        .select("-__v");
 
       const updatedSchema = await this.gameConfigJsonSchemaModel
         .findByIdAndUpdate(id, { schema, name, uiSchema }, { new: true })
-        .select('-__v');
+        .select("-__v");
 
       if (!updatedSchema) {
         throw new NotFoundException(
@@ -120,8 +120,8 @@ export class GameConfigSchemaService {
       });
 
       void this.adminLogService.createLog({
-        author: 'admin',
-        resource: 'game-config-schema',
+        author: "admin",
+        resource: "game-config-schema",
         action: AdminLogActions.UPDATE,
         diff: {
           old: oldSchemaObject,
@@ -155,8 +155,8 @@ export class GameConfigSchemaService {
     });
 
     void this.adminLogService.createLog({
-      author: 'admin',
-      resource: 'game-config-schema',
+      author: "admin",
+      resource: "game-config-schema",
       action: AdminLogActions.INSERT,
       diff: {
         new: newSchemaObject,
@@ -205,7 +205,7 @@ export class GameConfigSchemaService {
       this.ajv.compile(schema);
     } catch (error) {
       throw new BadRequestException({
-        message: 'Invalid JSON Schema',
+        message: "Invalid JSON Schema",
         error: error instanceof Error ? error.message : String(error),
         schema,
       });

@@ -1,6 +1,10 @@
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import mongoose, { ObjectId, Document, Schema as MongooseSchema } from 'mongoose';
-import { MarketIntegration } from './market-integration.schema';
+import { Prop, SchemaFactory, Schema } from "@nestjs/mongoose";
+import mongoose, {
+  ObjectId,
+  Document,
+  Schema as MongooseSchema,
+} from "mongoose";
+import { MarketIntegration } from "./market-integration.schema";
 
 @Schema()
 export class GameIntegration {
@@ -12,12 +16,14 @@ export class GameIntegration {
 
   @Prop({ type: mongoose.Schema.Types.Mixed })
   mergeEvent: Record<string, any>;
-  
+
   @Prop({ type: [mongoose.Schema.Types.Mixed] })
   mergeEventDetails: Array<any>;
 
-  @Prop({ 
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: MarketIntegration.name }]
+  @Prop({
+    type: [
+      { type: MongooseSchema.Types.ObjectId, ref: MarketIntegration.name },
+    ],
   })
   markets: Array<ObjectId | MarketIntegration>;
 

@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { GameConfig, GameConfigSchema } from './schema/game-config.schema';
-import { GameConfigController } from './game-config.controller';
-import { GameConfigService } from './game-config.service';
-import { GameConfigSchemaModule } from '../game-config-schema/game-config-schema.module';
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { GameConfig, GameConfigSchema } from "./schema/game-config.schema";
+import { GameConfigController } from "./game-config.controller";
+import { GameConfigService } from "./game-config.service";
+import { GameConfigSchemaModule } from "../game-config-schema/game-config-schema.module";
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { GameConfigSchemaModule } from '../game-config-schema/game-config-schema
       {
         name: GameConfig.name,
         schema: GameConfigSchema,
-        collection: 'game_configs',
+        collection: "game_configs",
       },
     ]),
     GameConfigSchemaModule,

@@ -1,42 +1,42 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { GameConfigSchemaService } from '../game-config-schema.service';
-import { GameConfigJsonSchema } from '../schema/game-config-schema.schema';
-import { AdminLogService } from '../../admin-log/admin-log.service';
-import { AdminLogActions } from '../../admin-log/constants';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getModelToken } from "@nestjs/mongoose";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { GameConfigSchemaService } from "../game-config-schema.service";
+import { GameConfigJsonSchema } from "../schema/game-config-schema.schema";
+import { AdminLogService } from "../../admin-log/admin-log.service";
+import { AdminLogActions } from "../../admin-log/constants";
 
-describe('GameConfigSchemaService', () => {
+describe("GameConfigSchemaService", () => {
   let service: GameConfigSchemaService;
   let mockModel: any;
   let mockAdminLogService: any;
 
-  const mockId = '507f1f77bcf86cd799439011';
+  const mockId = "507f1f77bcf86cd799439011";
   const mockGameConfigSchema = {
     _id: mockId,
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        level: { type: 'number', minimum: 1, maximum: 100 },
-        difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] },
+        level: { type: "number", minimum: 1, maximum: 100 },
+        difficulty: { type: "string", enum: ["easy", "medium", "hard"] },
         settings: {
-          type: 'object',
+          type: "object",
           properties: {
-            sound: { type: 'boolean' },
-            music: { type: 'boolean' },
+            sound: { type: "boolean" },
+            music: { type: "boolean" },
           },
-          required: ['sound', 'music'],
+          required: ["sound", "music"],
         },
       },
-      required: ['level', 'difficulty', 'settings'],
+      required: ["level", "difficulty", "settings"],
     },
-    name: 'Test Game Configuration',
+    name: "Test Game Configuration",
     uiSchema: {
-      level: { 'ui:widget': 'range' },
-      difficulty: { 'ui:widget': 'select' },
+      level: { "ui:widget": "range" },
+      difficulty: { "ui:widget": "select" },
       settings: {
-        sound: { 'ui:widget': 'checkbox' },
-        music: { 'ui:widget': 'checkbox' },
+        sound: { "ui:widget": "checkbox" },
+        music: { "ui:widget": "checkbox" },
       },
     },
   };
@@ -69,8 +69,8 @@ describe('GameConfigSchemaService', () => {
     service = module.get<GameConfigSchemaService>(GameConfigSchemaService);
   });
 
-  describe('getGameConfigSchema', () => {
-    it('should return game config schema when valid id is provided', async () => {
+  describe("getGameConfigSchema", () => {
+    it("should return game config schema when valid id is provided", async () => {
       // Arrange
       const mockReturnValue = {
         select: jest.fn().mockResolvedValue(mockGameConfigSchema),
@@ -82,13 +82,13 @@ describe('GameConfigSchemaService', () => {
 
       // Assert
       expect(mockModel.findById).toHaveBeenCalledWith(mockId);
-      expect(mockReturnValue.select).toHaveBeenCalledWith('-__v -_id');
+      expect(mockReturnValue.select).toHaveBeenCalledWith("-__v -_id");
       expect(result).toEqual(mockGameConfigSchema);
     });
 
-    it('should throw BadRequestException when invalid ObjectId is provided', async () => {
+    it("should throw BadRequestException when invalid ObjectId is provided", async () => {
       // Arrange
-      const invalidId = 'invalid-id';
+      const invalidId = "invalid-id";
 
       // Act & Assert
       await expect(service.getGameConfigSchema(invalidId)).rejects.toThrow(
@@ -96,9 +96,9 @@ describe('GameConfigSchemaService', () => {
       );
     });
 
-    it('should throw NotFoundException when schema is not found', async () => {
+    it("should throw NotFoundException when schema is not found", async () => {
       // Arrange
-      const nonExistentId = '507f1f77bcf86cd799439012';
+      const nonExistentId = "507f1f77bcf86cd799439012";
       const mockReturnValue = {
         select: jest.fn().mockResolvedValue(null),
       };
@@ -113,25 +113,25 @@ describe('GameConfigSchemaService', () => {
     });
   });
 
-  describe('getAllGameConfigSchemas', () => {
-    it('should return all game config schemas', async () => {
+  describe("getAllGameConfigSchemas", () => {
+    it("should return all game config schemas", async () => {
       // Arrange
       const mockSchemas = [
         {
           _id: mockId,
-          name: 'Schema 1',
+          name: "Schema 1",
           toObject: jest.fn().mockImplementation(({ transform }) => {
-            const result = { _id: mockId, name: 'Schema 1' };
+            const result = { _id: mockId, name: "Schema 1" };
             return transform(null, result);
           }),
         },
         {
-          _id: '507f1f77bcf86cd799439012',
-          name: 'Schema 2',
+          _id: "507f1f77bcf86cd799439012",
+          name: "Schema 2",
           toObject: jest.fn().mockImplementation(({ transform }) => {
             const result = {
-              _id: '507f1f77bcf86cd799439012',
-              name: 'Schema 2',
+              _id: "507f1f77bcf86cd799439012",
+              name: "Schema 2",
             };
             return transform(null, result);
           }),
@@ -148,17 +148,17 @@ describe('GameConfigSchemaService', () => {
       // Assert
       expect(mockModel.find).toHaveBeenCalled();
       expect(mockReturnValue.select).toHaveBeenCalledWith(
-        '-__v -schema -uiSchema',
+        "-__v -schema -uiSchema",
       );
       expect(result).toEqual([
-        { id: mockId, name: 'Schema 1' },
-        { id: '507f1f77bcf86cd799439012', name: 'Schema 2' },
+        { id: mockId, name: "Schema 1" },
+        { id: "507f1f77bcf86cd799439012", name: "Schema 2" },
       ]);
     });
   });
 
-  describe('upsertGameConfigSchema', () => {
-    it('should create new game config schema when no id is provided', async () => {
+  describe("upsertGameConfigSchema", () => {
+    it("should create new game config schema when no id is provided", async () => {
       // Arrange
       const args = {
         schema: mockGameConfigSchema.schema,
@@ -209,8 +209,8 @@ describe('GameConfigSchemaService', () => {
       });
       expect(mockSave).toHaveBeenCalled();
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: 'admin',
-        resource: 'game-config-schema',
+        author: "admin",
+        resource: "game-config-schema",
         action: AdminLogActions.INSERT,
         diff: {
           new: expectedResult,
@@ -219,12 +219,12 @@ describe('GameConfigSchemaService', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should update existing game config schema when id is provided', async () => {
+    it("should update existing game config schema when id is provided", async () => {
       // Arrange
       const args = {
         id: mockId,
         schema: mockGameConfigSchema.schema,
-        name: 'Updated Display Name',
+        name: "Updated Display Name",
         uiSchema: mockGameConfigSchema.uiSchema,
       };
 
@@ -277,10 +277,10 @@ describe('GameConfigSchemaService', () => {
         },
         { new: true },
       );
-      expect(mockReturnValue.select).toHaveBeenCalledWith('-__v');
+      expect(mockReturnValue.select).toHaveBeenCalledWith("-__v");
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: 'admin',
-        resource: 'game-config-schema',
+        author: "admin",
+        resource: "game-config-schema",
         action: AdminLogActions.UPDATE,
         diff: {
           old: expectedOld,
@@ -290,10 +290,10 @@ describe('GameConfigSchemaService', () => {
       expect(result).toEqual(expectedNew);
     });
 
-    it('should throw BadRequestException when invalid ObjectId is provided for update', async () => {
+    it("should throw BadRequestException when invalid ObjectId is provided for update", async () => {
       // Arrange
       const args = {
-        id: 'invalid-id',
+        id: "invalid-id",
         schema: mockGameConfigSchema.schema,
         name: mockGameConfigSchema.name,
         uiSchema: mockGameConfigSchema.uiSchema,
@@ -306,13 +306,13 @@ describe('GameConfigSchemaService', () => {
     });
   });
 
-  describe('validateGameConfigSchema', () => {
-    describe('valid config object', () => {
-      it('should validate config successfully when schema exists and config is valid', async () => {
+  describe("validateGameConfigSchema", () => {
+    describe("valid config object", () => {
+      it("should validate config successfully when schema exists and config is valid", async () => {
         // Arrange
         const validConfig = {
           level: 5,
-          difficulty: 'medium',
+          difficulty: "medium",
           settings: {
             sound: true,
             music: false,
@@ -332,11 +332,11 @@ describe('GameConfigSchemaService', () => {
         expect(mockModel.findById).toHaveBeenCalledWith(mockId);
       });
 
-      it('should validate config with different valid values', async () => {
+      it("should validate config with different valid values", async () => {
         // Arrange
         const validConfig = {
           level: 100,
-          difficulty: 'hard',
+          difficulty: "hard",
           settings: {
             sound: false,
             music: true,
@@ -356,12 +356,12 @@ describe('GameConfigSchemaService', () => {
       });
     });
 
-    describe('invalid config object', () => {
-      it('should throw BadRequestException when level is out of range', async () => {
+    describe("invalid config object", () => {
+      it("should throw BadRequestException when level is out of range", async () => {
         // Arrange
         const invalidConfig = {
           level: 150,
-          difficulty: 'medium',
+          difficulty: "medium",
           settings: {
             sound: true,
             music: false,
@@ -380,11 +380,11 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it('should throw BadRequestException when difficulty has invalid value', async () => {
+      it("should throw BadRequestException when difficulty has invalid value", async () => {
         // Arrange
         const invalidConfig = {
           level: 5,
-          difficulty: 'extreme',
+          difficulty: "extreme",
           settings: {
             sound: true,
             music: false,
@@ -403,7 +403,7 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it('should throw BadRequestException when required field is missing', async () => {
+      it("should throw BadRequestException when required field is missing", async () => {
         // Arrange
         const invalidConfig = {
           level: 5,
@@ -425,11 +425,11 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it('should throw BadRequestException when nested required field is missing', async () => {
+      it("should throw BadRequestException when nested required field is missing", async () => {
         // Arrange
         const invalidConfig = {
           level: 5,
-          difficulty: 'easy',
+          difficulty: "easy",
           settings: {
             sound: true,
           },
@@ -447,11 +447,11 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it('should throw BadRequestException when field has wrong type', async () => {
+      it("should throw BadRequestException when field has wrong type", async () => {
         // Arrange
         const invalidConfig = {
-          level: '5',
-          difficulty: 'medium',
+          level: "5",
+          difficulty: "medium",
           settings: {
             sound: true,
             music: false,
@@ -471,13 +471,13 @@ describe('GameConfigSchemaService', () => {
       });
     });
 
-    describe('invalid ObjectId', () => {
-      it('should throw BadRequestException when invalid ObjectId is provided', async () => {
+    describe("invalid ObjectId", () => {
+      it("should throw BadRequestException when invalid ObjectId is provided", async () => {
         // Arrange
-        const invalidId = 'invalid-id';
+        const invalidId = "invalid-id";
         const config = {
           level: 5,
-          difficulty: 'medium',
+          difficulty: "medium",
           settings: {
             sound: true,
             music: false,
@@ -495,12 +495,12 @@ describe('GameConfigSchemaService', () => {
       });
     });
 
-    describe('no schema id provided', () => {
-      it('should validate with default schema and throw BadRequestException when config is invalid', async () => {
+    describe("no schema id provided", () => {
+      it("should validate with default schema and throw BadRequestException when config is invalid", async () => {
         // Arrange
         const invalidConfig = {
           level: 5,
-          difficulty: 'medium',
+          difficulty: "medium",
         };
         const args = {
           config: invalidConfig,
@@ -513,7 +513,7 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it('should validate with default schema for valid game config', async () => {
+      it("should validate with default schema for valid game config", async () => {
         // Arrange
         const validConfig = {
           enabled: true,
@@ -529,13 +529,13 @@ describe('GameConfigSchemaService', () => {
         await expect(act).resolves.not.toThrow();
       });
 
-      it('should validate with default schema when id is empty string', async () => {
+      it("should validate with default schema when id is empty string", async () => {
         // Arrange
         const validConfig = {
           enabled: false,
         };
         const args = {
-          id: '',
+          id: "",
           config: validConfig,
         };
 
@@ -546,10 +546,10 @@ describe('GameConfigSchemaService', () => {
         await expect(act).resolves.not.toThrow();
       });
 
-      it('should throw BadRequestException with default schema when required field is missing', async () => {
+      it("should throw BadRequestException with default schema when required field is missing", async () => {
         // Arrange
         const invalidConfig = {
-          someOtherField: 'value',
+          someOtherField: "value",
         };
         const args = {
           config: invalidConfig,
@@ -562,10 +562,10 @@ describe('GameConfigSchemaService', () => {
         await expect(act).rejects.toThrow(BadRequestException);
       });
 
-      it('should throw BadRequestException with default schema when enabled field has wrong type', async () => {
+      it("should throw BadRequestException with default schema when enabled field has wrong type", async () => {
         // Arrange
         const invalidConfig = {
-          enabled: 'true',
+          enabled: "true",
         };
         const args = {
           config: invalidConfig,
@@ -579,13 +579,13 @@ describe('GameConfigSchemaService', () => {
       });
     });
 
-    describe('no schema found', () => {
-      it('should throw NotFoundException when schema does not exist for id', async () => {
+    describe("no schema found", () => {
+      it("should throw NotFoundException when schema does not exist for id", async () => {
         // Arrange
-        const nonExistentId = '507f1f77bcf86cd799439012';
+        const nonExistentId = "507f1f77bcf86cd799439012";
         const config = {
           level: 5,
-          difficulty: 'medium',
+          difficulty: "medium",
           settings: {
             sound: true,
             music: false,

@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { ApiLogQueryService, QueryLogsParams } from '../api-log.service';
-import { LogRecord } from '../schema/log-record.schema';
-import { Model } from 'mongoose';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getModelToken } from "@nestjs/mongoose";
+import { ApiLogQueryService, QueryLogsParams } from "../api-log.service";
+import { LogRecord } from "../schema/log-record.schema";
+import { Model } from "mongoose";
 
 type MockQueryChain = {
   sort: jest.MockedFunction<() => MockQueryChain>;
@@ -12,9 +12,9 @@ type MockQueryChain = {
   >;
 };
 
-type TransformedLogRecord = Omit<LogRecord, '_id'> & { id: string };
+type TransformedLogRecord = Omit<LogRecord, "_id"> & { id: string };
 
-describe('ApiLogQueryService', () => {
+describe("ApiLogQueryService", () => {
   let service: ApiLogQueryService;
   let logModel: jest.Mocked<Model<LogRecord>>;
 
@@ -41,17 +41,17 @@ describe('ApiLogQueryService', () => {
     jest.clearAllMocks();
   });
 
-  describe('queryLogs', () => {
-    it('should query logs with all parameters provided', async () => {
+  describe("queryLogs", () => {
+    it("should query logs with all parameters provided", async () => {
       const params: QueryLogsParams = {
-        operator: 'test-operator',
-        endpoint: '/api/test',
-        queryParams: 'param1=value1&param2=value2',
+        operator: "test-operator",
+        endpoint: "/api/test",
+        queryParams: "param1=value1&param2=value2",
         gameId: 123,
         eventId: 456,
         dateRange: {
-          startDate: new Date('2025-01-01T00:00:00.000Z'),
-          endDate: new Date('2025-01-01T23:59:59.000Z'),
+          startDate: new Date("2025-01-01T00:00:00.000Z"),
+          endDate: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
@@ -63,29 +63,29 @@ describe('ApiLogQueryService', () => {
 
       const expectedQuery = {
         timestamp: {
-          $gte: new Date('2025-01-01T00:00:00.000Z'),
-          $lte: new Date('2025-01-01T23:59:59.000Z'),
+          $gte: new Date("2025-01-01T00:00:00.000Z"),
+          $lte: new Date("2025-01-01T23:59:59.000Z"),
         },
-        'user.userId': 'test-operator',
-        'request.path': '/api/test',
-        'request.query': { param1: 'value1', param2: 'value2' },
-        'request.additionalInfo.gameId': 123,
-        'request.additionalInfo.eventId': 456,
+        "user.userId": "test-operator",
+        "request.path": "/api/test",
+        "request.query": { param1: "value1", param2: "value2" },
+        "request.additionalInfo.gameId": 123,
+        "request.additionalInfo.eventId": 456,
       };
 
       const expectedResult: TransformedLogRecord[] = [
         {
-          id: 'log-id-1',
-          timestamp: new Date('2025-01-01T12:00:00.000Z'),
-          user: { userId: 'test-operator' },
-          request: { path: '/api/test' },
+          id: "log-id-1",
+          timestamp: new Date("2025-01-01T12:00:00.000Z"),
+          user: { userId: "test-operator" },
+          request: { path: "/api/test" },
           response: { status: 200 },
         },
         {
-          id: 'log-id-2',
-          timestamp: new Date('2025-01-01T13:00:00.000Z'),
-          user: { userId: 'test-operator' },
-          request: { path: '/api/test' },
+          id: "log-id-2",
+          timestamp: new Date("2025-01-01T13:00:00.000Z"),
+          user: { userId: "test-operator" },
+          request: { path: "/api/test" },
           response: { status: 200 },
         },
       ];
@@ -104,11 +104,11 @@ describe('ApiLogQueryService', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should query logs with only required parameters', async () => {
+    it("should query logs with only required parameters", async () => {
       const params: QueryLogsParams = {
         dateRange: {
-          startDate: new Date('2025-01-01T00:00:00.000Z'),
-          endDate: new Date('2025-01-01T23:59:59.000Z'),
+          startDate: new Date("2025-01-01T00:00:00.000Z"),
+          endDate: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
@@ -120,17 +120,17 @@ describe('ApiLogQueryService', () => {
 
       const expectedQuery = {
         timestamp: {
-          $gte: new Date('2025-01-01T00:00:00.000Z'),
-          $lte: new Date('2025-01-01T23:59:59.000Z'),
+          $gte: new Date("2025-01-01T00:00:00.000Z"),
+          $lte: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
       const expectedResult: TransformedLogRecord[] = [
         {
-          id: 'log-id-1',
-          timestamp: new Date('2025-01-01T12:00:00.000Z'),
-          user: { userId: 'operator-1' },
-          request: { path: '/api/health' },
+          id: "log-id-1",
+          timestamp: new Date("2025-01-01T12:00:00.000Z"),
+          user: { userId: "operator-1" },
+          request: { path: "/api/health" },
           response: { status: 200 },
         },
       ];
@@ -149,13 +149,13 @@ describe('ApiLogQueryService', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should query logs with partial optional parameters', async () => {
+    it("should query logs with partial optional parameters", async () => {
       const params: QueryLogsParams = {
-        operator: 'test-operator',
+        operator: "test-operator",
         gameId: 123,
         dateRange: {
-          startDate: new Date('2025-01-01T00:00:00.000Z'),
-          endDate: new Date('2025-01-01T23:59:59.000Z'),
+          startDate: new Date("2025-01-01T00:00:00.000Z"),
+          endDate: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
@@ -167,18 +167,18 @@ describe('ApiLogQueryService', () => {
 
       const expectedQuery = {
         timestamp: {
-          $gte: new Date('2025-01-01T00:00:00.000Z'),
-          $lte: new Date('2025-01-01T23:59:59.000Z'),
+          $gte: new Date("2025-01-01T00:00:00.000Z"),
+          $lte: new Date("2025-01-01T23:59:59.000Z"),
         },
-        'user.userId': 'test-operator',
-        'request.additionalInfo.gameId': 123,
+        "user.userId": "test-operator",
+        "request.additionalInfo.gameId": 123,
       };
 
       const expectedResult: TransformedLogRecord[] = [
         {
-          id: 'log-id-1',
-          timestamp: new Date('2025-01-01T12:00:00.000Z'),
-          user: { userId: 'test-operator' },
+          id: "log-id-1",
+          timestamp: new Date("2025-01-01T12:00:00.000Z"),
+          user: { userId: "test-operator" },
           request: { additionalInfo: { gameId: 123 } },
           response: { status: 200 },
         },
@@ -198,12 +198,12 @@ describe('ApiLogQueryService', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should handle empty result from database', async () => {
+    it("should handle empty result from database", async () => {
       const params: QueryLogsParams = {
-        operator: 'non-existent-operator',
+        operator: "non-existent-operator",
         dateRange: {
-          startDate: new Date('2025-01-01T00:00:00.000Z'),
-          endDate: new Date('2025-01-01T23:59:59.000Z'),
+          startDate: new Date("2025-01-01T00:00:00.000Z"),
+          endDate: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
@@ -215,10 +215,10 @@ describe('ApiLogQueryService', () => {
 
       const expectedQuery = {
         timestamp: {
-          $gte: new Date('2025-01-01T00:00:00.000Z'),
-          $lte: new Date('2025-01-01T23:59:59.000Z'),
+          $gte: new Date("2025-01-01T00:00:00.000Z"),
+          $lte: new Date("2025-01-01T23:59:59.000Z"),
         },
-        'user.userId': 'non-existent-operator',
+        "user.userId": "non-existent-operator",
       };
 
       const expectedResult: TransformedLogRecord[] = [];
@@ -237,12 +237,12 @@ describe('ApiLogQueryService', () => {
       expect(result).toEqual([]);
     });
 
-    it('should handle complex query parameters parsing', async () => {
+    it("should handle complex query parameters parsing", async () => {
       const params: QueryLogsParams = {
-        queryParams: 'page=1&limit=10&filter=active&sort=desc',
+        queryParams: "page=1&limit=10&filter=active&sort=desc",
         dateRange: {
-          startDate: new Date('2025-01-01T00:00:00.000Z'),
-          endDate: new Date('2025-01-01T23:59:59.000Z'),
+          startDate: new Date("2025-01-01T00:00:00.000Z"),
+          endDate: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
@@ -254,22 +254,22 @@ describe('ApiLogQueryService', () => {
 
       const expectedQuery = {
         timestamp: {
-          $gte: new Date('2025-01-01T00:00:00.000Z'),
-          $lte: new Date('2025-01-01T23:59:59.000Z'),
+          $gte: new Date("2025-01-01T00:00:00.000Z"),
+          $lte: new Date("2025-01-01T23:59:59.000Z"),
         },
-        'request.query': {
-          page: '1',
-          limit: '10',
-          filter: 'active',
-          sort: 'desc',
+        "request.query": {
+          page: "1",
+          limit: "10",
+          filter: "active",
+          sort: "desc",
         },
       };
 
       const expectedResult: TransformedLogRecord[] = [
         {
-          id: 'log-id-1',
-          timestamp: new Date('2025-01-01T12:00:00.000Z'),
-          request: { query: { page: '1', limit: '10' } },
+          id: "log-id-1",
+          timestamp: new Date("2025-01-01T12:00:00.000Z"),
+          request: { query: { page: "1", limit: "10" } },
           response: { status: 200 },
         },
       ];
@@ -288,11 +288,11 @@ describe('ApiLogQueryService', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should handle database errors', async () => {
+    it("should handle database errors", async () => {
       const params: QueryLogsParams = {
         dateRange: {
-          startDate: new Date('2025-01-01T00:00:00.000Z'),
-          endDate: new Date('2025-01-01T23:59:59.000Z'),
+          startDate: new Date("2025-01-01T00:00:00.000Z"),
+          endDate: new Date("2025-01-01T23:59:59.000Z"),
         },
       };
 
@@ -302,7 +302,7 @@ describe('ApiLogQueryService', () => {
         then: jest.fn(),
       };
 
-      const mockError = new Error('Database connection failed');
+      const mockError = new Error("Database connection failed");
 
       mockQueryChain.then.mockRejectedValue(mockError);
       logModel.find.mockReturnValue(
@@ -310,13 +310,13 @@ describe('ApiLogQueryService', () => {
       );
 
       await expect(service.queryLogs(params)).rejects.toThrow(
-        'Database connection failed',
+        "Database connection failed",
       );
 
       expect(logModel.find).toHaveBeenCalledWith({
         timestamp: {
-          $gte: new Date('2025-01-01T00:00:00.000Z'),
-          $lte: new Date('2025-01-01T23:59:59.000Z'),
+          $gte: new Date("2025-01-01T00:00:00.000Z"),
+          $lte: new Date("2025-01-01T23:59:59.000Z"),
         },
       });
       expect(mockQueryChain.sort).toHaveBeenCalledWith({ timestamp: -1 });

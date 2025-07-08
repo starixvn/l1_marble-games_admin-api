@@ -1,9 +1,8 @@
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import { Prop, SchemaFactory, Schema } from "@nestjs/mongoose";
+import mongoose from "mongoose";
 
 @Schema()
 export class MarketIntegration {
-
   @Prop({ type: mongoose.Schema.Types.Mixed })
   merge: Record<string, any>;
 

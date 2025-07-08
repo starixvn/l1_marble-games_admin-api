@@ -7,51 +7,51 @@ import {
   HttpStatus,
   Post,
   Query,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-} from '@nestjs/swagger';
-import { GameIntegrationService } from './game-integration.service';
-import { GameIntegrationQueryDto } from './dto/game-integration-query.dto';
-import { GameIntegrationUpdateRequestDto } from './dto/game-integration-update-request.dto';
-import { Roles } from '../common/decorators/role.decorator';
-import { Role } from '../common/enums/role.enum';
+} from "@nestjs/swagger";
+import { GameIntegrationService } from "./game-integration.service";
+import { GameIntegrationQueryDto } from "./dto/game-integration-query.dto";
+import { GameIntegrationUpdateRequestDto } from "./dto/game-integration-update-request.dto";
+import { Roles } from "../common/decorators/role.decorator";
+import { Role } from "../common/enums/role.enum";
 
-@ApiTags('Game Integration')
+@ApiTags("Game Integration")
 @ApiBearerAuth()
 @Roles(Role.ADMIN, Role.DEVELOPER)
-@Controller('gameIntegration')
+@Controller("gameIntegration")
 export class GameIntegrationController {
   constructor(
     private readonly gameIntegrationService: GameIntegrationService,
   ) {}
 
-  @Post('upsert')
+  @Post("upsert")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Create or update game integration',
+    summary: "Create or update game integration",
     description:
-      'Creates a new game integration or updates an existing one based on operatorId/alias and gameId. This endpoint allows you to configure game-specific settings for operators.',
+      "Creates a new game integration or updates an existing one based on operatorId/alias and gameId. This endpoint allows you to configure game-specific settings for operators.",
   })
   @ApiResponse({
     status: 200,
-    description: 'Game integration successfully created or updated',
+    description: "Game integration successfully created or updated",
   })
   @ApiResponse({
     status: 400,
     description:
-      'Bad request - Missing required parameters (operatorId/alias and gameId)',
+      "Bad request - Missing required parameters (operatorId/alias and gameId)",
   })
   @ApiResponse({
     status: 404,
-    description: 'Operator not found',
+    description: "Operator not found",
   })
   @ApiResponse({
     status: 500,
-    description: 'Internal server error - Update operation failed',
+    description: "Internal server error - Update operation failed",
   })
   async upsertGameIntegration(
     @Query()
@@ -65,20 +65,20 @@ export class GameIntegrationController {
     );
   }
 
-  @Get('get')
+  @Get("get")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get game integration',
+    summary: "Get game integration",
     description:
-      'Retrieves game integration details based on operatorId/alias and gameId',
+      "Retrieves game integration details based on operatorId/alias and gameId",
   })
   @ApiResponse({
     status: 200,
-    description: 'Game integration successfully retrieved',
+    description: "Game integration successfully retrieved",
   })
   @ApiResponse({
     status: 404,
-    description: 'Game integration not found',
+    description: "Game integration not found",
   })
   async getGameIntegration(
     @Query()
@@ -87,22 +87,22 @@ export class GameIntegrationController {
     return this.gameIntegrationService.getGameIntegration(query);
   }
 
-  @Get('list')
+  @Get("list")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'List game integrations',
-    description: 'Retrieves all game integrations',
+    summary: "List game integrations",
+    description: "Retrieves all game integrations",
   })
   async listGameIntegrations() {
     return this.gameIntegrationService.listGameIntegrations();
   }
 
-  @Delete('delete')
+  @Delete("delete")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Delete game integration',
+    summary: "Delete game integration",
     description:
-      'Deletes a game integration based on operatorId/alias and gameId',
+      "Deletes a game integration based on operatorId/alias and gameId",
   })
   async deleteGameIntegration(
     @Query()
@@ -110,7 +110,7 @@ export class GameIntegrationController {
   ) {
     await this.gameIntegrationService.deleteGameIntegration(query);
     return {
-      message: 'Game integration deleted successfully',
+      message: "Game integration deleted successfully",
     };
   }
 }

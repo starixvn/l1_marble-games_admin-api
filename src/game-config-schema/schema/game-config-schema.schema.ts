@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, ObjectId,  } from "mongoose";
-
+import { Document, ObjectId } from "mongoose";
 
 export interface GameConfigJsonSchema {
   name: string;
@@ -8,7 +7,8 @@ export interface GameConfigJsonSchema {
   uiSchema: object;
 }
 
-export type GameConfigJsonSchemaDocument = GameConfigJsonSchema & Document<ObjectId>;
+export type GameConfigJsonSchemaDocument = GameConfigJsonSchema &
+  Document<ObjectId>;
 
 @Schema()
 export class GameConfigJsonSchema {
@@ -20,6 +20,7 @@ export class GameConfigJsonSchema {
 
   @Prop({ type: Object, required: false })
   uiSchema: object;
-} 
+}
 
-export const GameConfigJsonSchemaSchema = SchemaFactory.createForClass(GameConfigJsonSchema);
+export const GameConfigJsonSchemaSchema =
+  SchemaFactory.createForClass(GameConfigJsonSchema);

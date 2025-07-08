@@ -1,20 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getModelToken } from "@nestjs/mongoose";
+import { Types } from "mongoose";
 import {
   NotFoundException,
   InternalServerErrorException,
-} from '@nestjs/common';
-import { GameIntegrationService } from '../game-integration.service';
-import { GameIntegration } from '../schema/game-integration.schema';
-import { MarketIntegration } from '../schema/market-integration.schema';
-import { OperatorCredential } from '../../operator/schema/operator-credential.schema';
-import { GameIntegrationQueryDto } from '../dto/game-integration-query.dto';
-import { GameIntegrationUpdateRequestDto } from '../dto/game-integration-update-request.dto';
-import { AdminLogService } from '../../admin-log/admin-log.service';
-import { AdminLogActions } from '../../admin-log/constants';
+} from "@nestjs/common";
+import { GameIntegrationService } from "../game-integration.service";
+import { GameIntegration } from "../schema/game-integration.schema";
+import { MarketIntegration } from "../schema/market-integration.schema";
+import { OperatorCredential } from "../../operator/schema/operator-credential.schema";
+import { GameIntegrationQueryDto } from "../dto/game-integration-query.dto";
+import { GameIntegrationUpdateRequestDto } from "../dto/game-integration-update-request.dto";
+import { AdminLogService } from "../../admin-log/admin-log.service";
+import { AdminLogActions } from "../../admin-log/constants";
 
-describe('GameIntegrationService', () => {
+describe("GameIntegrationService", () => {
   let service: GameIntegrationService;
   let mockGameIntegrationModel: any;
   let mockMarketIntegrationModel: any;
@@ -122,16 +122,16 @@ describe('GameIntegrationService', () => {
     });
   };
 
-  describe('upsertGameIntegration', () => {
-    describe('when operatorId is provided', () => {
-      it('should upsert game integration successfully', async () => {
+  describe("upsertGameIntegration", () => {
+    describe("when operatorId is provided", () => {
+      it("should upsert game integration successfully", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [],
         };
         const mockOperator = { _id: mockOperatorId };
@@ -172,8 +172,8 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
             old: undefined,
@@ -183,34 +183,34 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
-      it('should upsert game integration with market integrations', async () => {
+      it("should upsert game integration with market integrations", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [
             {
-              name: 'Test Market',
-              selections: ['Selection 1', 'Selection 2'],
-              merge: { key: 'value' },
+              name: "Test Market",
+              selections: ["Selection 1", "Selection 2"],
+              merge: { key: "value" },
             },
           ],
         };
         const mockOperator = { _id: mockOperatorId };
         const mockCreatedMarketIntegration = {
           _id: mockMarketIntegrationId,
-          name: 'Test Market',
-          selections: ['Selection 1', 'Selection 2'],
-          merge: { key: 'value' },
+          name: "Test Market",
+          selections: ["Selection 1", "Selection 2"],
+          merge: { key: "value" },
         };
         const mockUpsertedIntegration = {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [mockCreatedMarketIntegration],
         };
 
@@ -234,11 +234,11 @@ describe('GameIntegrationService', () => {
         expect(
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
-          { name: 'Test Market' },
+          { name: "Test Market" },
           {
             $set: {
-              merge: { key: 'value' },
-              selections: ['Selection 1', 'Selection 2'],
+              merge: { key: "value" },
+              selections: ["Selection 1", "Selection 2"],
             },
           },
           { new: true, upsert: true },
@@ -247,7 +247,7 @@ describe('GameIntegrationService', () => {
           { operatorId: mockOperatorId, gameId: 1001 },
           {
             $set: {
-              mergeEvent: { eventType: 'match' },
+              mergeEvent: { eventType: "match" },
               operatorId: mockOperatorId,
               gameId: 1001,
               markets: [mockMarketIntegrationId],
@@ -256,8 +256,8 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
             old: undefined,
@@ -267,18 +267,18 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
-      it('should update existing market integration when name is provided', async () => {
+      it("should update existing market integration when name is provided", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [
             {
-              name: 'Updated Market',
-              selections: ['Updated Selection'],
+              name: "Updated Market",
+              selections: ["Updated Selection"],
               merge: { updated: true },
             },
           ],
@@ -286,15 +286,15 @@ describe('GameIntegrationService', () => {
         const mockOperator = { _id: mockOperatorId };
         const mockUpdatedMarketIntegration = {
           _id: mockMarketIntegrationId,
-          name: 'Updated Market',
-          selections: ['Updated Selection'],
+          name: "Updated Market",
+          selections: ["Updated Selection"],
           merge: { updated: true },
         };
         const mockUpsertedIntegration = {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [mockUpdatedMarketIntegration],
         };
 
@@ -318,11 +318,11 @@ describe('GameIntegrationService', () => {
         expect(
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
-          { name: 'Updated Market' },
+          { name: "Updated Market" },
           {
             $set: {
               merge: { updated: true },
-              selections: ['Updated Selection'],
+              selections: ["Updated Selection"],
             },
           },
           { new: true, upsert: true },
@@ -331,7 +331,7 @@ describe('GameIntegrationService', () => {
           { operatorId: mockOperatorId, gameId: 1001 },
           {
             $set: {
-              mergeEvent: { eventType: 'match' },
+              mergeEvent: { eventType: "match" },
               operatorId: mockOperatorId,
               gameId: 1001,
               markets: [mockMarketIntegrationId],
@@ -340,8 +340,8 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
             old: undefined,
@@ -351,14 +351,14 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
-      it('should update existing game integration and log as UPDATE', async () => {
+      it("should update existing game integration and log as UPDATE", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [],
         };
         const mockOperator = { _id: mockOperatorId };
@@ -366,7 +366,7 @@ describe('GameIntegrationService', () => {
           _id: mockGameIntegrationId,
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'old' },
+          mergeEvent: { eventType: "old" },
           markets: [],
         };
         const mockUpsertedIntegration = {
@@ -391,8 +391,8 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.UPDATE,
           diff: {
             old: mockOldIntegration,
@@ -403,15 +403,15 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when name is provided', () => {
-      it('should upsert game integration successfully', async () => {
+    describe("when name is provided", () => {
+      it("should upsert game integration successfully", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          name: 'test-operator',
+          name: "test-operator",
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [],
         };
         const mockOperator = { _id: mockOperatorId };
@@ -437,7 +437,7 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-          name: 'test-operator',
+          name: "test-operator",
         });
         expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
           { operatorId: mockOperatorId, gameId: 1001 },
@@ -452,8 +452,8 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
             old: undefined,
@@ -463,15 +463,15 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockUpsertedIntegration);
       });
 
-      describe('and operator does not exist', () => {
-        it('should throw NotFoundException', async () => {
+      describe("and operator does not exist", () => {
+        it("should throw NotFoundException", async () => {
           // Arrange
           const query: GameIntegrationQueryDto = {
-            name: 'non-existent-operator',
+            name: "non-existent-operator",
             gameId: 1001,
           };
           const updateRequest: GameIntegrationUpdateRequestDto = {
-            mergeEvent: { eventType: 'match' },
+            mergeEvent: { eventType: "match" },
           };
 
           setupOperatorMock(null);
@@ -481,20 +481,20 @@ describe('GameIntegrationService', () => {
             service.upsertGameIntegration(query, updateRequest),
           ).rejects.toThrow(NotFoundException);
           expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-            name: 'non-existent-operator',
+            name: "non-existent-operator",
           });
         });
       });
     });
 
-    describe('when neither operatorId nor name is provided', () => {
-      it('should throw NotFoundException', async () => {
+    describe("when neither operatorId nor name is provided", () => {
+      it("should throw NotFoundException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
         };
 
         // Act & Assert
@@ -504,15 +504,15 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when operatorId is provided but operator does not exist', () => {
-      it('should throw NotFoundException', async () => {
+    describe("when operatorId is provided but operator does not exist", () => {
+      it("should throw NotFoundException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
         };
 
         setupOperatorMock(null);
@@ -527,20 +527,20 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when market integration creation fails', () => {
-      it('should throw InternalServerErrorException', async () => {
+    describe("when market integration creation fails", () => {
+      it("should throw InternalServerErrorException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [
             {
-              name: 'Test Market',
-              selections: ['Selection 1'],
-              merge: { key: 'value' },
+              name: "Test Market",
+              selections: ["Selection 1"],
+              merge: { key: "value" },
             },
           ],
         };
@@ -556,11 +556,11 @@ describe('GameIntegrationService', () => {
         expect(
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
-          { name: 'Test Market' },
+          { name: "Test Market" },
           {
             $set: {
-              merge: { key: 'value' },
-              selections: ['Selection 1'],
+              merge: { key: "value" },
+              selections: ["Selection 1"],
             },
           },
           { new: true, upsert: true },
@@ -568,19 +568,19 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when market integration update fails', () => {
-      it('should throw InternalServerErrorException', async () => {
+    describe("when market integration update fails", () => {
+      it("should throw InternalServerErrorException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [
             {
-              name: 'Updated Market',
-              selections: ['Updated Selection'],
+              name: "Updated Market",
+              selections: ["Updated Selection"],
               merge: { updated: true },
             },
           ],
@@ -597,11 +597,11 @@ describe('GameIntegrationService', () => {
         expect(
           mockMarketIntegrationModel.findOneAndUpdate,
         ).toHaveBeenCalledWith(
-          { name: 'Updated Market' },
+          { name: "Updated Market" },
           {
             $set: {
               merge: { updated: true },
-              selections: ['Updated Selection'],
+              selections: ["Updated Selection"],
             },
           },
           { new: true, upsert: true },
@@ -609,17 +609,17 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('with complete update request data', () => {
-      it('should handle all optional fields', async () => {
+    describe("with complete update request data", () => {
+      it("should handle all optional fields", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
           gameId: 1001,
         };
         const updateRequest: GameIntegrationUpdateRequestDto = {
-          mergeEvent: { eventType: 'match', priority: 1 },
-          mergeEventDetails: [{ detail: 'live', value: true }],
-          patches: [{ op: 'replace', path: '/status', value: 'active' }],
+          mergeEvent: { eventType: "match", priority: 1 },
+          mergeEventDetails: [{ detail: "live", value: true }],
+          patches: [{ op: "replace", path: "/status", value: "active" }],
           markets: [],
         };
         const mockOperator = { _id: mockOperatorId };
@@ -657,8 +657,8 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
             old: undefined,
@@ -669,8 +669,8 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('with empty update request', () => {
-      it('should handle empty update request', async () => {
+    describe("with empty update request", () => {
+      it("should handle empty update request", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -705,8 +705,8 @@ describe('GameIntegrationService', () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
             old: undefined,
@@ -718,9 +718,9 @@ describe('GameIntegrationService', () => {
     });
   });
 
-  describe('getGameIntegration', () => {
-    describe('when operatorId is provided', () => {
-      it('should return game integration successfully', async () => {
+  describe("getGameIntegration", () => {
+    describe("when operatorId is provided", () => {
+      it("should return game integration successfully", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -729,14 +729,14 @@ describe('GameIntegrationService', () => {
         const mockOperator = { _id: mockOperatorId };
         const mockMarketIntegration = {
           _id: mockMarketIntegrationId,
-          name: 'Test Market',
-          selections: ['Selection 1', 'Selection 2'],
-          merge: { key: 'value' },
+          name: "Test Market",
+          selections: ["Selection 1", "Selection 2"],
+          merge: { key: "value" },
         };
         const mockGameIntegration = {
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [mockMarketIntegration],
         };
 
@@ -757,7 +757,7 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockGameIntegration);
       });
 
-      it('should throw NotFoundException when operator does not exist', async () => {
+      it("should throw NotFoundException when operator does not exist", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -776,18 +776,18 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when name is provided', () => {
-      it('should return game integration successfully', async () => {
+    describe("when name is provided", () => {
+      it("should return game integration successfully", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          name: 'test-operator',
+          name: "test-operator",
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
         const mockGameIntegration = {
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [],
         };
 
@@ -799,7 +799,7 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-          name: 'test-operator',
+          name: "test-operator",
         });
         expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
@@ -808,10 +808,10 @@ describe('GameIntegrationService', () => {
         expect(result).toEqual(mockGameIntegration);
       });
 
-      it('should throw NotFoundException when operator does not exist', async () => {
+      it("should throw NotFoundException when operator does not exist", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          name: 'non-existent-operator',
+          name: "non-existent-operator",
           gameId: 1001,
         };
 
@@ -822,13 +822,13 @@ describe('GameIntegrationService', () => {
           NotFoundException,
         );
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-          name: 'non-existent-operator',
+          name: "non-existent-operator",
         });
       });
     });
 
-    describe('when neither operatorId nor name is provided', () => {
-      it('should throw NotFoundException', async () => {
+    describe("when neither operatorId nor name is provided", () => {
+      it("should throw NotFoundException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           gameId: 1001,
@@ -841,8 +841,8 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when game integration does not exist', () => {
-      it('should throw NotFoundException', async () => {
+    describe("when game integration does not exist", () => {
+      it("should throw NotFoundException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -864,8 +864,8 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('market population and transformation', () => {
-      it('should populate markets with correct select and transform options', async () => {
+    describe("market population and transformation", () => {
+      it("should populate markets with correct select and transform options", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -895,16 +895,16 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockSelect).toHaveBeenCalledWith(
-          '-_id -__v -gameId -operatorId',
+          "-_id -__v -gameId -operatorId",
         );
         expect(mockPopulate).toHaveBeenCalledWith({
-          path: 'markets',
-          select: '-_id -__v',
+          path: "markets",
+          select: "-_id -__v",
           transform: expect.any(Function),
         });
       });
 
-      it('should transform market documents correctly', async () => {
+      it("should transform market documents correctly", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -936,23 +936,23 @@ describe('GameIntegrationService', () => {
         // Act
         await service.getGameIntegration(query);
         const mockDoc = {
-          name: 'Test Market',
-          selections: ['Selection 1'],
+          name: "Test Market",
+          selections: ["Selection 1"],
         };
         const transformedDoc = transformFunction(mockDoc);
 
         // Assert
         expect(transformedDoc).toEqual({
-          name: 'Test Market',
-          selections: ['Selection 1'],
+          name: "Test Market",
+          selections: ["Selection 1"],
         });
       });
     });
   });
 
-  describe('deleteGameIntegration', () => {
-    describe('when operatorId is provided', () => {
-      it('should delete game integration successfully', async () => {
+  describe("deleteGameIntegration", () => {
+    describe("when operatorId is provided", () => {
+      it("should delete game integration successfully", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -962,7 +962,7 @@ describe('GameIntegrationService', () => {
         const mockGameIntegration = {
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [],
         };
 
@@ -988,8 +988,8 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         });
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.DELETE,
           diff: {
             old: mockGameIntegration,
@@ -998,7 +998,7 @@ describe('GameIntegrationService', () => {
         expect(result).toBe(true);
       });
 
-      it('should return false when game integration does not exist', async () => {
+      it("should return false when game integration does not exist", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -1024,7 +1024,7 @@ describe('GameIntegrationService', () => {
         expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
 
-      it('should throw NotFoundException when operator does not exist', async () => {
+      it("should throw NotFoundException when operator does not exist", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -1045,18 +1045,18 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('when name is provided', () => {
-      it('should delete game integration successfully', async () => {
+    describe("when name is provided", () => {
+      it("should delete game integration successfully", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          name: 'test-operator',
+          name: "test-operator",
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
         const mockGameIntegration = {
           operatorId: mockOperatorId,
           gameId: 1001,
-          mergeEvent: { eventType: 'match' },
+          mergeEvent: { eventType: "match" },
           markets: [],
         };
 
@@ -1071,7 +1071,7 @@ describe('GameIntegrationService', () => {
 
         // Assert
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-          name: 'test-operator',
+          name: "test-operator",
         });
         expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
@@ -1082,8 +1082,8 @@ describe('GameIntegrationService', () => {
           gameId: 1001,
         });
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.DELETE,
           diff: {
             old: mockGameIntegration,
@@ -1092,10 +1092,10 @@ describe('GameIntegrationService', () => {
         expect(result).toBe(true);
       });
 
-      it('should return false when game integration does not exist', async () => {
+      it("should return false when game integration does not exist", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          name: 'test-operator',
+          name: "test-operator",
           gameId: 1001,
         };
         const mockOperator = { _id: mockOperatorId };
@@ -1108,7 +1108,7 @@ describe('GameIntegrationService', () => {
           NotFoundException,
         );
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-          name: 'test-operator',
+          name: "test-operator",
         });
         expect(mockGameIntegrationModel.findOne).toHaveBeenCalledWith({
           operatorId: mockOperatorId,
@@ -1118,10 +1118,10 @@ describe('GameIntegrationService', () => {
         expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
 
-      it('should throw NotFoundException when operator does not exist', async () => {
+      it("should throw NotFoundException when operator does not exist", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
-          name: 'non-existent-operator',
+          name: "non-existent-operator",
           gameId: 1001,
         };
 
@@ -1132,15 +1132,15 @@ describe('GameIntegrationService', () => {
           NotFoundException,
         );
         expect(mockOperatorModel.findOne).toHaveBeenCalledWith({
-          name: 'non-existent-operator',
+          name: "non-existent-operator",
         });
         expect(mockGameIntegrationModel.deleteOne).not.toHaveBeenCalled();
         expect(mockAdminLogService.createLog).not.toHaveBeenCalled();
       });
     });
 
-    describe('when neither operatorId nor name is provided', () => {
-      it('should throw NotFoundException', async () => {
+    describe("when neither operatorId nor name is provided", () => {
+      it("should throw NotFoundException", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           gameId: 1001,
@@ -1155,8 +1155,8 @@ describe('GameIntegrationService', () => {
       });
     });
 
-    describe('edge cases', () => {
-      it('should handle deletion when multiple documents could match but only one exists', async () => {
+    describe("edge cases", () => {
+      it("should handle deletion when multiple documents could match but only one exists", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
@@ -1182,8 +1182,8 @@ describe('GameIntegrationService', () => {
         expect(result).toBe(true);
         expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledTimes(1);
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: 'admin',
-          resource: 'game-integration',
+          author: "admin",
+          resource: "game-integration",
           action: AdminLogActions.DELETE,
           diff: {
             old: mockGameIntegration,
@@ -1191,7 +1191,7 @@ describe('GameIntegrationService', () => {
         });
       });
 
-      it('should return correct boolean value based on deletedCount', async () => {
+      it("should return correct boolean value based on deletedCount", async () => {
         // Arrange
         const query: GameIntegrationQueryDto = {
           operatorId: mockOperatorId.toString(),
