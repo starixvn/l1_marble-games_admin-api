@@ -8,7 +8,7 @@ import { AdminLogQueryDto } from "./dto/admin-log-query.dto";
 @ApiBearerAuth()
 @ApiTags("Admin Log")
 @Controller("adminLog")
-@Roles(Role.ADMIN)
+@Roles(Role.ADMIN, Role.READONLY)
 export class AdminLogController {
   constructor(private readonly adminLogService: AdminLogService) {}
 

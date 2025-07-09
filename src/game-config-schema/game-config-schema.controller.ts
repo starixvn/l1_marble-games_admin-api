@@ -25,6 +25,7 @@ export class GameConfigSchemaController {
   ) {}
 
   @Get("list")
+  @Roles(Role.ADMIN, Role.DEVELOPER, Role.READONLY)
   @ApiOperation({
     summary: "Get all game config schemas",
     description: "Get all game config schemas",
@@ -34,6 +35,7 @@ export class GameConfigSchemaController {
   }
 
   @Get("get")
+  @Roles(Role.ADMIN, Role.DEVELOPER, Role.READONLY)
   async getSchema(@Query() query: GameConfigSchemaQueryDto) {
     return this.gameConfigSchemaService.getGameConfigSchema(query.id);
   }

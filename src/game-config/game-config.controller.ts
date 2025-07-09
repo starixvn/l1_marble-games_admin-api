@@ -45,6 +45,7 @@ export class GameConfigController {
   }
 
   @Get("get")
+  @Roles(Role.ADMIN, Role.READONLY)
   @ApiOperation({
     summary: "Get game config by gameId",
     description: "Get game config by gameId",
@@ -55,7 +56,7 @@ export class GameConfigController {
   }
 
   @Get("list")
-  @Roles(Role.ADMIN, Role.DEVELOPER)
+  @Roles(Role.ADMIN, Role.DEVELOPER, Role.READONLY)
   @ApiOperation({
     summary: "Get all game configs",
     description: "Get all game configs",

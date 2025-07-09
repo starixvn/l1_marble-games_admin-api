@@ -8,7 +8,7 @@ import { ApiLogQueryDto } from "./dto/log-query.dto";
 @ApiBearerAuth()
 @ApiTags("API Log")
 @Controller("apiLog")
-@Roles(Role.ADMIN)
+@Roles(Role.ADMIN, Role.READONLY)
 export class ApiLogController {
   constructor(private readonly apiLogService: ApiLogQueryService) {}
 

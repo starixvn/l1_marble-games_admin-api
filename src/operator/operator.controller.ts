@@ -49,12 +49,13 @@ export class OperatorController {
   }
 
   @Get("get")
+  @Roles(Role.ADMIN, Role.READONLY)
   async getOperator(@Query() query: GetOperatorDto) {
     return this.operatorServcice.getOperator(query);
   }
 
   @Get("list")
-  @Roles(Role.ADMIN, Role.DEVELOPER)
+  @Roles(Role.ADMIN, Role.DEVELOPER, Role.READONLY)
   async getAllOperators() {
     return this.operatorServcice.getAllOperators();
   }
