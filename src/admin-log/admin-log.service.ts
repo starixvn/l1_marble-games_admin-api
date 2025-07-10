@@ -6,6 +6,7 @@ import {
   Diff,
 } from "./schema/admin-log-record.schema";
 import { Model, RootFilterQuery } from "mongoose";
+import { ClsService } from "nestjs-cls";
 
 export type AdminQueryLogParams = {
   dateRange: {
@@ -18,7 +19,7 @@ export type AdminQueryLogParams = {
 };
 
 export type LogParams = {
-  author: string;
+  author?: string;
   resource: string;
   action: string;
   diff?: Diff;
@@ -29,10 +30,14 @@ export class AdminLogService {
   constructor(
     @InjectModel(AdminLogRecord.name)
     private readonly adminLogModel: Model<AdminLogRecordDocument>,
+    private readonly cls: ClsService,
   ) {}
 
   async createLog(params: LogParams) {
-    const { author, resource, action, diff } = params;
+    const { resource, action, diff } = params;
+
+    const user = this.cls.get("user");
+    const author = user?.username ?? "";
 
     const log = await this.adminLogModel.create({
       author,
@@ -45,7 +50,7 @@ export class AdminLogService {
   }
 
   async queryLogs(params: AdminQueryLogParams) {
-    const { dateRange, author, resource, action } = params;
+    const { author, dateRange, resource, action } = params;
 
     const query: RootFilterQuery<AdminLogRecordDocument> = {
       timestamp: {

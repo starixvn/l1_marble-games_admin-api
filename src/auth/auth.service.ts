@@ -28,6 +28,7 @@ interface AccountCredentialParams {
 interface JwtPayload {
   id: string;
   role: Role;
+  username: string;
 }
 
 export interface CreateAccountParams {
@@ -57,7 +58,11 @@ export class AuthService {
   async validateAccount({
     username,
     password,
-  }: AccountCredentialParams): Promise<{ id: string; role: Role } | null> {
+  }: AccountCredentialParams): Promise<{
+    id: string;
+    role: Role;
+    username: string;
+  } | null> {
     if (!password) {
       return null;
     }
@@ -74,12 +79,17 @@ export class AuthService {
       ? {
           id: (account._id as unknown as string).toString(),
           role: account.role,
+          username: account.username,
         }
       : null;
   }
 
   async generateJwt(user: JwtPayload): Promise<string> {
-    const payload = { id: user?.id, role: user?.role };
+    const payload = {
+      id: user?.id,
+      role: user?.role,
+      username: user?.username,
+    };
 
     const token = await this.jwtService.signAsync(payload, {
       subject: user.id,

@@ -6,14 +6,20 @@ import {
   AdminQueryLogParams,
 } from "../admin-log.service";
 import { AdminLogRecord } from "../schema/admin-log-record.schema";
+import { ClsService } from "nestjs-cls";
 
 describe("AdminLogService", () => {
   let service: AdminLogService;
   let model: any;
+  let clsService: any;
 
   const mockAdminLogModel = {
     create: jest.fn(),
     find: jest.fn(),
+  };
+
+  const mockClsService = {
+    get: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -24,11 +30,16 @@ describe("AdminLogService", () => {
           provide: getModelToken(AdminLogRecord.name),
           useValue: mockAdminLogModel,
         },
+        {
+          provide: ClsService,
+          useValue: mockClsService,
+        },
       ],
     }).compile();
 
     service = module.get<AdminLogService>(AdminLogService);
     model = module.get(getModelToken(AdminLogRecord.name));
+    clsService = module.get(ClsService);
   });
 
   afterEach(() => {
@@ -39,11 +50,11 @@ describe("AdminLogService", () => {
     it("should create a log with all required parameters", async () => {
       // Arrange
       const logParams: LogParams = {
-        author: "admin-user",
         resource: "operator",
         action: "insert",
       };
 
+      const mockUser = { username: "admin-user" };
       const mockCreatedLog = {
         _id: "log-id-1",
         timestamp: new Date("2025-01-01T12:00:00.000Z"),
@@ -53,12 +64,14 @@ describe("AdminLogService", () => {
         diff: undefined,
       };
 
+      clsService.get.mockReturnValue(mockUser);
       model.create.mockResolvedValue(mockCreatedLog);
 
       // Act
       const result = await service.createLog(logParams);
 
       // Assert
+      expect(clsService.get).toHaveBeenCalledWith("user");
       expect(model.create).toHaveBeenCalledWith({
         author: "admin-user",
         resource: "operator",
@@ -72,7 +85,6 @@ describe("AdminLogService", () => {
     it("should create a log with diff information", async () => {
       // Arrange
       const logParams: LogParams = {
-        author: "admin-user",
         resource: "game-config",
         action: "update",
         diff: {
@@ -81,6 +93,7 @@ describe("AdminLogService", () => {
         },
       };
 
+      const mockUser = { username: "admin-user" };
       const mockCreatedLog = {
         _id: "log-id-2",
         timestamp: new Date("2025-01-01T12:00:00.000Z"),
@@ -93,12 +106,14 @@ describe("AdminLogService", () => {
         },
       };
 
+      clsService.get.mockReturnValue(mockUser);
       model.create.mockResolvedValue(mockCreatedLog);
 
       // Act
       const result = await service.createLog(logParams);
 
       // Assert
+      expect(clsService.get).toHaveBeenCalledWith("user");
       expect(model.create).toHaveBeenCalledWith({
         author: "admin-user",
         resource: "game-config",
@@ -112,21 +127,58 @@ describe("AdminLogService", () => {
       expect(result).toEqual(mockCreatedLog);
     });
 
-    it("should propagate database errors", async () => {
+    it("should handle case when user is not available in cls", async () => {
       // Arrange
       const logParams: LogParams = {
-        author: "admin-user",
         resource: "operator",
         action: "insert",
       };
 
+      const mockCreatedLog = {
+        _id: "log-id-3",
+        timestamp: new Date("2025-01-01T12:00:00.000Z"),
+        author: "",
+        resource: "operator",
+        action: "insert",
+        diff: undefined,
+      };
+
+      clsService.get.mockReturnValue(null);
+      model.create.mockResolvedValue(mockCreatedLog);
+
+      // Act
+      const result = await service.createLog(logParams);
+
+      // Assert
+      expect(clsService.get).toHaveBeenCalledWith("user");
+      expect(model.create).toHaveBeenCalledWith({
+        author: "",
+        resource: "operator",
+        action: "insert",
+        diff: undefined,
+      });
+      expect(model.create).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockCreatedLog);
+    });
+
+    it("should propagate database errors", async () => {
+      // Arrange
+      const logParams: LogParams = {
+        resource: "operator",
+        action: "insert",
+      };
+
+      const mockUser = { username: "admin-user" };
       const mockError = new Error("Database connection failed");
+
+      clsService.get.mockReturnValue(mockUser);
       model.create.mockRejectedValue(mockError);
 
       // Act & Assert
       await expect(service.createLog(logParams)).rejects.toThrow(
         "Database connection failed",
       );
+      expect(clsService.get).toHaveBeenCalledWith("user");
       expect(model.create).toHaveBeenCalledWith({
         author: "admin-user",
         resource: "operator",

@@ -8,14 +8,22 @@ import { AuthModule } from "./auth/auth.module";
 import { GameConfigModule } from "./game-config/game-config.module";
 import { GameConfigSchemaModule } from "./game-config-schema/game-config-schema.module";
 import { RolesGuard } from "./common/guards/role.guard";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtAuthGuard } from "./common/guards/jwt.auth.guard";
 import { HealthcheckModule } from "./healthcheck/healthcheck.module";
 import { ApiLogModule } from "./api-log/api-log.module";
 import { AdminLogModule } from "./admin-log/admin-log.module";
+import { ClsModule } from "nestjs-cls";
+import { UserInterceptor } from "./common/interceptors/user.interceptor";
 
 @Module({
   imports: [
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
@@ -48,6 +56,10 @@ import { AdminLogModule } from "./admin-log/admin-log.module";
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: UserInterceptor,
     },
   ],
 })

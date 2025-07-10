@@ -58,6 +58,7 @@ export class AuthController {
     const token = await this.authService.generateJwt({
       id: account.id,
       role: account.role,
+      username: account.username,
     });
 
     return {

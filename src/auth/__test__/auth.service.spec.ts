@@ -117,6 +117,7 @@ describe("AuthService", () => {
       const params = { username: "test", password: "password" };
       const mockAccount = {
         _id: "123",
+        username: "test",
         role: Role.ADMIN,
         password: "hashedPassword",
       };
@@ -127,14 +128,14 @@ describe("AuthService", () => {
       const result = await service.validateAccount(params);
 
       // assert
-      expect(result).toEqual({ id: "123", role: Role.ADMIN });
+      expect(result).toEqual({ id: "123", role: Role.ADMIN, username: "test" });
     });
   });
 
   describe("generateJwt", () => {
     it("should generate JWT token", async () => {
       // arrange
-      const user = { id: "123", role: Role.ADMIN };
+      const user = { id: "123", role: Role.ADMIN, username: "testuser" };
       const expectedToken = "jwt-token";
       mockJwtService.signAsync.mockResolvedValue(expectedToken);
 
@@ -144,7 +145,7 @@ describe("AuthService", () => {
       // assert
       expect(result).toBe(expectedToken);
       expect(mockJwtService.signAsync).toHaveBeenCalledWith(
-        { id: user.id, role: user.role },
+        { id: user.id, role: user.role, username: user.username },
         { subject: user.id, expiresIn: "1h" },
       );
     });
