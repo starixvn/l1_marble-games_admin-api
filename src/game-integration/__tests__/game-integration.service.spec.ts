@@ -172,7 +172,6 @@ describe("GameIntegrationService", () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
@@ -256,7 +255,6 @@ describe("GameIntegrationService", () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
@@ -340,7 +338,6 @@ describe("GameIntegrationService", () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
@@ -391,7 +388,6 @@ describe("GameIntegrationService", () => {
 
         // Assert
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.UPDATE,
           diff: {
@@ -452,7 +448,6 @@ describe("GameIntegrationService", () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
@@ -657,7 +652,6 @@ describe("GameIntegrationService", () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
@@ -705,7 +699,6 @@ describe("GameIntegrationService", () => {
           { upsert: true, new: true },
         );
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.INSERT,
           diff: {
@@ -988,7 +981,6 @@ describe("GameIntegrationService", () => {
           gameId: 1001,
         });
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.DELETE,
           diff: {
@@ -1082,7 +1074,6 @@ describe("GameIntegrationService", () => {
           gameId: 1001,
         });
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.DELETE,
           diff: {
@@ -1182,7 +1173,6 @@ describe("GameIntegrationService", () => {
         expect(result).toBe(true);
         expect(mockGameIntegrationModel.deleteOne).toHaveBeenCalledTimes(1);
         expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-          author: "admin",
           resource: "game-integration",
           action: AdminLogActions.DELETE,
           diff: {

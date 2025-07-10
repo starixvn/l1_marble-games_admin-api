@@ -120,7 +120,6 @@ export class GameConfigSchemaService {
       });
 
       void this.adminLogService.createLog({
-        author: "admin",
         resource: "game-config-schema",
         action: AdminLogActions.UPDATE,
         diff: {
@@ -155,7 +154,6 @@ export class GameConfigSchemaService {
     });
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "game-config-schema",
       action: AdminLogActions.INSERT,
       diff: {

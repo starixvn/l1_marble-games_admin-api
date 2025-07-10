@@ -37,7 +37,7 @@ export class AdminLogService {
     const { resource, action, diff } = params;
 
     const user = this.cls.get("user");
-    const author = user?.username ?? "";
+    const author = user?.username;
 
     const log = await this.adminLogModel.create({
       author,

@@ -264,7 +264,6 @@ describe("GameConfigService", () => {
 
       // Assert
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "game-config",
         action: "insert",
         diff: {
@@ -300,7 +299,6 @@ describe("GameConfigService", () => {
 
       // Assert
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "game-config",
         action: "update",
         diff: {

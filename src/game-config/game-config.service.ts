@@ -80,7 +80,6 @@ export class GameConfigService {
       : AdminLogActions.INSERT;
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "game-config",
       action,
       diff: {

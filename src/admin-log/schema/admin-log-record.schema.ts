@@ -15,7 +15,7 @@ export class AdminLogRecord {
   @Prop({ type: Date, default: Date.now })
   timestamp: Date;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: false })
   author: string;
 
   @Prop({ type: String, required: true })

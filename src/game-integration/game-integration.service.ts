@@ -72,7 +72,6 @@ export class GameIntegrationService {
       : AdminLogActions.INSERT;
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "game-integration",
       action,
       diff: {
@@ -104,7 +103,6 @@ export class GameIntegrationService {
       ).deletedCount > 0;
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "game-integration",
       action: AdminLogActions.DELETE,
       diff: {

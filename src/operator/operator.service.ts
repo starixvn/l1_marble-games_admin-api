@@ -75,7 +75,6 @@ export class OperatorService {
     await newOperator.save();
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "operator",
       action: AdminLogActions.INSERT,
       diff: {
@@ -117,7 +116,6 @@ export class OperatorService {
     await operator.save();
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "operator",
       action: AdminLogActions.UPDATE,
       diff: {
@@ -160,7 +158,6 @@ export class OperatorService {
     await operator.save();
 
     void this.adminLogService.createLog({
-      author: "admin",
       resource: "operator",
       action: AdminLogActions.UPDATE,
       diff: {

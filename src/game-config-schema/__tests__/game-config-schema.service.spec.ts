@@ -209,7 +209,6 @@ describe("GameConfigSchemaService", () => {
       });
       expect(mockSave).toHaveBeenCalled();
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "game-config-schema",
         action: AdminLogActions.INSERT,
         diff: {
@@ -279,7 +278,6 @@ describe("GameConfigSchemaService", () => {
       );
       expect(mockReturnValue.select).toHaveBeenCalledWith("-__v");
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "game-config-schema",
         action: AdminLogActions.UPDATE,
         diff: {

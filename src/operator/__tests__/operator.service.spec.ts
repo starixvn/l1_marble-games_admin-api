@@ -101,7 +101,6 @@ describe("OperatorService", () => {
         name: "new-operator",
       });
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "operator",
         action: "insert",
         diff: {
@@ -200,7 +199,6 @@ describe("OperatorService", () => {
       expect(foundOperator.save).toHaveBeenCalled();
       expect(foundOperator.name).toBe("new-name");
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "operator",
         action: "update",
         diff: {
@@ -292,7 +290,6 @@ describe("OperatorService", () => {
         password: "random-password",
       });
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "operator",
         action: "update",
         diff: {
@@ -338,7 +335,6 @@ describe("OperatorService", () => {
         password: "random-password",
       });
       expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
-        author: "admin",
         resource: "operator",
         action: "update",
         diff: {
