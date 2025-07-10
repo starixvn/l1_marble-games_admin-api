@@ -152,7 +152,7 @@ describe("AdminLogService", () => {
       // Assert
       expect(clsService.get).toHaveBeenCalledWith("user");
       expect(model.create).toHaveBeenCalledWith({
-        author: "",
+        author: undefined,
         resource: "operator",
         action: "insert",
         diff: undefined,
