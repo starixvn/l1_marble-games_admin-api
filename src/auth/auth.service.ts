@@ -17,6 +17,8 @@ import { Role } from "../common/enums/role.enum";
 import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "../common/decorators/role.decorator";
 import { IS_PUBLIC_KEY } from "../common/decorators/public.decorator";
+import { AdminLogService } from "../admin-log/admin-log.service";
+import { AdminLogActions } from "../admin-log/constants";
 
 const SALT_ROUND = 10;
 
@@ -51,6 +53,8 @@ export class AuthService {
     private readonly metadataScanner: MetadataScanner,
     @Inject(Reflector)
     private readonly reflector: Reflector,
+    @Inject(AdminLogService)
+    private readonly adminLogService: AdminLogService,
   ) {
     this.expireIn = configService.get(ConfigKeys.Jwt).signOptions.expireIn;
   }
@@ -120,6 +124,18 @@ export class AuthService {
 
     await newAccount.save();
 
+    void this.adminLogService.createLog({
+      resource: "account",
+      action: AdminLogActions.INSERT,
+      diff: {
+        new: {
+          role: Role.ADMIN,
+          username,
+          password: "NEW_PASSWORD",
+        },
+      },
+    });
+
     return {
       username,
       password,
@@ -139,6 +155,23 @@ export class AuthService {
     existingAccount.password = hashedPassword;
 
     await existingAccount.save();
+
+    void this.adminLogService.createLog({
+      resource: "account",
+      action: AdminLogActions.UPDATE,
+      diff: {
+        old: {
+          username: existingAccount.username,
+          role: existingAccount.role,
+          password: "OLD_PASSWORD",
+        },
+        new: {
+          username: existingAccount.username,
+          role: existingAccount.role,
+          password: "NEW_PASSWORD",
+        },
+      },
+    });
 
     return {
       username: existingAccount.username,
@@ -163,6 +196,18 @@ export class AuthService {
     });
 
     await newAccount.save();
+
+    void this.adminLogService.createLog({
+      resource: "account",
+      action: AdminLogActions.INSERT,
+      diff: {
+        new: {
+          username: args.username,
+          role: args.role,
+          password: "NEW_PASSWORD",
+        },
+      },
+    });
 
     return {
       username: args.username,

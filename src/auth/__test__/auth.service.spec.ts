@@ -14,6 +14,9 @@ import {
 import { compare, hash } from "bcryptjs";
 import { Role } from "../../common/enums/role.enum";
 import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
+import { AdminLogService } from "../../admin-log/admin-log.service";
+import { ClsService } from "nestjs-cls";
+import { AdminLogRecord } from "../../admin-log/schema/admin-log-record.schema";
 
 jest.mock("bcryptjs");
 
@@ -41,10 +44,22 @@ describe("AuthService", () => {
     getAllAndOverride: jest.fn(),
   };
 
+  const mockAdminLogService = {
+    createLog: jest.fn(),
+  };
+
+  const mockClsService = {
+    get: jest.fn(),
+  };
+
   const mockAccountModel = jest.fn().mockImplementation((data) => ({
     ...data,
     save: jest.fn().mockResolvedValue(data),
   })) as unknown as Model<Account>;
+
+  const mockAdminLogModel = {
+    create: jest.fn(),
+  } as unknown as Model<AdminLogRecord>;
 
   (mockAccountModel as any).findOne = jest.fn().mockResolvedValue(null);
   (mockAccountModel as any).findById = jest.fn().mockResolvedValue(null);
@@ -63,6 +78,9 @@ describe("AuthService", () => {
         { provide: DiscoveryService, useValue: mockDiscoveryService },
         { provide: MetadataScanner, useValue: mockMetadataScanner },
         { provide: Reflector, useValue: mockReflector },
+        { provide: AdminLogService, useValue: mockAdminLogService },
+        { provide: ClsService, useValue: mockClsService },
+        { provide: getModelToken(AdminLogRecord.name), useValue: mockAdminLogModel },
       ],
     }).compile();
 
@@ -183,6 +201,17 @@ describe("AuthService", () => {
         password: "hashedPassword",
         role: Role.ADMIN,
       });
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        resource: "account",
+        action: "insert",
+        diff: {
+          new: {
+            role: Role.ADMIN,
+            username: "admin",
+            password: "NEW_PASSWORD",
+          },
+        },
+      });
     });
   });
 
@@ -203,6 +232,7 @@ describe("AuthService", () => {
       const mockAccount = {
         username: "test",
         password: "oldPassword",
+        role: Role.ADMIN,
         save: jest.fn().mockResolvedValue(true),
       };
       (mockAccountModel as any).findById.mockResolvedValue(mockAccount);
@@ -218,6 +248,22 @@ describe("AuthService", () => {
       });
       expect(mockAccount.password).toBe("newHashedPassword");
       expect(mockAccount.save).toHaveBeenCalled();
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        resource: "account",
+        action: "update",
+        diff: {
+          old: {
+            username: "test",
+            role: Role.ADMIN,
+            password: "OLD_PASSWORD",
+          },
+          new: {
+            username: "test",
+            role: Role.ADMIN,
+            password: "NEW_PASSWORD",
+          },
+        },
+      });
     });
   });
 
@@ -256,6 +302,17 @@ describe("AuthService", () => {
         username: "test",
         password: "hashedPassword",
         role: Role.ADMIN,
+      });
+      expect(mockAdminLogService.createLog).toHaveBeenCalledWith({
+        resource: "account",
+        action: "insert",
+        diff: {
+          new: {
+            username: "test",
+            role: Role.ADMIN,
+            password: "NEW_PASSWORD",
+          },
+        },
       });
     });
   });
