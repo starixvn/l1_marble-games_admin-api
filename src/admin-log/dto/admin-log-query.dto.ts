@@ -56,8 +56,8 @@ export class AdminLogQueryDto {
   @ValidateIf(
     (o: AdminLogQueryDto) =>
       new Date(o.endDate).getTime() - new Date(o.startDate).getTime() >
-      24 * 60 * 60 * 1000,
+      24 * 60 * 60 * 1000 * 7,
   )
-  @IsNotEmpty({ message: "Only query logs within 24 hours are allowed" })
+  @IsNotEmpty({ message: "Only query logs within 7 days are allowed" })
   _dateRangeValid?: never;
 }
