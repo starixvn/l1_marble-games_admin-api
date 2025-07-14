@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
   IsOptional,
-  IsNumberString,
   ValidateIf,
   IsNotEmpty,
   IsDateString,
+  IsNumber,
 } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class ApiLogQueryDto {
   @IsDateString()
@@ -49,19 +50,21 @@ export class ApiLogQueryDto {
   queryParams?: string;
 
   @IsOptional()
-  @IsNumberString()
+  @Transform(({ value }) => (value ? Number(value) : undefined))
+  @IsNumber()
   @ApiProperty({
     description: "The game id of the log",
-    example: 1,
+    example: "1",
     required: false,
   })
   gameId?: number;
 
   @IsOptional()
-  @IsNumberString()
+  @Transform(({ value }) => (value ? Number(value) : undefined))
+  @IsNumber()
   @ApiProperty({
     description: "The event id of the log",
-    example: 1,
+    example: "1",
     required: false,
   })
   eventId?: number;
