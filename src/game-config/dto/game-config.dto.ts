@@ -22,3 +22,12 @@ export class GameConfigUpsertQueryDto {
   })
   schemaId?: string;
 }
+
+export class GameConfigGetQueryDto {
+  @IsNumberString()
+  @ApiProperty({
+    description: "The id of the game to get the config for",
+    required: true
+  })
+  gameId: number;
+}

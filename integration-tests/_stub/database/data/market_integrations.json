@@ -2,6 +2,7 @@
   "_id": {
     "$oid": "6809fce26a798f36657e4c4d"
   },
+  "name": "MARKET_HANDICAP",
   "merge": {
     "marketID": 1,
     "marketNameKey": "MARKET_HANDICAP",
@@ -28,6 +29,7 @@
   "_id": {
     "$oid": "680a038f6a798f36657e4c51"
   },
+  "name": "MARKET_1H_HANDICAP",
   "merge": {
     "marketID": 2,
     "marketNameKey": "MARKET_1H_HANDICAP",
@@ -54,6 +56,7 @@
   "_id": {
     "$oid": "680a03bf6a798f36657e4c52"
   },
+  "name": "MARKET_OVER_UNDER",
   "merge": {
     "marketID": 3,
     "marketNameKey": "MARKET_OVER_UNDER",
@@ -80,6 +83,7 @@
   "_id": {
     "$oid": "680a03d96a798f36657e4c53"
   },
+  "name": "MARKET_1H_OVER_UNDER",
   "merge": {
     "marketID": 4,
     "marketNameKey": "MARKET_1H_OVER_UNDER",
@@ -106,6 +110,7 @@
   "_id": {
     "$oid": "680a03fc6a798f36657e4c54"
   },
+  "name": "MARKET_EVEN_ODD",
   "merge": {
     "marketID": 5,
     "marketNameKey": "MARKET_EVEN_ODD",
@@ -132,6 +137,7 @@
   "_id": {
     "$oid": "680a04126a798f36657e4c55"
   },
+  "name": "MARKET_1H_EVEN_ODD",
   "merge": {
     "marketID": 6,
     "marketNameKey": "MARKET_1H_EVEN_ODD",
@@ -158,6 +164,7 @@
   "_id": {
     "$oid": "680a04266a798f36657e4c56"
   },
+  "name": "MARKET_1X2",
   "merge": {
     "marketID": 7,
     "marketNameKey": "MARKET_1X2",
@@ -191,6 +198,7 @@
   "_id": {
     "$oid": "680a043a6a798f36657e4c57"
   },
+  "name": "MARKET_1H_1X2",
   "merge": {
     "marketID": 8,
     "marketNameKey": "MARKET_1H_1X2",

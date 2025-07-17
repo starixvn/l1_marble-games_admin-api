@@ -13,7 +13,7 @@ describe("Game Config", () => {
         const config = { level: 5 };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ describe("Game Config", () => {
           role: Role.DEVELOPER
         };
 
-        const createResponse = await fetch(`${baseUrl}/api/auth/createAccount`, {
+        const createResponse = await fetch(`${baseUrl}/auth/createAccount`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ describe("Game Config", () => {
         });
         const devAccount = await createResponse.json();
 
-        const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
+        const loginResponse = await fetch(`${baseUrl}/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ describe("Game Config", () => {
         const loginData = await loginResponse.json();
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=123&schemaId=507f1f77bcf86cd799439001`, {
+        const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=123&schemaId=507f1f77bcf86cd799439001`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ describe("Game Config", () => {
           uiSchema: {}
         };
 
-        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+        const schemaResponse = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -100,7 +100,7 @@ describe("Game Config", () => {
 
         expect(schemaResponse.status).toBe(200);
         const schemaData = await schemaResponse.json();
-        const schemaId = schemaData._id;
+        const schemaId = schemaData.id;
 
         const config = {
           level: 5,
@@ -108,7 +108,7 @@ describe("Game Config", () => {
         };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -147,7 +147,7 @@ describe("Game Config", () => {
           uiSchema: {}
         };
 
-        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+        const schemaResponse = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -158,7 +158,7 @@ describe("Game Config", () => {
 
         expect(schemaResponse.status).toBe(200);
         const schemaData = await schemaResponse.json();
-        const schemaId = schemaData._id;
+        const schemaId = schemaData.id;
 
         const invalidConfig = {
           level: 150,
@@ -166,7 +166,7 @@ describe("Game Config", () => {
         };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -195,7 +195,7 @@ describe("Game Config", () => {
           uiSchema: {}
         };
 
-        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+        const schemaResponse = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -214,7 +214,7 @@ describe("Game Config", () => {
         };
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -228,13 +228,11 @@ describe("Game Config", () => {
         const data = await response.json();
         expect(data).toEqual(
           expect.objectContaining({
-            validationErrors: expect.arrayContaining([
-              expect.objectContaining({
-                instancePath: "/level",
-                keyword: "maximum",
-                message: "must be <= 100"
-              })
-            ])
+            error: "Bad Request",
+            message: expect.arrayContaining([
+              expect.stringContaining("schemaId must be a mongodb id")
+            ]),
+            statusCode: 400
           })
         );
       });
@@ -250,7 +248,7 @@ describe("Game Config", () => {
           };
 
           // Act
-          const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}`, {
+          const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}`, {
             method: 'POST',
             headers: {
               ...addAdminAuth(),
@@ -286,7 +284,7 @@ describe("Game Config", () => {
           };
 
           // Act
-          const response = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}`, {
+          const response = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}`, {
             method: 'POST',
             headers: {
               ...addAdminAuth(),
@@ -318,7 +316,7 @@ describe("Game Config", () => {
         const gameId = 999;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/get?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/get?gameId=${gameId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -336,7 +334,7 @@ describe("Game Config", () => {
         const nonExistentGameId = 999999;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/get?gameId=${nonExistentGameId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/get?gameId=${nonExistentGameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -371,7 +369,7 @@ describe("Game Config", () => {
           uiSchema: {}
         };
 
-        const schemaResponse = await fetch(`${baseUrl}/api/gameConfigSchema/upsert`, {
+        const schemaResponse = await fetch(`${baseUrl}/gameConfigSchema/upsert`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -382,14 +380,14 @@ describe("Game Config", () => {
 
         expect(schemaResponse.status).toBe(200);
         const schemaData = await schemaResponse.json();
-        const schemaId = schemaData._id;
+        const schemaId = schemaData.id;
 
         const config = {
           level: 25,
           difficulty: 'hard'
         };
 
-        const createResponse = await fetch(`${baseUrl}/api/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
+        const createResponse = await fetch(`${baseUrl}/gameConfig/upsert?gameId=${gameId}&schemaId=${schemaId}`, {
           method: 'POST',
           headers: {
             ...addAdminAuth(),
@@ -401,7 +399,7 @@ describe("Game Config", () => {
         expect(createResponse.status).toBe(200);
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/get?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/gameConfig/get?gameId=${gameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -424,7 +422,7 @@ describe("Game Config", () => {
     describe("unauthenticated", () => {
       it("should throw 401", async () => {
         // Act
-        const response = await fetch(`${baseUrl}/api/gameConfig/list`, {
+        const response = await fetch(`${baseUrl}/gameConfig/list`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -438,7 +436,7 @@ describe("Game Config", () => {
     
     it("should return all game configs", async () => {
       // Act
-      const response = await fetch(`${baseUrl}/api/gameConfig/list`, {
+      const response = await fetch(`${baseUrl}/gameConfig/list`, {
         method: 'GET',
         headers: addAdminAuth(),
       });

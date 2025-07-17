@@ -100,26 +100,10 @@ describe('GameConfigSchemaController', () => {
       jest.spyOn(service, 'getGameConfigSchema').mockResolvedValue(mockResult as any);
 
       // Act
-      const result = await controller.getSchema(id);
+      const result = await controller.getSchema({ id });
 
       // Assert
       expect(service.getGameConfigSchema).toHaveBeenCalledWith(id);
-      expect(result).toBe(mockResult);
-    });
-
-    it('should call getAllGameConfigSchemas when no id is provided', async () => {
-      // Arrange
-      const mockResult = [
-        { _id: '507f1f77bcf86cd799439011', name: 'Schema 1' },
-        { _id: '507f1f77bcf86cd799439012', name: 'Schema 2' }
-      ];
-      jest.spyOn(service, 'getAllGameConfigSchemas').mockResolvedValue(mockResult as any);
-
-      // Act
-      const result = await controller.getSchema();
-
-      // Assert
-      expect(service.getAllGameConfigSchemas).toHaveBeenCalled();
       expect(result).toBe(mockResult);
     });
   });

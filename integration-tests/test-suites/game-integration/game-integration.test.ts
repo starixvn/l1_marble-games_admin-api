@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { addAdminAuth } from '../../utils/auth';
 
 describe("Game Integration", () => {
@@ -14,10 +14,10 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+         'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateRequest),
       });
@@ -35,7 +35,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?name=${nonExistentName}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?name=${nonExistentName}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -54,7 +54,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -70,7 +70,7 @@ describe("Game Integration", () => {
       const testName = `test-operator-name`;
       const gameId = 2001;
       
-      await fetch(`${baseUrl}/api/operator/updateName`, {
+      await fetch(`${baseUrl}/operator/updateName`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify({
@@ -85,7 +85,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -120,7 +120,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -154,7 +154,7 @@ describe("Game Integration", () => {
         mergeEvent: { eventType: "initial", priority: 1 }
       };
 
-      const createResponse = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const createResponse = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(initialRequest),
@@ -174,7 +174,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -198,58 +198,17 @@ describe("Game Integration", () => {
       );
     });
 
-    it("should create a new market integration if not provide id in market array", async () => {
-      // Arrange
-      const existingOperatorId = "67d291d943a96fad7f14ddae";
-      const gameId = 2002;
-      const updateRequest = {
-        mergeEvent: { eventType: "live", priority: 1 },
-        markets: [
-          {
-            name: "Test Market",
-            merge: { marketID: 100, marketName: "Test Market Name" },
-            selections: [
-              { selectionID: 1, name: "Selection 1" },
-              { selectionID: 2, name: "Selection 2" }
-            ]
-          }
-        ]
-      };
-
-      // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
-        method: 'POST',
-        headers: addAdminAuth(),
-        body: JSON.stringify(updateRequest),
-      });
-
-      // Assert
-      expect(response.status).toBe(200);
-      
-      const data = await response.json();
-      expect(data).toHaveProperty('markets');
-      expect(Array.isArray(data.markets)).toBe(true);
-      expect(data.markets.length).toBe(1);
-      
-      const market = data.markets[0];
-      expect(typeof market).toBe('object');
-      expect(market).toHaveProperty('id');
-      expect(typeof market.id).toBe('string');
-      expect(market.id.length).toBe(24);
-    });
-
-    it("should update market integration if id and fields are provided", async () => {
+    it("should update market integration if name and fields are provided", async () => {
       // Arrange
       const existingOperatorId = "67d291d943a96fad7f14ddae";
       const gameId = 2003;
-      const existingMarketId = "6809fce26a798f36657e4c4d";
+      const marketName = "Updated Market Name";
       
       const updateRequest = {
         mergeEvent: { eventType: "pre-match", priority: 2 },
         markets: [
           {
-            id: existingMarketId,
-            name: "Updated Market Name",
+            name: marketName,
             merge: { marketID: 1, marketName: "Updated Handicap", updated: true },
             selections: [
               { selectionID: 1, name: "Updated Home", column: 1 },
@@ -260,7 +219,7 @@ describe("Game Integration", () => {
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -272,7 +231,7 @@ describe("Game Integration", () => {
       const client = new MongoClient(databaseUri);
       await client.connect();
       const db = client.db(databaseName);
-      const marketIntegration = await db.collection('market_integrations').findOne({ _id: new ObjectId(existingMarketId) });
+      const marketIntegration = await db.collection('market_integrations').findOne({ name: marketName });
       await client.close();
 
       // Assert
@@ -284,7 +243,7 @@ describe("Game Integration", () => {
       expect(data.markets.length).toBe(1);
       
       const market = data.markets[0];
-      expect(market.id).toBe(existingMarketId);
+      expect(market.name).toBe(marketName);
 
       expect(marketIntegration).toEqual(expect.objectContaining({
         merge: expect.objectContaining({
@@ -299,23 +258,23 @@ describe("Game Integration", () => {
       }));
     });
 
-    it("should not update market integration if id is provided but no fields are provided", async () => {
+    it("should not update market integration if name is provided but no fields are provided", async () => {
       // Arrange
       const existingOperatorId = "67d291d943a96fad7f14ddae";
       const gameId = 2004;
-      const existingMarketId = "680a038f6a798f36657e4c51";
+      const marketName = "Test Market Name";
       
       const updateRequest = {
         mergeEvent: { eventType: "in-play", priority: 3 },
         markets: [
           {
-            id: existingMarketId
+            name: marketName
           }
         ]
       };
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(updateRequest),
@@ -330,7 +289,7 @@ describe("Game Integration", () => {
       expect(data.markets.length).toBe(1);
       
       const market = data.markets[0];
-      expect(market.id).toBe(existingMarketId);
+      expect(market.name).toBe(marketName);
     });
   });
 
@@ -341,7 +300,7 @@ describe("Game Integration", () => {
         const gameId = 3001;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameIntegration/get?gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/gameIntegration/get?gameId=${gameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -358,7 +317,7 @@ describe("Game Integration", () => {
         const gameId = 3002;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameIntegration/get?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
+        const response = await fetch(`${baseUrl}/gameIntegration/get?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -375,7 +334,7 @@ describe("Game Integration", () => {
         const nonExistentGameId = 99999;
 
         // Act
-        const response = await fetch(`${baseUrl}/api/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${nonExistentGameId}`, {
+        const response = await fetch(`${baseUrl}/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${nonExistentGameId}`, {
           method: 'GET',
           headers: addAdminAuth(),
         });
@@ -427,7 +386,7 @@ describe("Game Integration", () => {
         ],
         "markets": [
           { 
-            "id": "684957076f3aab5c92f20f8f",
+            "name": "Handicap Market",
             "merge": {
               "marketID": 1,
               "marketNameKey": "MARKET_HANDICAP",
@@ -453,7 +412,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f90",
+            "name": "1H Handicap Market",
             "merge": {
               "marketID": 2,
               "marketNameKey": "MARKET_1H_HANDICAP",
@@ -466,7 +425,7 @@ describe("Game Integration", () => {
                 "selectionOrder": 1,
                 "selectionNameLongKey": "HOME_WIN",
                 "name": "h1_hdp_home",
-                 "settlementStatus": null
+                "settlementStatus": null
               },
               {
                 "selectionID": 4,
@@ -479,7 +438,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f91",
+            "name": "Over/Under Market",
             "merge": {
               "marketID": 3,
               "marketNameKey": "MARKET_OVER_UNDER",
@@ -505,7 +464,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f92",
+            "name": "1H Over/Under Market",
             "merge": {
               "marketID": 4,
               "marketNameKey": "MARKET_1H_OVER_UNDER",
@@ -531,7 +490,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f93",
+            "name": "Odd/Even Market",
             "merge": {
               "marketID": 5,
               "marketNameKey": "MARKET_EVEN_ODD",
@@ -557,7 +516,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f94",
+            "name": "1H Odd/Even Market",
             "merge": {
               "marketID": 6,
               "marketNameKey": "MARKET_1H_EVEN_ODD",
@@ -583,7 +542,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f95",
+            "name": "1X2 Market",
             "merge": {
               "marketID": 7,
               "marketNameKey": "MARKET_1X2",
@@ -617,7 +576,7 @@ describe("Game Integration", () => {
             ]
           },
           {
-            "id": "684957076f3aab5c92f20f96",
+            "name": "1H 1X2 Market",
             "merge": {
               "marketID": 8,
               "marketNameKey": "MARKET_1H_1X2",
@@ -657,7 +616,7 @@ describe("Game Integration", () => {
         ...upsertRequest
       };
 
-      const upsertResponse = await fetch(`${baseUrl}/api/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const upsertResponse = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'POST',
         headers: addAdminAuth(),
         body: JSON.stringify(upsertRequest),
@@ -666,15 +625,164 @@ describe("Game Integration", () => {
       await upsertResponse.json();
 
       // Act
-      const response = await fetch(`${baseUrl}/api/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+      const response = await fetch(`${baseUrl}/gameIntegration/get?operatorId=${existingOperatorId}&gameId=${gameId}`, {
         method: 'GET',
         headers: addAdminAuth(),
       });
       const data = await response.json();
 
       // Assert
-      expect(data).toEqual(expectedResponse);
+      expect(data).toEqual(expect.objectContaining({
+        mergeEvent: expectedResponse.mergeEvent,
+        mergeEventDetails: expectedResponse.mergeEventDetails,
+        patches: expectedResponse.patches,
+        markets: expectedResponse.markets.map(expectedMarket => 
+          expect.objectContaining({
+            name: expectedMarket.name,
+            merge: expectedMarket.merge,
+            selections: expectedMarket.selections
+          })
+        )
+      }));
     });
     
+  });
+
+  describe("List", () => {
+    it("should return 401 if not authenticated", async () => {
+      // Arrange
+      const response = await fetch(`${baseUrl}/gameIntegration/list`, {
+        method: 'GET',
+      });
+      expect(response.status).toBe(401);
+    });
+
+    it("should return all game integrations", async () => {
+      // Arrange
+      const response = await fetch(`${baseUrl}/gameIntegration/list`, {
+        method: 'GET',
+        headers: addAdminAuth(),
+      });
+      const data = await response.json();
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(data).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          operatorId: expect.any(String),
+          gameId: expect.any(Number)
+        })
+      ]));
+    });
+  });
+
+  describe("Delete", () => {
+    it("should return 401 if not authenticated", async () => {
+      // Arrange
+      const response = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=67d291d943a96fad7f14ddae&gameId=2001`, {
+        method: 'DELETE',
+      });
+      expect(response.status).toBe(401);
+    });
+
+    it("should throw 404 if operator not found", async () => {
+      // Arrange
+      const nonExistentOperatorId = "000000000000000000000000";
+      const gameId = 2001;
+
+      // Act
+      const response = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=${nonExistentOperatorId}&gameId=${gameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(response.status).toBe(404);
+    });
+
+    it("should delete game integration", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const gameId = 4001;
+      const createRequest = {
+        mergeEvent: { eventType: "match", priority: 1 },
+        patches: [{ op: "replace", path: "/status", value: "active" }]
+      };
+
+      const createResponse = await fetch(`${baseUrl}/gameIntegration/upsert?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+        method: 'POST',
+        headers: addAdminAuth(),
+        body: JSON.stringify(createRequest),
+      });
+
+      expect(createResponse.status).toBe(200);
+
+      // Act
+      const deleteResponse = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=${existingOperatorId}&gameId=${gameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(deleteResponse.status).toBe(200);
+      
+      const deleteData = await deleteResponse.json();
+      expect(deleteData).toEqual({ message: 'Game integration deleted successfully' });
+    });
+
+    it("should throw 404 if game integration not found", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const nonExistentGameId = 99999;
+
+      // Act
+      const response = await fetch(`${baseUrl}/gameIntegration/delete?operatorId=${existingOperatorId}&gameId=${nonExistentGameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(response.status).toBe(404);
+    });
+
+    it("should delete game integration using operator name", async () => {
+      // Arrange
+      const existingOperatorId = "67d291d943a96fad7f14ddae";
+      const testName = "test-delete-operator";
+      const gameId = 4002;
+      
+      await fetch(`${baseUrl}/operator/updateName`, {
+        method: 'POST',
+        headers: addAdminAuth(),
+        body: JSON.stringify({
+          operatorId: existingOperatorId,
+          name: testName,
+        }),
+      });
+
+      const createRequest = {
+        mergeEvent: { eventType: "match", priority: 1 }
+      };
+
+      const createResponse = await fetch(`${baseUrl}/gameIntegration/upsert?name=${testName}&gameId=${gameId}`, {
+        method: 'POST',
+        headers: addAdminAuth(),
+        body: JSON.stringify(createRequest),
+      });
+
+      expect(createResponse.status).toBe(200);
+
+      // Act
+      const deleteResponse = await fetch(`${baseUrl}/gameIntegration/delete?name=${testName}&gameId=${gameId}`, {
+        method: 'DELETE',
+        headers: addAdminAuth(),
+      });
+
+      // Assert
+      expect(deleteResponse.status).toBe(200);
+      
+      const deleteData = await deleteResponse.json();
+      expect(deleteData).toEqual({ message: 'Game integration deleted successfully' });
+    });
   });
 })

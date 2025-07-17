@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Query } from "@nestjs/common";
 import { GameConfigService } from "./game-config.service";
 import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
-import { GameConfigUpdateRequestDto, GameConfigUpsertQueryDto } from "./dto/game-config.dto";
+import { GameConfigGetQueryDto, GameConfigUpdateRequestDto, GameConfigUpsertQueryDto } from "./dto/game-config.dto";
 import { Roles } from "../common/decorators/role.decorator";
 import { Role } from "../common/enums/role.enum";
 
@@ -36,8 +36,8 @@ export class GameConfigController {
     description: "Get game config by gameId"
   })
   @HttpCode(HttpStatus.OK)
-  async getGameConfig(@Query('gameId') gameId: number) {
-    return this.gameConfigService.getGameConfigByGameId(Number(gameId));
+  async getGameConfig(@Query() query: GameConfigGetQueryDto) {
+    return this.gameConfigService.getGameConfigByGameId(query.gameId);
   }
 
   @Get('list')

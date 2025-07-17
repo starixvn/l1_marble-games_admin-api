@@ -12,8 +12,8 @@ export class GameConfig {
   @Prop({ type: mongoose.Schema.Types.Mixed, required: true})
   config: object;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: GameConfigJsonSchema.name, required: true })
-  gameConfigSchema: ObjectId | GameConfigJsonSchemaDocument;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: GameConfigJsonSchema.name, required: false })
+  gameConfigSchema?: ObjectId | GameConfigJsonSchemaDocument;
 }
 
 export const GameConfigSchema = SchemaFactory.createForClass(GameConfig);

@@ -9,7 +9,7 @@ describe("Operator", () => {
 
         it("should return 401 if not authenticated", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/create`, {
+            const response = await fetch(`${baseUrl}/operator/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ describe("Operator", () => {
               role: Role.DEVELOPER
             };
 
-            const createResponse = await fetch(`${baseUrl}/api/auth/createAccount`, {
+            const createResponse = await fetch(`${baseUrl}/auth/createAccount`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ describe("Operator", () => {
             });
             const devAccount = await createResponse.json();
 
-            const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
+            const loginResponse = await fetch(`${baseUrl}/auth/login`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ describe("Operator", () => {
             const loginData = await loginResponse.json();
 
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/create`, {
+            const response = await fetch(`${baseUrl}/operator/create`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ describe("Operator", () => {
       
         it("should create an operator", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/create`, {
+            const response = await fetch(`${baseUrl}/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -84,14 +84,14 @@ describe("Operator", () => {
             // Arrange
             const testName = "duplicate-test-operator";
             
-            await fetch(`${baseUrl}/api/operator/create`, {
+            await fetch(`${baseUrl}/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({ name: testName }),
             });
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/create`, {
+            const response = await fetch(`${baseUrl}/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({ name: testName }),
@@ -108,7 +108,7 @@ describe("Operator", () => {
             const testName = "test-operator-with-name";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/create`, {
+            const response = await fetch(`${baseUrl}/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({ name: testName }),
@@ -132,7 +132,7 @@ describe("Operator", () => {
             const newName = "updated-test-operator";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/updateName`, {
+            const response = await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ describe("Operator", () => {
             const newName = "updated-test-operator";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/updateName`, {
+            const response = await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -172,7 +172,7 @@ describe("Operator", () => {
             const newName = "test-name";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/updateName`, {
+            const response = await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -193,7 +193,7 @@ describe("Operator", () => {
             const secondOperatorId = "507f1f77bcf86cd799439011";
             const duplicateName = "duplicate-test-operator";
             
-            await fetch(`${baseUrl}/api/operator/updateName`, {
+            await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -203,7 +203,7 @@ describe("Operator", () => {
             });
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/updateName`, {
+            const response = await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -223,7 +223,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/generatePassword?operatorId=${existingOperatorId}`, {
+            const response = await fetch(`${baseUrl}/operator/generatePassword?operatorId=${existingOperatorId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/generatePassword?operatorId=${existingOperatorId}`, {
+            const response = await fetch(`${baseUrl}/operator/generatePassword?operatorId=${existingOperatorId}`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -258,7 +258,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             const testName = "test-operator-name";
             
-            await fetch(`${baseUrl}/api/operator/updateName`, {
+            await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -268,7 +268,7 @@ describe("Operator", () => {
             });
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/generatePassword?name=${testName}`, {
+            const response = await fetch(`${baseUrl}/operator/generatePassword?name=${testName}`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -287,7 +287,7 @@ describe("Operator", () => {
             const nonExistentOperatorId = "507f1f77bcf86cd799439011";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/generatePassword?operatorId=${nonExistentOperatorId}`, {
+            const response = await fetch(`${baseUrl}/operator/generatePassword?operatorId=${nonExistentOperatorId}`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
@@ -305,7 +305,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${existingOperatorId}`, {
+            const response = await fetch(`${baseUrl}/operator/get?operatorId=${existingOperatorId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -318,7 +318,7 @@ describe("Operator", () => {
 
         it("should return 400 if operatorId and name are not provided", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/get`, {
+            const response = await fetch(`${baseUrl}/operator/get`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
@@ -332,7 +332,7 @@ describe("Operator", () => {
             const nonExistentOperatorId = "507f1f77bcf86cd799439011";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${nonExistentOperatorId}`, {
+            const response = await fetch(`${baseUrl}/operator/get?operatorId=${nonExistentOperatorId}`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
@@ -353,7 +353,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${existingOperatorId}`, {
+            const response = await fetch(`${baseUrl}/operator/get?operatorId=${existingOperatorId}`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
@@ -372,7 +372,7 @@ describe("Operator", () => {
             const existingOperatorId = "67d291d943a96fad7f14ddae";
             const testName = "test-operator-get-by-name";
             
-            await fetch(`${baseUrl}/api/operator/updateName`, {
+            await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -382,7 +382,7 @@ describe("Operator", () => {
             });
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/get?name=${encodeURIComponent(testName)}`, {
+            const response = await fetch(`${baseUrl}/operator/get?name=${encodeURIComponent(testName)}`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
@@ -402,7 +402,7 @@ describe("Operator", () => {
             const someOtherName = "some-other-name";
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/get?operatorId=${existingOperatorId}&name=${encodeURIComponent(someOtherName)}`, {
+            const response = await fetch(`${baseUrl}/operator/get?operatorId=${existingOperatorId}&name=${encodeURIComponent(someOtherName)}`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
@@ -420,7 +420,7 @@ describe("Operator", () => {
     describe("Get all operators", () => {
         it("should return 401 if not authenticated", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/list`, {
+            const response = await fetch(`${baseUrl}/operator/list`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -433,7 +433,7 @@ describe("Operator", () => {
 
         it("should return all operators with exact structure", async () => {
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/list`, {
+            const response = await fetch(`${baseUrl}/operator/list`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });
@@ -457,14 +457,14 @@ describe("Operator", () => {
 
         it("should return operators with field transformation", async () => {
             // Arrange
-            const createResponse = await fetch(`${baseUrl}/api/operator/create`, {
+            const createResponse = await fetch(`${baseUrl}/operator/create`, {
                 method: 'POST',
                 headers: addAdminAuth(),
             });
             const createdOperator = await createResponse.json();
             const testName = "test-list-operator";
             
-            await fetch(`${baseUrl}/api/operator/updateName`, {
+            await fetch(`${baseUrl}/operator/updateName`, {
                 method: 'POST',
                 headers: addAdminAuth(),
                 body: JSON.stringify({
@@ -474,7 +474,7 @@ describe("Operator", () => {
             });
             
             // Act
-            const response = await fetch(`${baseUrl}/api/operator/list`, {
+            const response = await fetch(`${baseUrl}/operator/list`, {
                 method: 'GET',
                 headers: addAdminAuth(),
             });

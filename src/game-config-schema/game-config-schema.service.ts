@@ -30,7 +30,7 @@ export const DEFAULT_GAME_CONFIG_SCHEMA = {
 
 @Injectable()
 export class GameConfigSchemaService {
-  private readonly ajv = new Ajv();
+  private readonly ajv = new Ajv({ $data: true , $comment: true });
 
   constructor(
     @InjectModel(GameConfigJsonSchema.name)
@@ -61,6 +61,8 @@ export class GameConfigSchemaService {
 
   async upsertGameConfigSchema(args: UpsertGameConfigSchemaArgs) {
     const { id, schema, name, uiSchema } = args;
+
+    this.validateJsonSchema(schema);
 
     if (id) {
       if (!Types.ObjectId.isValid(id)) {
@@ -126,6 +128,18 @@ export class GameConfigSchemaService {
       throw new BadRequestException({
         validationErrors: validate.errors,
         config,
+        schema
+      });
+    }
+  }
+
+  private validateJsonSchema(schema: object) {
+    try {
+      this.ajv.compile(schema);
+    } catch (error) {
+      throw new BadRequestException({
+        message: 'Invalid JSON Schema',
+        error: error instanceof Error ? error.message : String(error),
         schema
       });
     }
