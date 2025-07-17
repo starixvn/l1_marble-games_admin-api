@@ -66,7 +66,7 @@ export class GameIntegrationController {
   }
 
   @Get("get")
-  @Roles(Role.ADMIN, Role.READONLY)
+  @Roles(Role.ADMIN, Role.READONLY, Role.DEVELOPER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Get game integration",
