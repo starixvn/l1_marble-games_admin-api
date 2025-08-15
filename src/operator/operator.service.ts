@@ -231,7 +231,7 @@ export class OperatorService {
     query: ReturnType<typeof this.operatorModel.findOne>,
   ) {
     return query.select(PASSWORD_FILTER).transform((doc) => {
-      if (doc && typeof (doc as any).toObject === "function") {
+      if (doc && typeof (doc as OperatorDocument).toObject === "function") {
         const obj = (doc as OperatorDocument).toObject();
         const { _id, ...rest } = obj;
         return { id: _id.toString(), ...rest };
