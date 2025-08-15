@@ -2,7 +2,7 @@ import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { RequestMethod, ValidationPipe } from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
 import { networkInterfaces } from "os";
 import * as morgan from "morgan";
 
@@ -62,4 +62,4 @@ function getServerIp() {
   return "localhost";
 }
 
-bootstrap();
+void bootstrap();

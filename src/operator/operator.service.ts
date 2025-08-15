@@ -43,6 +43,14 @@ export type GeneratePasswordArgs = {
   name?: string;
 };
 
+const PASSWORD_FILTER = "-password -__v";
+
+enum OperatorError {
+  NOT_FOUND = "Operator not found",
+  CONFLICT = "Operator with this name already exists",
+  ID_OR_NAME_REQUIRED = "Either operatorId or name must be provided",
+}
+
 @Injectable()
 export class OperatorService {
   constructor(
@@ -58,9 +66,9 @@ export class OperatorService {
     if (options?.name) {
       const existingOperator = await this.operatorModel
         .findOne({ name: options.name })
-        .select("-password -__v");
+        .select(PASSWORD_FILTER);
       if (existingOperator) {
-        throw new ConflictException("Operator with this name already exists");
+        throw new ConflictException(OperatorError.CONFLICT);
       }
     }
 
@@ -98,16 +106,16 @@ export class OperatorService {
 
     const existingOperator = await this.operatorModel
       .findOne({ name })
-      .select("-password -__v");
+      .select(PASSWORD_FILTER);
 
     if (existingOperator) {
-      throw new ConflictException("Operator with this name already exists");
+      throw new ConflictException(OperatorError.CONFLICT);
     }
 
     const operator = await this.operatorModel.findById(operatorId);
 
     if (!operator) {
-      throw new NotFoundException("Operator not found");
+      throw new NotFoundException(OperatorError.NOT_FOUND);
     }
 
     const oldName = operator.name ?? "";
@@ -137,9 +145,7 @@ export class OperatorService {
     const { operatorId, name } = args;
 
     if (!operatorId && !name) {
-      throw new BadRequestException(
-        "Either operatorId or name must be provided",
-      );
+      throw new BadRequestException(OperatorError.ID_OR_NAME_REQUIRED);
     }
 
     const operator =
@@ -147,7 +153,7 @@ export class OperatorService {
       (name && (await this.operatorModel.findOne({ name })));
 
     if (!operator) {
-      throw new NotFoundException("Operator not found");
+      throw new NotFoundException(OperatorError.NOT_FOUND);
     }
 
     const password = generateRandomPassword();
@@ -186,7 +192,7 @@ export class OperatorService {
     if (operatorId) {
       const operator = await this.getOperatorById(operatorId);
       if (!operator) {
-        throw new NotFoundException("Operator not found");
+        throw new NotFoundException(OperatorError.NOT_FOUND);
       }
       return operator;
     }
@@ -194,12 +200,12 @@ export class OperatorService {
     if (name) {
       const operator = await this.getOperatorByName(name);
       if (!operator) {
-        throw new NotFoundException("Operator not found");
+        throw new NotFoundException(OperatorError.NOT_FOUND);
       }
       return operator;
     }
 
-    throw new Error("Either operatorId or name must be provided"); // this is developer fault to not provide either operatorId or name
+    throw new Error(OperatorError.ID_OR_NAME_REQUIRED); // this is developer fault to not provide either operatorId or name
   }
 
   async getAllOperators() {
@@ -224,7 +230,7 @@ export class OperatorService {
   private filterOperatorFields(
     query: ReturnType<typeof this.operatorModel.findOne>,
   ) {
-    return query.select("-password -__v").transform((doc) => {
+    return query.select(PASSWORD_FILTER).transform((doc) => {
       if (doc && typeof (doc as any).toObject === "function") {
         const obj = (doc as OperatorDocument).toObject();
         const { _id, ...rest } = obj;

@@ -13,43 +13,47 @@ import {
   ValidateIf,
 } from "class-validator";
 
+const OPERATOR_NAME_SWAGGER_DESC = {
+  description: "Operator name",
+  required: false,
+};
+
 export class CreateOperatorDto implements OperatorCreateOptions {
-  @ApiProperty({
-    description: "Operator name",
-    required: false,
-    example: "JohnDoe",
-  })
+  @ApiProperty(OPERATOR_NAME_SWAGGER_DESC)
   @IsOptional()
   @IsString()
   name?: string;
 }
 
 export class UpdateNameDto implements UpdateNameArgs {
-  @ApiProperty({ description: "Operator ID string" })
-  operatorId: string = "";
+  @ApiProperty({ description: "Operator ID string for the updated operator" })
+  operatorId = "";
 
-  @ApiProperty({ description: "New name for the operator" })
+  @ApiProperty({ description: "New name for the updated operator" })
   @IsString()
   @IsNotEmpty({ message: "Name cannot be empty" })
-  name: string = "";
+  name = "";
 }
 
 export class GeneratePasswordDto implements GeneratePasswordArgs {
   @ApiProperty({ description: "Operator ID string", required: false })
   operatorId?: string;
 
-  @ApiProperty({ description: "Operator name", required: false })
+  @ApiProperty(OPERATOR_NAME_SWAGGER_DESC)
   name?: string;
 }
 
 export class GetOperatorDto implements GetOperatorArgs {
-  @ApiProperty({ description: "Operator ID string", required: false })
+  @ApiProperty({
+    description: "Operator ID, if not specified, name must be provided",
+    required: false,
+  })
   @IsString()
   @IsMongoId()
   @IsOptional()
   operatorId?: string;
 
-  @ApiProperty({ description: "Operator name", required: false })
+  @ApiProperty(OPERATOR_NAME_SWAGGER_DESC)
   @IsOptional()
   @IsString()
   name?: string;

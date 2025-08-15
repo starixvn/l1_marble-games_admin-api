@@ -12,9 +12,15 @@ export function generateRandomPassword(
   const specialChars = "!@#$%^&*()-_=+[]{}|;:,.<>?";
   let chars = lower;
 
-  if (upper) chars += upperChars;
-  if (nums) chars += numChars;
-  if (special) chars += specialChars;
+  if (upper) {
+    chars += upperChars;
+  }
+  if (nums) {
+    chars += numChars;
+  }
+  if (special) {
+    chars += specialChars;
+  }
 
   let pass = "";
   for (let i = 0; i < len; i++) {

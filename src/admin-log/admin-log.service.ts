@@ -39,14 +39,12 @@ export class AdminLogService {
     const user = this.cls.get("user");
     const author = user?.username;
 
-    const log = await this.adminLogModel.create({
+    return this.adminLogModel.create({
       author,
       resource,
       action,
       diff,
     });
-
-    return log;
   }
 
   async queryLogs(params: AdminQueryLogParams) {

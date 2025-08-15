@@ -24,7 +24,7 @@ import {
   MarketIntegrationDocument,
 } from "./schema/market-integration.schema";
 import { AdminLogService } from "../admin-log/admin-log.service";
-import { AdminLogActions } from "../admin-log/constants";
+import { AdminLogActions, AdminLogResources } from "../admin-log/constants";
 
 @Injectable()
 export class GameIntegrationService {
@@ -72,7 +72,7 @@ export class GameIntegrationService {
       : AdminLogActions.INSERT;
 
     void this.adminLogService.createLog({
-      resource: "game-integration",
+      resource: AdminLogResources.GAME_INTEGRATION,
       action,
       diff: {
         old: oldGameIntegration ?? undefined,
@@ -103,7 +103,7 @@ export class GameIntegrationService {
       ).deletedCount > 0;
 
     void this.adminLogService.createLog({
-      resource: "game-integration",
+      resource: AdminLogResources.GAME_INTEGRATION,
       action: AdminLogActions.DELETE,
       diff: {
         old: oldGameIntegration,
@@ -192,13 +192,11 @@ export class GameIntegrationService {
   private async processMarketIntegrations(
     marketIntegrations: MarketIntegrationUpdateRequestDto[],
   ): Promise<unknown[]> {
-    const marketIntegrationIds = await Promise.all(
+    return Promise.all(
       marketIntegrations.map((marketIntegration) =>
         this.processMarketIntegration(marketIntegration),
       ),
     );
-
-    return marketIntegrationIds;
   }
 
   private async processMarketIntegration(

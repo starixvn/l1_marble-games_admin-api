@@ -24,7 +24,7 @@ export class OperatorController {
   @HttpCode(200)
   @Post("create")
   async createOperator(@Body() body?: CreateOperatorDto) {
-    return await this.operatorServcice.createOperator(body);
+    return this.operatorServcice.createOperator(body);
   }
 
   @ApiOperation({
