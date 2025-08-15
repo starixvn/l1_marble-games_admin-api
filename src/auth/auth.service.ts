@@ -38,6 +38,13 @@ export interface CreateAccountParams {
   role: Role;
 }
 
+enum AccountError {
+  NOT_FOUND = "Account not found",
+  ALREADY_EXISTS = "Account already exists",
+  ONLY_ONE_ADMIN_ALLOWED = "Only one admin account is allowed",
+  UNAUTHORIZED = "Unauthorized",
+}
+
 @Injectable()
 export class AuthService {
   private readonly expireIn: string;
@@ -95,12 +102,10 @@ export class AuthService {
       username: user?.username,
     };
 
-    const token = await this.jwtService.signAsync(payload, {
+    return this.jwtService.signAsync(payload, {
       subject: user.id,
       expiresIn: this.expireIn,
     });
-
-    return token;
   }
 
   async oneTimeRegister() {
@@ -109,7 +114,7 @@ export class AuthService {
     const existingAccount = await this.getAccount(username);
 
     if (existingAccount) {
-      throw new BadRequestException("Only one admin account is allowed");
+      throw new BadRequestException(AccountError.ONLY_ONE_ADMIN_ALLOWED);
     }
 
     const password = generateRandomPassword();
@@ -146,7 +151,7 @@ export class AuthService {
     const existingAccount = await this.getAccountById(userId);
 
     if (!existingAccount) {
-      throw new UnauthorizedException("Account not found");
+      throw new UnauthorizedException(AccountError.NOT_FOUND);
     }
 
     const password = generateRandomPassword();
@@ -183,7 +188,7 @@ export class AuthService {
     const existingAccount = await this.getAccount(args.username);
 
     if (existingAccount) {
-      throw new ConflictException("Account already exists");
+      throw new ConflictException(AccountError.ALREADY_EXISTS);
     }
 
     const password = generateRandomPassword();
@@ -227,7 +232,7 @@ export class AuthService {
     const account = await this.getAccountById(userId);
 
     if (!account) {
-      throw new UnauthorizedException("Account not found");
+      throw new UnauthorizedException(AccountError.NOT_FOUND);
     }
 
     const allowedEndpoints = await this.getAllowedEndpoints(userId);
@@ -243,7 +248,7 @@ export class AuthService {
     const account = await this.getAccountById(userId);
 
     if (!account) {
-      throw new UnauthorizedException("Account not found");
+      throw new UnauthorizedException(AccountError.NOT_FOUND);
     }
 
     return this.getAllAllowedEndpoints(account.role);
@@ -265,11 +270,16 @@ export class AuthService {
 
     controllers.forEach((controller) => {
       const { instance, metatype } = controller;
-      if (!instance || !metatype) return;
+      if (!instance || !metatype) {
+        return;
+      }
 
       const controllerPath = Reflect.getMetadata("path", metatype) ?? "";
       const prototype = Object.getPrototypeOf(instance) as object | null;
-      if (!prototype) return;
+      if (!prototype) {
+        return;
+      }
+
       const methodNames = this.metadataScanner.getAllMethodNames(prototype);
       methodNames.forEach((methodKey: string) => {
         const methodPath = Reflect.getMetadata(
@@ -311,9 +321,15 @@ export class AuthService {
   }
 
   private buildFullPath(controllerPath: string, methodPath: string): string {
-    if (!controllerPath && !methodPath) return "/";
-    if (!controllerPath) return `/${methodPath}`;
-    if (!methodPath) return `/${controllerPath}`;
+    if (!controllerPath && !methodPath) {
+      return "/";
+    }
+    if (!controllerPath) {
+      return `/${methodPath}`;
+    }
+    if (!methodPath) {
+      return `/${controllerPath}`;
+    }
     return `/${controllerPath}/${methodPath}`.replace(/\/+/g, "/");
   }
 }
