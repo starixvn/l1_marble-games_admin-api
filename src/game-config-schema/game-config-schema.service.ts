@@ -67,7 +67,7 @@ export class GameConfigSchemaService {
       .select("-__v -schema -uiSchema");
     return schemas.map((schema) =>
       schema.toObject({
-        transform: (_, ret) => {
+        transform: (_, ret: any) => {
           ret.id = ret._id;
           delete ret._id;
           delete ret.__v;
@@ -102,7 +102,7 @@ export class GameConfigSchemaService {
       }
 
       const oldSchemaObject = oldSchema?.toObject({
-        transform: (_, ret) => {
+        transform: (_, ret: any) => {
           ret.id = ret._id;
           delete ret._id;
           delete ret.__v;
@@ -111,7 +111,7 @@ export class GameConfigSchemaService {
       });
 
       const updatedSchemaObject = updatedSchema.toObject({
-        transform: (_, ret) => {
+        transform: (_, ret: any) => {
           ret.id = ret._id;
           delete ret._id;
           delete ret.__v;
@@ -129,7 +129,7 @@ export class GameConfigSchemaService {
       });
 
       return updatedSchema.toObject({
-        transform: (_, ret) => {
+        transform: (_, ret: any) => {
           ret.id = ret._id;
           delete ret._id;
           delete ret.__v;
@@ -145,7 +145,7 @@ export class GameConfigSchemaService {
     });
     const saved = await newSchema.save();
     const newSchemaObject = saved.toObject({
-      transform: (_, ret) => {
+      transform: (_, ret: any) => {
         ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
