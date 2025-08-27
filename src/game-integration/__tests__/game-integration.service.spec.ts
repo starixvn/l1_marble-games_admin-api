@@ -482,6 +482,158 @@ describe("GameIntegrationService", () => {
       });
     });
 
+    describe("no merge in market integration", () => {
+      it("should not update merge field", async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: "match" },
+          markets: [
+            {
+              name: "Test Market",
+              selections: ["Selection 1", "Selection 2"],
+              // merge is intentionally not provided
+            },
+          ],
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockCreatedMarketIntegration = {
+          _id: mockMarketIntegrationId,
+          name: "Test Market",
+          selections: ["Selection 1", "Selection 2"],
+        };
+        const mockUpsertedIntegration = {
+          _id: mockGameIntegrationId,
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: "match" },
+          markets: [mockCreatedMarketIntegration],
+        };
+
+        setupOperatorMock(mockOperator);
+        mockMarketIntegrationModel.findOneAndUpdate.mockResolvedValue(
+          mockCreatedMarketIntegration,
+        );
+        setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
+
+        // Act
+        const result = await service.upsertGameIntegration(
+          query,
+          updateRequest,
+        );
+
+        // Assert
+        expect(
+          mockMarketIntegrationModel.findOneAndUpdate,
+        ).toHaveBeenCalledWith(
+          { name: "Test Market" },
+          {
+            $set: {
+              selections: ["Selection 1", "Selection 2"],
+              // merge should not be in the $set operation
+            },
+          },
+          { new: true, upsert: true },
+        );
+        expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+          { operatorId: mockOperatorId, gameId: 1001 },
+          {
+            $set: {
+              mergeEvent: { eventType: "match" },
+              operatorId: mockOperatorId,
+              gameId: 1001,
+              markets: [mockMarketIntegrationId],
+            },
+          },
+          { upsert: true, new: true },
+        );
+        expect(result).toEqual(mockUpsertedIntegration);
+      });
+    });
+
+    describe("no selections in market integration", () => {
+      it("should not update selections field", async () => {
+        // Arrange
+        const query: GameIntegrationQueryDto = {
+          operatorId: mockOperatorId.toString(),
+          gameId: 1001,
+        };
+        const updateRequest: GameIntegrationUpdateRequestDto = {
+          mergeEvent: { eventType: "match" },
+          markets: [
+            {
+              name: "Test Market",
+              merge: { key: "value" },
+              // selections is intentionally not provided
+            },
+          ],
+        };
+        const mockOperator = { _id: mockOperatorId };
+        const mockCreatedMarketIntegration = {
+          _id: mockMarketIntegrationId,
+          name: "Test Market",
+          merge: { key: "value" },
+        };
+        const mockUpsertedIntegration = {
+          _id: mockGameIntegrationId,
+          operatorId: mockOperatorId,
+          gameId: 1001,
+          mergeEvent: { eventType: "match" },
+          markets: [mockCreatedMarketIntegration],
+        };
+
+        setupOperatorMock(mockOperator);
+        mockMarketIntegrationModel.findOneAndUpdate.mockResolvedValue(
+          mockCreatedMarketIntegration,
+        );
+        setupGameIntegrationFindOneAndUpdateMock(mockUpsertedIntegration);
+        setupGameIntegrationFindOneMockMultipleCalls([
+          null,
+          mockUpsertedIntegration,
+        ]); // First call for getNullableGameIntegration, second for getGameIntegration
+
+        // Act
+        const result = await service.upsertGameIntegration(
+          query,
+          updateRequest,
+        );
+
+        // Assert
+        expect(
+          mockMarketIntegrationModel.findOneAndUpdate,
+        ).toHaveBeenCalledWith(
+          { name: "Test Market" },
+          {
+            $set: {
+              merge: { key: "value" },
+              // selections should not be in the $set operation
+            },
+          },
+          { new: true, upsert: true },
+        );
+        expect(mockGameIntegrationModel.findOneAndUpdate).toHaveBeenCalledWith(
+          { operatorId: mockOperatorId, gameId: 1001 },
+          {
+            $set: {
+              mergeEvent: { eventType: "match" },
+              operatorId: mockOperatorId,
+              gameId: 1001,
+              markets: [mockMarketIntegrationId],
+            },
+          },
+          { upsert: true, new: true },
+        );
+        expect(result).toEqual(mockUpsertedIntegration);
+      });
+    });
+
     describe("when neither operatorId nor name is provided", () => {
       it("should throw NotFoundException", async () => {
         // Arrange

@@ -208,17 +208,23 @@ export class GameIntegrationService {
   private async updateMarketIntegration(
     marketIntegration: MarketIntegrationUpdateRequestDto,
   ) {
-    const merge = marketIntegration.merge ?? {};
-    const selections = marketIntegration.selections ?? [];
+    const merge = marketIntegration.merge;
+    const selections = marketIntegration.selections;
+    const updateRequest = {} as { merge?: object; selections?: object };
+
+    if (merge) {
+      updateRequest.merge = merge;
+    }
+
+    if (selections) {
+      updateRequest.selections = selections;
+    }
 
     const existingMarketIntegration =
       await this.marketIntegrationModel.findOneAndUpdate(
         { name: marketIntegration.name },
         {
-          $set: {
-            merge,
-            selections,
-          },
+          $set: updateRequest,
         },
         { new: true, upsert: true },
       );
