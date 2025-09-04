@@ -1,4 +1,4 @@
-FROM hub.lumigame.com/docker-hub/library/node:24-alpine AS builder
+FROM hub.lumigame.com/docker-hub/library/node:24-alpine@sha256:be4d5e92ac68483ec71440bf5934865b4b7fcb93588f17a24d411d15f0204e4f AS builder
 WORKDIR /app
 COPY package.json yarn.lock .modprunerrc ./
 RUN npm run reg \
@@ -10,7 +10,7 @@ RUN yarn install --production \
     && npx mod-pruner prune --force 
 
 
-FROM hub.lumigame.com/docker-hub/library/node:24-alpine
+FROM hub.lumigame.com/docker-hub/library/node:24-alpine@sha256:be4d5e92ac68483ec71440bf5934865b4b7fcb93588f17a24d411d15f0204e4f
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 RUN mkdir /app && chown node:node /app
