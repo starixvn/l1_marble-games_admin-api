@@ -5107,9 +5107,9 @@ neo-async@^2.6.2:
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
 nestjs-cls@^6.0.1:
-  version "6.0.1"
-  resolved "https://npm.lumigame.com/nestjs-cls/-/nestjs-cls-6.0.1.tgz#13b83cadb7db9885b4fb08cad487ba0605c41303"
-  integrity sha512-FnU8MI5/RKdbNvGmlUMD7nuFs7zUiueNzTjO+sxj7BJbsf7cUmosarppPLXRJ7C1WaZ/gLE9ZAcM6//0q1CQIA==
+  version "6.1.0"
+  resolved "http://npm.lumigame.com/nestjs-cls/-/nestjs-cls-6.1.0.tgz#c2b13d9690f425b5149137fd905ce23c03bf08ca"
+  integrity sha512-n4T2aXy5cQxrB8VIGzUF3JBK8lXbRDaWdDS0g7uDKshvYn8NGWMe46PX1p+sb2SxiC0Gjrsff44hkk0kvpS+Ug==
 
 node-abort-controller@^3.0.1:
   version "3.1.1"
